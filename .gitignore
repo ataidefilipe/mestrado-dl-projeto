@@ -13,7 +13,7 @@ scratch/
 results/**
 !results/
 !results/baseline_episodic_500.zip
-!results/temporal_encoded_100.zip
+!results/temporal_encoded_*.zip
 !results/longmemeval_baseline_full/
 !results/longmemeval_baseline_full/eval_results/
 !results/longmemeval_baseline_full/eval_results/eval_summary.json
