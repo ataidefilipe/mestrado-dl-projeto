@@ -44,6 +44,7 @@ from hela_mem.utils import (
     load_api_keys,
     gpt_generate_answer_with_rotation,
     get_timestamp,
+    get_embedding,
 )
 from src.modeling.temporal_knowledge_memory import TemporalKnowledgeMemory, parse_date
 from src.modeling.validity_aware_retriever import ValidityAwareRetriever
@@ -98,10 +99,16 @@ def encode_single_temporal_item(
     kb_path = os.path.join(output_dir, f"{item_id}_long_term.json")
     kb_graph_path = os.path.join(output_dir, f"{item_id}_long_term_kb_graph.json")
 
-    # Checkpoint check
+    # Checkpoint check (must also have non-empty KB graph nodes)
     if os.path.exists(kb_path) and os.path.exists(kb_graph_path):
-        print(f"  [{item_id}] Temporal knowledge already exists, skipping encode.")
-        return {"item_id": item_id, "status": "skipped", "encoding_time": 0.0}
+        try:
+            with open(kb_graph_path, "r", encoding="utf-8") as _f:
+                _kb_data = json.load(_f)
+            if len(_kb_data.get("nodes", {})) > 0:
+                print(f"  [{item_id}] Temporal knowledge already exists ({len(_kb_data['nodes'])} facts), skipping encode.")
+                return {"item_id": item_id, "status": "skipped", "encoding_time": 0.0}
+        except Exception:
+            pass
 
     # 1. Setup episodic graph
     if reuse_episodic_dir:
@@ -319,6 +326,11 @@ def run_pipeline(
     print(f"Reuse Episodic: {reuse_episodic_dir or 'None'}")
     print(f"Workers: {workers} | Top-K: {top_k} | Semantic Top-K: {semantic_top_k}")
     print("=" * 80)
+
+    # Pre-warm embedding model in main thread before spawning workers
+    print("[Init] Pre-warming SentenceTransformer embedding model in main thread...")
+    _ = get_embedding("warmup")
+    print("[Init] Embedding model ready.")
 
     # 1. ENCODING
     t0_enc = time.time()
