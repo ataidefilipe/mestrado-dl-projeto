@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Por Dentro do Código do HeLa-Mem: Guia Interativo Passo a Passo</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  
+  <!-- KaTeX para Fórmulas Matemáticas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    /* Estilos e Efeitos Personalizados */
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4)); }
+      50% { opacity: 1; transform: scale(1.03); filter: drop-shadow(0 0 16px rgba(6, 182, 212, 0.8)); }
+    }
+    .node-pulse { animation: pulse-glow 3s infinite ease-in-out; }
+    
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(51, 65, 85, 0.65);
+    }
+    .glass-panel:hover {
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 12px 30px rgba(8, 145, 178, 0.1);
+    }
+    
+    /* Scrollbar Moderna */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+    /* Layout Bilíngue / Lado a Lado */
+    .bilingual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1024px) {
+      .bilingual-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Code Block styling */
+    pre code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.83rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- BARRA DE NAVEGAÇÃO SUPERIOR -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/90 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-2">
+          HeLa-Mem: Passo a Passo do Código
+          <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-cyan-950/90 text-cyan-400 border border-cyan-800">Técnico &harr; Leigo</span>
+        </h1>
+        <p class="text-xs text-slate-400">Desvendando a Arquitetura de Memória Hebbiana em Grafos para Agentes de IA</p>
+      </div>
+    </div>
+
+    <!-- SELETOR DE MODO DE EXPLICAÇÃO -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center bg-slate-900 border border-slate-700/80 p-1 rounded-xl shadow-inner text-xs font-semibold">
+        <button id="btn-leigo" onclick="setMode('leigo')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+          <span>💡</span> <span class="hidden sm:inline">Modo</span> Leigo
+        </button>
+        <button id="btn-tecnico" onclick="setMode('tecnico')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200">
+          <span>🔬</span> <span class="hidden sm:inline">Modo</span> Técnico
+        </button>
+        <button id="btn-hibrido" onclick="setMode('hibrido')" class="px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 shadow-sm">
+          <span>⚖️</span> Visão Lado a Lado
+        </button>
+      </div>
+
+      <!-- Links Rápidos -->
+      <nav class="hidden xl:flex items-center gap-1 text-xs font-medium text-slate-400">
+        <a href="#arquitetura" class="hover:text-cyan-400 transition-colors px-2 py-1">Arquitetura</a>
+        <a href="#passo-a-passo" class="hover:text-cyan-400 transition-colors px-2 py-1">O Código</a>
+        <a href="#simulador" class="hover:text-cyan-400 transition-colors px-2 py-1 text-cyan-300 bg-cyan-950/50 rounded-md border border-cyan-800/40">🎮 Simulador</a>
+        <a href="#dicionario" class="hover:text-cyan-400 transition-colors px-2 py-1 text-indigo-300">Dicionário</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-16">
+
+    <!-- HERO SECTION -->
+    <section class="relative overflow-hidden rounded-3xl p-8 sm:p-12 border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 shadow-2xl">
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 max-w-4xl space-y-5">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-700/50 text-cyan-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          Guia Didático da Base do Projeto de Mestrado
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Como dar um <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">cérebro que aprende</span> a um Modelo de Inteligência Artificial?
+        </h2>
+        <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+          Modelos de linguagem como o ChatGPT sofrem de amnésia crônica: a cada nova mensagem, eles esquecem o contexto anterior assim que a conversa fecha. O <strong class="text-cyan-400">HeLa-Mem</strong> (publicado na ACL 2026) resolve isso construindo um grafo biológico onde experiências ganham conexões neurais que se fortalecem com o uso.
+        </p>
+
+        <!-- Banner com a Grande Ideia -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-start gap-4">
+          <div class="text-3xl">🧠</div>
+          <div>
+            <h4 class="font-bold text-white text-sm">O Princípio Central de Hebb (1949):</h4>
+            <p class="text-xs sm:text-sm text-slate-300 italic mt-0.5">
+              "Neurons that fire together, wire together" &mdash; <span class="text-cyan-300">Neurônios que disparam juntos, conectam-se entre si.</span> Se duas memórias são úteis ao mesmo tempo para responder uma pergunta, a ponte entre elas fica mais forte para sempre.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAPA DOS 4 ARQUIVOS FUNDAMENTAIS -->
+    <section id="arquitetura" class="space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+            <span>🗺️</span> O Mapa dos 4 Arquivos do Projeto
+          </h3>
+          <p class="text-sm text-slate-400">O que cada arquivo do repositório realmente faz por trás dos panos</p>
+        </div>
+        <span class="text-xs font-mono text-cyan-400 bg-cyan-950/60 px-3 py-1 rounded-lg border border-cyan-800/40">Código Fonte Original</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: hebbian_memory.py -->
+        <div class="glass-panel p-5 rounded-2xl space-y-3 border-t-2 border-t-cyan-500">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400">hebbian_memory.py</span>
+            <span class="text-lg">🕸️</span>
+          </div>
+          <h4 class="font-bold text-white text-sm">O Grafo Episódico</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            É o diário de bordo! Guarda cada fala de cada conversa como um nó do grafo e calcula a força das conexões sinápticas.
+          </p>
+          <div class="pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex flex-wrap gap-1">
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-cyan-300">HebbianMemoryGraph</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded">SpreadingActivation</span>
+          </div>
+        </div>
+
+        <!-- Card 2: hebbian_knowledge_memory.py -->
+        <div class="glass-panel p-5 rounded-2xl space-y-3 border-t-2 border-t-emerald-500">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-emerald-400">hebbian_knowledge_memory.py</span>
+            <span class="text-lg">📚</span>
+          </div>
+          <h4 class="font-bold text-white text-sm">A Memória Semântica</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            É a enciclopédia! Extrai fatos consolidados a cada 10 turnos (ex: "Filipe é pesquisador") e guarda o perfil do usuário.
+          </p>
+          <div class="pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex flex-wrap gap-1">
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-emerald-300">HebbianKnowledgeMemory</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded">UserProfile</span>
+          </div>
+        </div>
+
+        <!-- Card 3: encode_longmemeval.py -->
+        <div class="glass-panel p-5 rounded-2xl space-y-3 border-t-2 border-t-sky-500">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-sky-400">encode_longmemeval.py</span>
+            <span class="text-lg">📥</span>
+          </div>
+          <h4 class="font-bold text-white text-sm">O Processador de Ingestão</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Lê o histórico de meses de conversa, transforma o texto em vetores matemáticos e salva os grafos no disco.
+          </p>
+          <div class="pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex flex-wrap gap-1">
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-sky-300">parse_sessions()</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded">ThreadPoolExecutor</span>
+          </div>
+        </div>
+
+        <!-- Card 4: eval_longmemeval.py -->
+        <div class="glass-panel p-5 rounded-2xl space-y-3 border-t-2 border-t-purple-500">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-purple-400">eval_longmemeval.py</span>
+            <span class="text-lg">⚖️</span>
+          </div>
+          <h4 class="font-bold text-white text-sm">O Juiz e Avaliador</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Faz a busca no grafo, chama o modelo para responder perguntas difíceis e usa outro LLM como juiz imparcial.
+          </p>
+          <div class="pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-400 flex flex-wrap gap-1">
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded text-purple-300">answer_question()</span>
+            <span class="bg-slate-900 px-1.5 py-0.5 rounded">GPT-Judge</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASSO A PASSO DO CÓDIGO (COMPARATIVO TÉCNICO VS LEIGO) -->
+    <section id="passo-a-passo" class="space-y-12">
+      <div class="border-b border-slate-800 pb-4">
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
+          <span>🪜</span> O Ciclo de Vida da Memória: 8 Passos Explicados
+        </h3>
+        <p class="text-slate-400 text-sm mt-1">
+          Acompanhe como uma frase dita pelo usuário vira um nó no cérebro digital e é resgatada meses depois.
+        </p>
+      </div>
+
+      <!-- PASSO 1: A CHEGADA DA CONVERSA E A MATEMÁTICA DO TEXTO -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">01</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">A Conversa Vira Vetores Matemáticos</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">encode_longmemeval.py &bull; utils.py</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA (O Código Real)</span>
+              <span class="text-[10px] text-slate-500">SentenceTransformers + Cosine</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># utils.py
+def get_embedding(text, model_name="all-MiniLM-L6-v2"):
+    model = SentenceTransformer(model_name, device='cpu')
+    embedding = model.encode([text])[0]
+    return embedding
+
+def normalize_vector(vec):
+    norm = np.linalg.norm(vec)
+    return vec if norm == 0 else vec / norm</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              O modelo converte qualquer sentença em um vetor denso de $384$ números reais normalizados ($L_2\text{-norm} = 1.0$). A proximidade semântica entre duas falas $u$ e $v$ é calculada via produto escalar $\langle u, v \rangle$, dispensando cálculos trigonométricos pesados.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO (A Intuição)</span>
+              <span class="text-xs">Analogia da Bússola</span>
+            </div>
+            <h5 class="text-white font-semibold">"Como o computador entende o que uma frase significa?"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Imagine uma folha de papel onde desenhamos um mapa. Coisas parecidas ficam perto uma da outra: a palavra <em>"cachorro"</em> fica coladinha em <em>"gato"</em>, enquanto <em>"submarino"</em> fica lá no canto da folha.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O modelo faz exatamente isso, mas em vez de um mapa 2D, ele usa um mapa com <strong>384 direções diferentes</strong>. Cada frase recebe um endereço com coordenadas. Se duas frases têm coordenadas próximas, o agente sabe que falam do mesmo assunto, mesmo usando palavras diferentes!
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 2: CRIANDO OS NÓS E AS SINAPSES INICIAIS -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">02</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">Criando Nós e Sinapses Temporais</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">hebbian_memory.py: add_node() &bull; add_edge()</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">Adjacency List + Weights</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># hebbian_memory.py
+self.nodes[node_id] = {
+    "content": content,
+    "role": role,
+    "embedding": norm_embedding,
+    "timestamp": timestamp,
+    "keywords": keywords,
+}
+
+# Conexão temporal sequencial (peso inicial moderado = 0.5)
+if len(self.nodes) > 1:
+    prev_id = str(len(self.nodes) - 2)
+    self.add_edge(prev_id, node_id, weight=0.5)
+
+def add_edge(self, u, v, weight=0.1):
+    self.edges[u][v] = min(1.0, self.edges[u][v] + weight)</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              A topologia inicial é uma cadeia linear temporal. Cada novo turno $t$ é acoplado bidirecionalmente ao turno $t-1$ com peso $W_{t, t-1} = 0.5$. O teto de saturação da sinapse é estritamente limitado em $1.0$.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia do Álbum de Fotos</span>
+            </div>
+            <h5 class="text-white font-semibold">"Como o cérebro conecta o presente com o passado imediato?"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Quando você conversa com alguém, o que foi dito há 10 segundos ainda está fresco na sua mente e faz sentido com o que você acabou de responder.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O código simula isso esticando um <strong>fio de barbante</strong> entre o evento atual e o evento que acabou de acontecer. O barbante começa com força média ($0.5$). Se você falar sobre esse mesmo assunto várias vezes, o barbante vai engrossando até virar um cabo de aço!
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 3: O SONO REM DO AGENTE (MEMÓRIA SEMÂNTICA) -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">03</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">O Sono REM: Destilando Fatos Permanentes</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">hebbian_knowledge_memory.py &bull; encode_longmemeval.py</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">Incremental Knowledge Distillation</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># encode_longmemeval.py
+if len(incremental_buffer) >= BUFFER_SIZE: # default = 10
+    result = gpt_personality_analysis(dialogs_for_analysis, client)
+    
+    # 1. Atualiza características e persona do usuário
+    knowledge_memory.update_user_profile(item_id, result["profile"])
+    
+    # 2. Adiciona fatos atômicos à base semântica
+    for line in result["private"].split("\n"):
+        fact = line.strip().lstrip("- ")
+        if fact and fact != "None":
+            knowledge_memory.add_knowledge(fact)</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              Para evitar poluição episódica com *chitchat*, um agente extrator opera a cada $10$ turnos destilando proposições atômicas que são injetadas em um segundo grafo (`HebbianKnowledgeMemory`) com tag `metadata={"type": "fact"}`.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia do Caderno de Resumos</span>
+            </div>
+            <h5 class="text-white font-semibold">"Ninguém lembra de cada 'olá', 'tudo bem?' e 'obrigado'."</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Se você teve uma conversa de 2 horas sobre finanças com seu gerente de banco, você não decora todas as palavras. À noite, seu cérebro resume: <em>"Decidi abrir a conta X e investir R$ 1.000"</em>.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O código faz essa mesma "limpeza": a cada 10 falas, um modelo inteligente filtra o bate-papo inútil e anota numa caderneta especial apenas os <strong>fatos consolidados</strong> (como preferências, decisões e aniversários).
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 4: A BUSCA DUPLA (DUAL-PATH RETRIEVAL) -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">04</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">Dual-Path: Procurando no Diário e na Enciclopédia</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">eval_longmemeval.py: answer_question()</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">Dual-Path Retrieval</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># 1. Recuperação Episódica (Diálogo cru no tempo)
+episodic_results = retriever.graph.retrieve(question, top_k=15)
+
+# 2. Recuperação Semântica (Base de Fatos consolidados)
+knowledge_results = knowledge_memory.search_knowledge(
+    question, top_k=5
+)
+
+# Concatenação contextual no prompt do LLM
+prompt = build_prompt(
+    context=episodic_results,
+    knowledge=knowledge_results,
+    traits=user_profile
+)</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              O sistema mitiga o *trade-off* precisão/relevância consultando duas representações ortogonais: a trajetória cronológica da conversa (`top_k=15`) e as assertivas destiladas do usuário (`semantic_top_k=5`).
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia dos Dois Hemisférios</span>
+            </div>
+            <h5 class="text-white font-semibold">"Como o cérebro junta fatos isolados com o momento em que foram ditos?"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Se alguém pergunta: <em>"Qual foi o restaurante que fomos no meu aniversário?"</em>, seu cérebro consulta duas áreas:
+            </p>
+            <ul class="text-slate-300 text-xs sm:text-sm space-y-1 list-disc list-inside">
+              <li><strong>Memória Semântica:</strong> "O aniversário dele é 14 de maio".</li>
+              <li><strong>Memória Episódica:</strong> "Naquele dia 14 de maio fomos na Cantina Italiana".</li>
+            </ul>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O HeLa-Mem faz a mesma coisa: ele pega 15 pedaços do histórico e 5 fatos do resumo e entrega os dois juntos para o modelo responder com precisão cirúrgica.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 5: SPREADING ACTIVATION (O EFEITO UMA COISA PUXA A OUTRA) -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">05</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">Spreading Activation: "Uma Coisa Lembra Outra"</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">hebbian_memory.py: retrieve()</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">1-Hop Activation Propagation</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># hebbian_memory.py
+final_scores = base_activations.copy()
+
+for i, score in enumerate(base_activations):
+    # Propaga apenas se o nó de origem for altamente relevante
+    if score > self.spreading_threshold: # threshold = 0.4
+        source_id = node_ids[i]
+        neighbors = self.edges.get(source_id, {})
+        
+        for target_id, weight in neighbors.items():
+            target_idx = id_to_idx[target_id]
+            # Fórmula do impulso sináptico:
+            boost = score * weight * self.activation_alpha # alpha = 0.1
+            final_scores[target_idx] += boost</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              Seja $A_i$ a ativação base do nó $i$. Se $A_i > \theta$, ele propaga energia para todo vizinho $j$ com aresta $W_{ij}$. O incremento é $\Delta A_j = A_i \cdot W_{ij} \cdot \alpha$. Isso permite resgatar nós essenciais que possuem baixa similaridade de cosseno com a pergunta bruta (*multi-hop reasoning*).
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia do Trem de Pensamento</span>
+            </div>
+            <h5 class="text-white font-semibold">"Por que pensar em 'Praia' faz você lembrar de 'Protetor Solar'?"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Um sistema de busca comum (tipo o Google antigo) só acha páginas que têm exatamente a palavra que você digitou.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O cérebro não funciona assim! Quando a palavra <strong>"Praia"</strong> acende no seu cérebro, a eletricidade corre pelas ligações vizinhas e acende automaticamente <em>"Mar"</em>, <em>"Protetor Solar"</em> e <em>"Água de Coco"</em>.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              No HeLa-Mem, os nós fortemente ativados <strong>emprestam energia</strong> para os nós vizinhos. Assim, pistas escondidas são trazidas à tona mesmo que não usem as mesmas palavras da pergunta!
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 6: O REFORÇO HEBBIANO (A TRILHA NA GRAMA) -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">06</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">Reforço Hebbiano: Fortalecendo as Sinapses Úteis</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">hebbian_memory.py: reinforce_memory_cluster()</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">Hebbian Co-activation Update</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># hebbian_memory.py
+def reinforce_memory_cluster(self, node_ids):
+    """
+    Reforça conexões entre todos os pares resgatados juntos.
+    """
+    if len(node_ids) < 2: return
+    for i in range(len(node_ids)):
+        for j in range(i + 1, len(node_ids)):
+            u, v = node_ids[i], node_ids[j]
+            # Incrementa o peso sináptico com taxa de aprendizado:
+            self.add_edge(u, v, weight=self.learning_rate) # lr = 0.02</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              A cada consulta, os $K$ nós selecionados sofrem atualização de co-ativação completa: para cada par $(u, v)$, $W_{uv} \leftarrow \min(1.0, W_{uv} + \eta)$, onde $\eta = 0.02$. O grafo aprende dinamicamente a associar memórias correlatas através do próprio ato de responder perguntas.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia do Atalho no Jardim</span>
+            </div>
+            <h5 class="text-white font-semibold">"A trilha que vira estrada de tanto passar gente"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Quando as pessoas cruzam um gramado pelo mesmo caminho, a grama morre e nasce um atalho de terra batida. Quanto mais gente passa ali, mais largo e fácil de ver fica o caminho.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              É isso que o código faz! Se a memória A e a memória B foram úteis juntas para responder uma pergunta, o código dá um <strong>bônus de afinidade</strong> (+0.02) entre elas. Na próxima pergunta, elas estarão mais conectadas do que nunca.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 7: O JUIZ E O JULGAMENTO -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-700/60 font-mono font-bold flex items-center justify-center text-sm">07</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white">Geração Concisa e Avaliação Imparcial</h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800">eval_longmemeval.py: get_anscheck_prompt()</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 VISÃO TÉCNICA</span>
+              <span class="text-[10px] text-slate-500">LLM-as-a-Judge Evaluation</span>
+            </div>
+            <pre class="overflow-x-auto text-slate-300"><code># eval_longmemeval.py
+# Prompts específicos por categoria: temporal, knowledge-update, etc.
+if task == "temporal-reasoning":
+    template = "...Do not penalize off-by-one errors for days..."
+elif task == "knowledge-update":
+    template = "...The response should be considered correct as long as the updated answer is the required answer..."
+
+judge_response = gpt_judge(template.format(question, answer, response))
+correct = 1 if parse_judge_response(judge_response) else 0</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              A avaliação empírica não usa métricas superficiais de *string matching* como BLEU ou ROUGE. Utiliza-se um juiz LLM com rubricas adaptativas para cada tarefa, tolerando erros de $\pm 1$ dia em raciocínio temporal e exigindo prevalência de fatos novos em *knowledge-update*.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-cyan-950/20 p-5 rounded-2xl border border-cyan-800/40 text-sm">
+            <div class="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">Analogia do Professor com o Gabarito</span>
+            </div>
+            <h5 class="text-white font-semibold">"Por que não comparar letra por letra?"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Se o gabarito oficial diz: <em>"14 dias"</em> e o aluno responde <em>"duas semanas"</em>, uma conferência burra diria que ele errou porque as letras são diferentes.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O código usa outro modelo de IA que age como um <strong>professor examinador</strong>. Ele tem regras claras: <em>"Se o aluno acertou a ideia principal ou errou por apenas 1 dia de diferença em datas longas, considere como certo!"</em>. Foi assim que comprovamos a acurácia de 61.20% na nossa replicação!
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- PASSO 8: ONDE O NOSSO PROJETO VAI MEXER (A PROPOSTA) -->
+      <article class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border-2 border-amber-500/40 bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/20">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-800/60 pb-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-amber-950 text-amber-300 border border-amber-700/60 font-mono font-bold flex items-center justify-center text-sm">08</span>
+            <h4 class="font-bold text-lg sm:text-xl text-white flex items-center gap-2">
+              <span>🚀</span> O Nosso Ponto de Inovação: A Validade Temporal
+            </h4>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded bg-amber-950/80 text-amber-300 border border-amber-700/60">A Contribuição do Mestrado</span>
+        </div>
+
+        <div class="bilingual-grid">
+          <!-- Bloco Técnico -->
+          <div class="technical-block space-y-3 bg-slate-950/80 p-5 rounded-2xl border border-slate-800/90 font-mono text-xs">
+            <div class="flex items-center justify-between text-amber-300 font-bold border-b border-slate-800 pb-2">
+              <span>🔬 LIMITAÇÃO NO CÓDIGO & NOSSA EVOLUÇÃO</span>
+              <span class="text-[10px] text-slate-500">Zep/Graphiti Inspiration</span>
+            </div>
+            <p class="text-slate-300 font-sans text-xs">
+              No HeLa-Mem original, nós são adicionados na memória semântica com metadados estáticos:
+            </p>
+            <pre class="overflow-x-auto text-rose-300"><code># HeLa-Mem Original: Sem validade nem supersessão!
+metadata={"type": "fact"}</code></pre>
+            <p class="text-slate-300 font-sans text-xs">
+              Nossa proposta enriquece cirurgicamente a estrutura de fatos com intervalos e encerramento de vigência:
+            </p>
+            <pre class="overflow-x-auto text-emerald-300"><code># Nossa Evolução Controlada (Etapa 5):
+metadata={
+    "type": "fact",
+    "valid_from": "2023-01-15",
+    "valid_to": "2023-03-20",       # Fechado quando substituído!
+    "superseded_by": "node_new_id",
+    "source_timestamp": "..."
+}</code></pre>
+            <p class="text-slate-400 leading-relaxed font-sans text-xs">
+              Além disso, a data da pergunta (`question_date`) passa a alimentar o algoritmo de busca para priorizar fatos formalmente ativos naquele instante temporal.
+            </p>
+          </div>
+
+          <!-- Bloco Leigo -->
+          <div class="leigo-block space-y-3 bg-amber-950/20 p-5 rounded-2xl border border-amber-800/40 text-sm">
+            <div class="flex items-center justify-between text-amber-300 font-bold border-b border-amber-800/40 pb-2">
+              <span>💡 TRADUÇÃO PARA O LEIGO</span>
+              <span class="text-xs">O Problema do "Chefe Antigo"</span>
+            </div>
+            <h5 class="text-white font-semibold">"Saber quando uma coisa deixou de ser verdade!"</h5>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              Imagine que em <strong>Janeiro</strong> disseram: <em>"O Carlos é o gerente do projeto"</em>.<br>
+              Depois, em <strong>Março</strong>, disseram: <em>"A Mariana assumiu o projeto no lugar do Carlos"</em>.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              O HeLa original fica confuso: ele tem as duas informações guardadas com força parecida. Se alguém pergunta <em>"Quem manda no projeto hoje?"</em>, ele pode responder "Carlos" por engano.
+            </p>
+            <p class="text-slate-300 leading-relaxed text-xs sm:text-sm">
+              <strong>A nossa inovação:</strong> colocamos uma etiqueta de <strong>data de validade</strong> nos fatos. Carlos foi gerente de janeiro a março; Mariana é de março em diante. Nunca mais o agente confunde o passado com o presente!
+            </p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- SIMULADOR INTERATIVO NO NAVEGADOR -->
+    <section id="simulador" class="glass-panel rounded-3xl p-6 sm:p-10 space-y-8 border border-cyan-800/40">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+            <span>🎮</span> Laboratório Interativo: Brinque com os Neurônios de Memória
+          </h3>
+          <p class="text-sm text-slate-400">
+            Veja na prática o que acontece dentro do grafo do HeLa-Mem quando uma memória é ativada e reforçada.
+          </p>
+        </div>
+        <button onclick="resetSimulator()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 hover:text-white transition-colors">
+          🔄 Reiniciar Simulação
+        </button>
+      </div>
+
+      <!-- Área Gráfica Interativa -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Canvas/SVG interativo -->
+        <div class="lg:col-span-2 bg-slate-950 rounded-2xl p-6 border border-slate-800/90 relative min-h-[340px] flex items-center justify-center overflow-hidden">
+          <svg id="sim-svg" class="w-full h-72" viewBox="0 0 500 280">
+            <!-- Linhas de Conexão (Sinapses) -->
+            <line id="edge-ab" x1="100" y1="140" x2="250" y2="70" stroke="#334155" stroke-width="3" stroke-dasharray="2" />
+            <line id="edge-bc" x1="250" y1="70" x2="400" y2="140" stroke="#334155" stroke-width="3" stroke-dasharray="2" />
+            <line id="edge-ac" x1="100" y1="140" x2="400" y2="140" stroke="#1e293b" stroke-width="2" />
+
+            <!-- Labels dos Pesos Sinápticos -->
+            <rect x="155" y="85" width="48" height="20" rx="4" fill="#090d16" stroke="#334155" />
+            <text id="label-ab" x="179" y="99" fill="#38bdf8" font-size="11" font-family="monospace" text-anchor="middle">w: 0.50</text>
+
+            <rect x="305" y="85" width="48" height="20" rx="4" fill="#090d16" stroke="#334155" />
+            <text id="label-bc" x="329" y="99" fill="#38bdf8" font-size="11" font-family="monospace" text-anchor="middle">w: 0.50</text>
+
+            <rect x="226" y="145" width="48" height="20" rx="4" fill="#090d16" stroke="#1e293b" />
+            <text id="label-ac" x="250" y="159" fill="#64748b" font-size="11" font-family="monospace" text-anchor="middle">w: 0.10</text>
+
+            <!-- Nós do Grafo -->
+            <!-- Nó A -->
+            <g id="node-a" class="cursor-pointer transition-transform hover:scale-110" onclick="triggerNode('A')">
+              <circle cx="100" cy="140" r="32" fill="#0f172a" stroke="#0284c7" stroke-width="3" id="circle-a" />
+              <text x="100" y="136" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Memória A</text>
+              <text x="100" y="152" fill="#94a3b8" font-size="9" text-anchor="middle">"Projeto X"</text>
+            </g>
+
+            <!-- Nó B -->
+            <g id="node-b" class="cursor-pointer transition-transform hover:scale-110" onclick="triggerNode('B')">
+              <circle cx="250" cy="70" r="32" fill="#0f172a" stroke="#0284c7" stroke-width="3" id="circle-b" />
+              <text x="250" y="66" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Memória B</text>
+              <text x="250" y="82" fill="#94a3b8" font-size="9" text-anchor="middle">"Prazo Março"</text>
+            </g>
+
+            <!-- Nó C -->
+            <g id="node-c" class="cursor-pointer transition-transform hover:scale-110" onclick="triggerNode('C')">
+              <circle cx="400" cy="140" r="32" fill="#0f172a" stroke="#0284c7" stroke-width="3" id="circle-c" />
+              <text x="400" y="136" fill="#f8fafc" font-size="12" font-weight="bold" text-anchor="middle">Memória C</text>
+              <text x="400" y="152" fill="#94a3b8" font-size="9" text-anchor="middle">"Orçamento"</text>
+            </g>
+          </svg>
+
+          <!-- Dica Flutuante -->
+          <div class="absolute bottom-3 left-4 text-[11px] text-slate-400 font-mono flex items-center gap-1">
+            <span>👆 Clique em um nó para ativar e simular o espalhamento de energia (Spreading Activation)</span>
+          </div>
+        </div>
+
+        <!-- Painel de Controle e Feedback da Simulação -->
+        <div class="space-y-4 flex flex-col justify-between">
+          <div class="space-y-3 bg-slate-900/90 p-5 rounded-2xl border border-slate-800">
+            <h4 class="font-bold text-white text-sm flex items-center gap-2">
+              <span>📊</span> Console do Grafo
+            </h4>
+            <div id="sim-status" class="text-xs text-slate-300 space-y-2 font-mono bg-slate-950 p-3 rounded-xl border border-slate-800/80 min-h-[110px]">
+              <p class="text-cyan-400">> Sistema Hebbiano pronto.</p>
+              <p class="text-slate-500">> Clique em um nó para pesquisar ou reforçar.</p>
+            </div>
+          </div>
+
+          <!-- Ações Rápidas do Simulador -->
+          <div class="space-y-2">
+            <button onclick="simulateQueryAB()" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 font-bold text-xs text-white shadow-md shadow-cyan-500/20 transition-all flex items-center justify-center gap-2">
+              <span>⚡</span> Fazer Pergunta que Usa A & B Juntos
+            </button>
+            <p class="text-[11px] text-slate-400 text-center">
+              (Dispara a regra: "Neurons that fire together, wire together")
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DICIONÁRIO INTERATIVO: TÉCNICO <-> LEIGO -->
+    <section id="dicionario" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+          <span>📖</span> Dicionário de Tradução: De Desenvolvedor para Humano
+        </h3>
+        <p class="text-slate-400 text-sm mt-1">
+          Consulte os termos técnicos mais comuns da tese explicados de forma simples.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Termo 1 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-sm text-cyan-400">Embedding</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Geometria</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Vetor numérico contínuo de $D$ dimensões obtido por rede neural de linguagem.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> O "CEP" da frase. Dá um endereço para o significado da palavra, para sabermos o que fica perto do quê.</p>
+        </div>
+
+        <!-- Termo 2 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-cyan-400">Spreading Activation</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Grafo</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Algoritmo bio-inspirado que propaga energia de ativação através da matriz de adjacência ponderada.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> O efeito "uma coisa lembra outra". Se você pensa na praia, seu cérebro acende protetor solar e mar automaticamente.</p>
+        </div>
+
+        <!-- Termo 3 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-cyan-400">Hebbian Learning</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Neurociência</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Regra de plasticidade sináptica onde a coativação de nós aumenta iterativamente o peso da aresta.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> A trilha no gramado. Quanto mais você usa dois pensamentos juntos, mais forte e expressa fica a conexão entre eles.</p>
+        </div>
+
+        <!-- Termo 4 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-cyan-400">Dual-Path Retrieval</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Arquitetura</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Roteamento duplo de busca combinando episódios no tempo com proposições semânticas destiladas.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> O diário e a enciclopédia. Consulta o histórico exato do dia a dia e o caderninho de fatos resumidos ao mesmo tempo.</p>
+        </div>
+
+        <!-- Termo 5 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-cyan-400">Temporal Decay</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Matemática</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Atenuação exponencial $e^{-\Delta t/\tau}$ que reduz o ranking de memórias antigas.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> A memória vai sumindo com a idade se você não pensar nela de vez em quando.</p>
+        </div>
+
+        <!-- Termo 6 -->
+        <div class="glass-panel p-5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="font-mono font-bold text-cyan-400">Validade Temporal (Zep)</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">Nossa Tese</span>
+          </div>
+          <p class="text-xs text-slate-300"><strong class="text-white">Técnico:</strong> Modelagem de intervalos $[t_{\text{start}}, t_{\text{end}}]$ e arestas de supersessão explícita entre fatos.</p>
+          <p class="text-xs text-slate-400 border-t border-slate-800 pt-2"><strong class="text-cyan-300">Leigo:</strong> Saber a "data de validade" de uma informação. Entender que o João era o chefe em janeiro, mas a Maria assumiu em março.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER COM CONCLUSÃO E STATUS DA TESE -->
+    <footer class="border-t border-slate-800 pt-8 pb-12 text-center space-y-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-slate-400">
+        <span>🏆</span> Baseline HeLa-Mem Concluída: <strong>61.20% de Acurácia em 500 Itens</strong>
+      </div>
+      <p class="text-xs text-slate-500 max-w-xl mx-auto">
+        Documento gerado automaticamente para documentação do Projeto de Mestrado em Deep Learning. Todos os direitos reservados.
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- JAVASCRIPT INTERATIVO (MODOS & SIMULADOR) -->
+  <script>
+    // 1. Controle dos Modos (Técnico / Leigo / Híbrido)
+    function setMode(mode) {
+      const technicalBlocks = document.querySelectorAll('.technical-block');
+      const leigoBlocks = document.querySelectorAll('.leigo-block');
+      const bilingualGrids = document.querySelectorAll('.bilingual-grid');
+
+      const btnLeigo = document.getElementById('btn-leigo');
+      const btnTecnico = document.getElementById('btn-tecnico');
+      const btnHibrido = document.getElementById('btn-hibrido');
+
+      // Reset botões
+      [btnLeigo, btnTecnico, btnHibrido].forEach(btn => {
+        btn.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-slate-400 hover:text-slate-200";
+      });
+
+      if (mode === 'leigo') {
+        btnLeigo.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 shadow-sm";
+        bilingualGrids.forEach(g => g.style.gridTemplateColumns = "1fr");
+        technicalBlocks.forEach(b => b.style.display = "none");
+        leigoBlocks.forEach(b => b.style.display = "block");
+      } else if (mode === 'tecnico') {
+        btnTecnico.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 shadow-sm";
+        bilingualGrids.forEach(g => g.style.gridTemplateColumns = "1fr");
+        technicalBlocks.forEach(b => b.style.display = "block");
+        leigoBlocks.forEach(b => b.style.display = "none");
+      } else { // hibrido / lado a lado
+        btnHibrido.className = "px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 shadow-sm";
+        bilingualGrids.forEach(g => {
+          g.style.gridTemplateColumns = window.innerWidth > 1024 ? "1fr 1fr" : "1fr";
+        });
+        technicalBlocks.forEach(b => b.style.display = "block");
+        leigoBlocks.forEach(b => b.style.display = "block");
+      }
+    }
+
+    // 2. Simulador de Memória Hebbiana
+    let weightAB = 0.50;
+    let weightBC = 0.50;
+    let weightAC = 0.10;
+
+    function updateSimVisuals() {
+      document.getElementById('label-ab').textContent = `w: ${weightAB.toFixed(2)}`;
+      document.getElementById('label-bc').textContent = `w: ${weightBC.toFixed(2)}`;
+      document.getElementById('label-ac').textContent = `w: ${weightAC.toFixed(2)}`;
+
+      // Largura visual dos fios baseada nos pesos
+      document.getElementById('edge-ab').setAttribute('stroke-width', Math.max(2, weightAB * 8));
+      document.getElementById('edge-bc').setAttribute('stroke-width', Math.max(2, weightBC * 8));
+      document.getElementById('edge-ac').setAttribute('stroke-width', Math.max(1, weightAC * 8));
+      
+      // Cores das conexões
+      document.getElementById('edge-ab').setAttribute('stroke', weightAB > 0.6 ? '#38bdf8' : '#334155');
+      document.getElementById('edge-bc').setAttribute('stroke', weightBC > 0.6 ? '#38bdf8' : '#334155');
+      document.getElementById('edge-ac').setAttribute('stroke', weightAC > 0.3 ? '#818cf8' : '#1e293b');
+    }
+
+    function triggerNode(nodeId) {
+      const status = document.getElementById('sim-status');
+      const circleA = document.getElementById('circle-a');
+      const circleB = document.getElementById('circle-b');
+      const circleC = document.getElementById('circle-c');
+
+      // Reset visual
+      [circleA, circleB, circleC].forEach(c => {
+        c.setAttribute('fill', '#0f172a');
+        c.setAttribute('stroke', '#0284c7');
+      });
+
+      if (nodeId === 'A') {
+        circleA.setAttribute('fill', '#0369a1');
+        circleA.setAttribute('stroke', '#38bdf8');
+        
+        // Spreading para B e C
+        const boostB = (0.9 * weightAB * 0.1).toFixed(3);
+        const boostC = (0.9 * weightAC * 0.1).toFixed(3);
+
+        setTimeout(() => {
+          circleB.setAttribute('fill', '#1e293b');
+          circleB.setAttribute('stroke', '#38bdf8');
+        }, 300);
+
+        status.innerHTML = `
+          <p class="text-cyan-400">> ⚡ Nó A ("Projeto X") ativado com Score 0.90!</p>
+          <p class="text-slate-300">> Spreading: Nó B ("Prazo") ganha +${boostB} de impulso!</p>
+          <p class="text-slate-400">> Spreading: Nó C ganha apenas +${boostC} (conexão fraca).</p>
+        `;
+      } else if (nodeId === 'B') {
+        circleB.setAttribute('fill', '#0369a1');
+        circleB.setAttribute('stroke', '#38bdf8');
+        status.innerHTML = `
+          <p class="text-cyan-400">> ⚡ Nó B ("Prazo Março") ativado!</p>
+          <p class="text-slate-300">> A energia se espalha para os vizinhos A e C proporcionalmente aos pesos.</p>
+        `;
+      } else {
+        circleC.setAttribute('fill', '#0369a1');
+        circleC.setAttribute('stroke', '#38bdf8');
+        status.innerHTML = `
+          <p class="text-cyan-400">> ⚡ Nó C ("Orçamento") ativado!</p>
+          <p class="text-slate-300">> Spreading propaga ativação através das sinapses ativas.</p>
+        `;
+      }
+    }
+
+    function simulateQueryAB() {
+      const status = document.getElementById('sim-status');
+      
+      // Hebbian Update: weight += learning_rate (0.05 no simulador para impacto visual)
+      weightAB = Math.min(1.0, weightAB + 0.08);
+      updateSimVisuals();
+
+      // Piscar os dois nós
+      const circleA = document.getElementById('circle-a');
+      const circleB = document.getElementById('circle-b');
+      circleA.setAttribute('fill', '#0284c7');
+      circleB.setAttribute('fill', '#0284c7');
+
+      status.innerHTML = `
+        <p class="text-emerald-400 font-bold">> 🏆 Resposta gerada usando Nó A e Nó B juntos!</p>
+        <p class="text-cyan-300">> REFORÇO HEBBIANO APLICADO:</p>
+        <p class="text-slate-200">> Aresta A &harr; B aumentou para <strong>${weightAB.toFixed(2)}</strong>! A sinapse ficou mais espessa.</p>
+      `;
+
+      setTimeout(() => {
+        circleA.setAttribute('fill', '#0f172a');
+        circleB.setAttribute('fill', '#0f172a');
+      }, 700);
+    }
+
+    function resetSimulator() {
+      weightAB = 0.50;
+      weightBC = 0.50;
+      weightAC = 0.10;
+      updateSimVisuals();
+      document.getElementById('sim-status').innerHTML = `
+        <p class="text-cyan-400">> Simulador reiniciado para os pesos padrão.</p>
+      `;
+    }
+
+    // Renderizar fórmulas KaTeX quando carregado
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof renderMathInElement !== "undefined") {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "$", right: "$", display: false}
+          ]
+        });
+      }
+    });
+  </script>
+</body>
+</html>

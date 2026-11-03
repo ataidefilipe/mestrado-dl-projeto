@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Evolução da Memória em Inteligência Artificial: Da Recuperação Inerte às Mentes Adaptativas</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  
+  <!-- KaTeX para Renderização Matemática Precisa -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    /* Suporte a animações e refinamento visual */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .pulse-node { animation: pulse-subtle 3s infinite ease-in-out; }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(51, 65, 85, 0.65);
+    }
+    .glass-card-hover:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 10px 32px rgba(14, 165, 233, 0.12);
+    }
+    /* Estilo de Scrollbar Customizada */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #070a12; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    
+    /* Utilitários para visualização híbrida */
+    .view-grid-hybrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1024px) {
+      .view-grid-hybrid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- TOPBAR HEADER -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800/90 px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-2">
+          Arquitetura e Evolução da Memória em IA
+          <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-800">Compêndio Avançado</span>
+        </h1>
+        <p class="text-xs text-slate-400">Da Recuperação Inerte às Mentes Adaptativas &bull; Análise Sistemática de 5 Artigos Seminais</p>
+      </div>
+    </div>
+
+    <!-- DUAL & HYBRID MODE SWITCH -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center bg-slate-900 border border-slate-700/80 p-1 rounded-xl shadow-inner text-xs font-semibold">
+        <button id="btn-mode-intuitive" onclick="setExplanationMode('intuitive')" class="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-slate-400 hover:text-slate-200">
+          <span>💡</span> <span class="hidden sm:inline">Modo</span> Intuitivo
+        </button>
+        <button id="btn-mode-technical" onclick="setExplanationMode('technical')" class="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-slate-400 hover:text-slate-200">
+          <span>🔬</span> <span class="hidden sm:inline">Modo</span> Técnico
+        </button>
+        <button id="btn-mode-hybrid" onclick="setExplanationMode('hybrid')" class="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 shadow-sm">
+          <span>⚖️</span> Visão Híbrida
+        </button>
+      </div>
+
+      <!-- Quick Jump Menu -->
+      <nav class="hidden xl:flex items-center gap-1 text-xs font-medium text-slate-400">
+        <a href="#dilema" class="hover:text-cyan-400 transition-colors px-2 py-1">Dilema</a>
+        <a href="#timeline" class="hover:text-cyan-400 transition-colors px-2 py-1">Gerações</a>
+        <a href="#simulators" class="hover:text-cyan-400 transition-colors px-2 py-1 text-cyan-300 bg-cyan-950/50 rounded-md border border-cyan-800/40">🎮 5 Simuladores</a>
+        <a href="#deepdive" class="hover:text-cyan-400 transition-colors px-2 py-1">5 Pilares</a>
+        <a href="#matrix" class="hover:text-cyan-400 transition-colors px-2 py-1">Matriz</a>
+        <a href="#so-memoria" class="hover:text-cyan-400 transition-colors px-2 py-1 text-indigo-300">SO de Memória</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-16">
+
+    <section class="relative overflow-hidden rounded-3xl p-8 sm:p-12 border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 shadow-2xl">
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-4xl relative z-10 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-mono text-cyan-300">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          Pesquisa Avançada em Engenharia de Contexto e Memória de Longo Prazo
+        </div>
+        
+        <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Por que Modelos de Linguagem precisam de mais do que <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">Context Windows e Vetores?</span>
+        </h2>
+        
+        <!-- Explanation Dynamic Mode -->
+        <div id="hero-wrapper" class="transition-all duration-300">
+          <!-- Conteúdo gerado e chaveado via script (intuitivo, técnico ou híbrido) -->
+          <div class="view-content-intuitive text-slate-300 text-base sm:text-lg leading-relaxed space-y-3">
+            <p>
+              Imagine contratar um profissional com um raciocínio impecável, capaz de resolver problemas complexos em segundos, mas que sofre de <strong>amnésia completa a cada reunião</strong>. Se você não colocar os relatórios anteriores na frente dele toda vez, ele não saberá quem você é, o que foi decidido ontem ou se as premissas do projeto mudaram.
+            </p>
+            <p class="text-sm text-slate-400">
+              A primeira tentativa da indústria de resolver isso foi aumentar o tamanho da mesa de trabalho (<span class="text-cyan-300 font-semibold">Janela de Contexto</span>) e guardar papéis picados numa gaveta para puxar por palavras parecidas (<span class="text-cyan-300 font-semibold">RAG Vetorial Plano</span>). Mas o mundo real é relacional, temporal e evolutivo. Esta página demonstra os <strong>5 avanços arquiteturais mais recentes</strong> que estão transformando LLMs de respondedores descartáveis em agentes contínuos dotados de estado cognitivo durável.
+            </p>
+          </div>
+
+          <div class="view-content-technical hidden text-slate-300 text-sm sm:text-base leading-relaxed space-y-3 font-mono">
+            <p>
+              A operação fundamental dos Large Language Models (LLMs) opera sob inferência estritamente autorregressiva e <em>stateless</em>: $y_t \sim p_\theta(y \mid q_t, C_t)$, onde $\theta$ representa pesos fixados após o treinamento. Toda a ilusão de continuidade depende exclusivamente do contexto de inferência $C_t = \operatorname{Retrieve}(q_t, M_t)$ fornecido dinamicamente pela camada externa de orquestração.
+            </p>
+            <p class="text-xs text-slate-400 leading-normal">
+              A indexação vetorial densa por similaridade de cosseno ($\cos(e_q, e_i)$) resolve a busca pontual de "agulha no palheiro", mas sofre de três incapacidades estruturais: (1) <strong>inabilidade de síntese global</strong> sobre grandes acervos; (2) <strong>cegueira para transições temporais</strong> e contradições factuais; e (3) <strong>ausência de plasticidade</strong>, em que consultas e acessos não fortalecem conexões úteis. Esta síntese analisa o estado da arte a partir de 5 artigos seminais: <strong>Microsoft GraphRAG</strong>, <strong>ZEP</strong>, <strong>HeLa-Mem</strong>, <strong>A-MEM</strong> e <strong>CodeRAG</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Stats Badge -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+          <div class="glass-card p-4 rounded-xl border border-slate-800">
+            <span class="text-2xl font-bold text-cyan-400">5</span>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Artigos Seminais</p>
+            <span class="text-[10px] text-slate-500 font-mono">GraphRAG, ZEP, HeLa, A-MEM, CodeRAG</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-slate-800">
+            <span class="text-2xl font-bold text-indigo-400">6 Níveis</span>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Gerações de Memória</p>
+            <span class="text-[10px] text-slate-500 font-mono">G0 (Pura) até G5 (Auto-Evolutiva)</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-slate-800">
+            <span class="text-2xl font-bold text-emerald-400">5 Demos</span>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Simuladores Vivos</p>
+            <span class="text-[10px] text-slate-500 font-mono">Leiden, Bitemporal, Hebb, Zettelkasten, AST</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-slate-800">
+            <span class="text-2xl font-bold text-amber-400">10 Eixos</span>
+            <p class="text-xs text-slate-400 mt-1 font-medium">Desafios em Aberto</p>
+            <span class="text-[10px] text-slate-500 font-mono">GDPR, Amortização, Roteador</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 01: O DILEMA FUNDAMENTAL DA MEMÓRIA EM IA -->
+    <section id="dilema" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+          <span class="text-cyan-400 font-mono">01.</span> O Dilema Fundamental: Competência Linguística Sem Continuidade Garantida
+        </h3>
+        <p class="text-sm text-slate-400">Por que modelos de linguagem brilhantes falham em manter memória contínua sem uma camada externa estruturada</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Coluna 1: As 3 Camadas de Informação -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+          <div class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center text-cyan-400 font-bold text-sm">1</div>
+          <h4 class="font-bold text-base text-white">Três Tipos Distintos de Conhecimento</h4>
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-cyan-300">1. Conhecimento Paramétrico ($\theta$):</strong>
+              <p class="text-slate-400 mt-1">Incorporado aos pesos da rede neural durante o pré-treinamento e alinhamento. Não muda a cada pergunta. É estático, caro de atualizar e propenso a esquecimento catastrófico se re-treinado continuadamente.</p>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-indigo-300">2. Contexto de Inferência ($C_t$):</strong>
+              <p class="text-slate-400 mt-1">Os tokens imediatos presentes no prompt no exato instante da geração. Efêmero: após o término da resposta, o buffer de inferência é destruído pela GPU.</p>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+              <strong class="text-emerald-300">3. Memória Externa Persistente ($M_t$):</strong>
+              <p class="text-slate-400 mt-1">Bancos de vetores, grafos de conhecimento, registros temporais e índices mantidos fora do modelo, gerenciados pelo sistema operacional do agente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna 2: A Física do Contexto e Atenção Quadrática -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+          <div class="w-8 h-8 rounded-lg bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400 font-bold text-sm">2</div>
+          <h4 class="font-bold text-base text-white">Gargalo Físico: $O(n^2)$ e Orçamento de Janela</h4>
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <p>
+              Em um Transformer convencional, a camada de atenção calcula a relação entre cada par de tokens da sequência:
+            </p>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 font-mono text-[11px] text-indigo-300 overflow-x-auto">
+              \[ \operatorname{Attention}(Q,K,V) = \operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V \]
+            </div>
+            <p class="text-slate-400">
+              Isso impõe complexidade computacional da ordem de <strong class="text-indigo-300">$\mathcal{O}(n^2 d_k)$</strong> na atenção densa. Mesmo com inovações como FlashAttention e KV-caching, a memória disputa um orçamento estrito:
+            </p>
+            <div class="p-2.5 bg-slate-900 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300">
+              $T_{\text{instruções}} + T_{\text{consulta}} + T_{\text{memória}} + T_{\text{resposta}} \leq W$
+            </div>
+            <p class="text-[11px] text-slate-400">
+              Se você tentar enfiar 500 páginas de histórico no prompt, o custo financeiro explode e a latência de processamento se torna inviável para uso interativo.
+            </p>
+          </div>
+        </div>
+
+        <!-- Coluna 3: Efeito "Lost in the Middle" -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+          <div class="w-8 h-8 rounded-lg bg-rose-950 border border-rose-800 flex items-center justify-center text-rose-400 font-bold text-sm">3</div>
+          <h4 class="font-bold text-base text-white">O Efeito "Lost in the Middle"</h4>
+          <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+            <p>
+              Mesmo quando a janela de contexto suporta 1 milhão de tokens, <strong>mais contexto disponível não significa mais evidência utilizada</strong>.
+            </p>
+            <div class="p-3 bg-rose-950/30 rounded-xl border border-rose-800/50 text-rose-200">
+              <strong>Evidência Documentada [GraphRAG, §3.1.1 e Apêndice C]:</strong><br>
+              Em experimentos de extração sobre acervos textuais, janelas de <strong>8.000 tokens</strong> superaram sistematicamente janelas maiores (16k, 32k, 64k) em abrangência e precisão temática.
+            </div>
+            <p class="text-slate-400">
+              Os modelos tendem a dar alta atenção aos primeiros tokens (primacy effect) e aos últimos tokens (recency effect), enquanto informações críticas inseridas no meio do prompt frequentemente são ignoradas pelo mecanismo de atenção.
+            </p>
+            <div class="p-2 bg-slate-900 rounded-lg border border-slate-800 text-[11px] font-mono text-center text-cyan-400">
+              Contexto maior ≠ Inteligência maior
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 02: A LINHA DO TEMPO DA MEMÓRIA EM IA (G0 A G5 + CODERAG) -->
+    <section id="timeline" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+            <span class="text-cyan-400 font-mono">02.</span> A Taxonomia das Gerações de Memória
+          </h3>
+          <p class="text-sm text-slate-400">Do vazio de estado aos grafos auto-evolutivos e especializados por domínio</p>
+        </div>
+        <div class="text-xs font-mono text-amber-400 bg-amber-950/50 border border-amber-800/60 px-3 py-1 rounded-lg">
+          ⚠️ Nota metodológica: taxonomia didática; não implica obsolescência linear
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Gen 0: Contexto Puro -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-mono text-xs font-bold text-slate-400">G0</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/50">Stateless</span>
+          </div>
+          <h4 class="font-bold text-base text-white">Geração 0: Janela de Contexto Pura</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia:</strong> Como tentar trabalhar com um único caderno pequeno. Toda vez que as folhas acabam, você precisa rasgar as primeiras páginas para continuar escrevendo.</p>
+            <p class="text-slate-400">Funciona muito bem para conversas rápidas, mas não tem como lembrar o que você disse semana passada sem re-digitar tudo.</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Princípio:</strong> Inclusão sequencial literal no prompt ($C_t = [x_1, y_1, x_2, y_2, \dots]$).</p>
+            <p class="text-slate-400">Vantagem: fidelidade total ao histórico recente. Limitação: truncamento por FIFO, recalculo de KV-cache e colapso de atenção em sessões multi-turnos.</p>
+          </div>
+        </div>
+
+        <!-- Gen 1: RAG Vetorial Plano -->
+        <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-800 flex items-center justify-center font-mono text-xs font-bold text-cyan-400">G1</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/50">Embeddings</span>
+          </div>
+          <h4 class="font-bold text-base text-white">Geração 1: RAG Vetorial Plano</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia:</strong> Uma gaveta cheia de papéis picados. Ao fazer uma pergunta, um ímã puxa os 3 ou 4 bilhetes que usam palavras mais parecidas com a sua pergunta.</p>
+            <p class="text-slate-400">Excelente para achar uma informação pontual ("Qual a senha do Wi-Fi?"), mas inútil para responder "Quais foram as grandes lições aprendidas nos últimos dois anos?".</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Princípio:</strong> Chunking arbitrário, cálculo de embeddings densos $e_i = f_{\text{enc}}(c_i)$ e seleção Top-$k$ via produto escalar normalizado: $s(q, c_i) = \frac{e_q^\top e_i}{\|e_q\| \|e_i\|}$.</p>
+            <p class="text-slate-400">Limitação: proximidade vetorial não captura relações multi-hop, lógica causal, cobertura global nem validade temporal.</p>
+          </div>
+        </div>
+
+        <!-- Gen 2: GraphRAG -->
+        <div class="glass-card p-6 rounded-2xl border-indigo-900/60 bg-indigo-950/20 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-indigo-900/60 flex items-center justify-center font-mono text-xs font-bold text-indigo-400">G2</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-300 bg-indigo-900/60 px-2 py-0.5 rounded border border-indigo-700/50">Comunidades Leiden</span>
+          </div>
+          <h4 class="font-bold text-base text-white">Geração 2: Microsoft GraphRAG</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia:</strong> Uma enciclopédia que não guarda apenas páginas soltas, mas cria o índice temático de capítulos, seções e resumos executivos de todos os tópicos antes de qualquer consulta.</p>
+            <p class="text-slate-400">Para responder perguntas abrangentes, ele lê os resumos dos capítulos em paralelo, permitindo enxergar a floresta e não apenas árvores isoladas.</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Princípio:</strong> Extração de entidades e arestas via LLM ($G = (V,E,w)$), clustering hierárquico pelo algoritmo de Leiden e geração bottom-up de Community Reports de $C_3$ até a raiz $C_0$.</p>
+            <p class="text-slate-400">Busca Global via Map-Reduce: mapeia blocos de relatórios com utilidade $h_j \in [0, 100]$, descarta $h_j=0$ e reduz no contexto final sob limite $W$.</p>
+          </div>
+        </div>
+
+        <!-- Gen 3: ZEP Temporal -->
+        <div class="glass-card p-6 rounded-2xl border-amber-900/60 bg-amber-950/20 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-amber-900/60 flex items-center justify-center font-mono text-xs font-bold text-amber-400">G3</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-300 bg-amber-900/60 px-2 py-0.5 rounded border border-amber-700/50">Grafos Temporais</span>
+          </div>
+          <h4 class="font-bold text-base text-white">Geração 3: ZEP (t-KG Bitemporal)</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia:</strong> Um diário com carimbo duplo de cartório. Ele registra não apenas "quando você se mudou", mas também "quando você contou isso para o sistema".</p>
+            <p class="text-slate-400">Se você diz "Em março troquei de emprego", ele atualiza sua situação atual sem apagar o fato de que em janeiro você ainda trabalhava na empresa antiga.</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Princípio:</strong> Modelagem bitemporal estrita: tempo do evento ($t_{\text{valid}}, t_{\text{invalid}} \in T$) vs tempo transacional do sistema ($t'_{\text{created}}, t'_{\text{expired}} \in T'$).</p>
+            <p class="text-slate-400">Três subgrafos (episódico, semântico e comunitário incremental via Label Propagation). Invalidação transacional e deduplicação restrita ao mesmo par de entidades.</p>
+          </div>
+        </div>
+
+        <!-- Gen 4: HeLa-Mem Hebbiano -->
+        <div class="glass-card p-6 rounded-2xl border-emerald-900/60 bg-emerald-950/20 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-emerald-900/60 flex items-center justify-center font-mono text-xs font-bold text-emerald-400">G4</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-300 bg-emerald-900/60 px-2 py-0.5 rounded border border-emerald-700/50">Plasticidade Hebbiana</span>
+          </div>
+          <h4 class="font-bold text-base text-white">Geração 4: HeLa-Mem</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia:</strong> Trilhas em uma floresta. Toda vez que você consulta duas memórias juntas para resolver uma dúvida, o caminho entre elas fica mais batido e fácil de percorrer.</p>
+            <p class="text-slate-400">Caminhos nunca mais usados são cobertos pelo mato (decaimento contínuo). O sistema aprende sozinho quais lembranças funcionam melhor em equipe.</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Princípio:</strong> Atualização de arestas por coativação: $w_{ij}^{(t+1)} = (1 - \lambda)w_{ij}^{(t)} + \eta \mathbb{I}(v_i, v_j \in \mathcal{K}_t)$.</p>
+            <p class="text-slate-400">Recuperação dual: Score Base ($S_{\text{base}}$ lexical + vetorial + recência) somado à propagação associativa $S(v_j) = S_{\text{base}}(v_j) + \beta \sum S_{\text{base}}(v_i) w_{ij}$. Consolidação periódica de hubs.</p>
+          </div>
+        </div>
+
+        <!-- Gen 5 & Especialização: A-MEM & CodeRAG -->
+        <div class="glass-card p-6 rounded-2xl border-purple-900/60 bg-purple-950/20 space-y-3 relative group glass-card-hover transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-8 h-8 rounded-lg bg-purple-900/60 flex items-center justify-center font-mono text-xs font-bold text-purple-400">G5</span>
+            <span class="text-[10px] font-mono uppercase tracking-wider text-purple-300 bg-purple-900/60 px-2 py-0.5 rounded border border-purple-700/50">Auto-Evolutiva / AST</span>
+          </div>
+          <h4 class="font-bold text-base text-white">G5: A-MEM & CodeRAG</h4>
+          
+          <div class="view-content-intuitive text-xs text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>Analogia A-MEM:</strong> O secretário que reclassifica pastas antigas quando chega um relatório novo.</p>
+            <p><strong>Analogia CodeRAG:</strong> O engenheiro de precisão que não joga o manual inteiro da fábrica na mesa, mas abre exatamente o diagrama elétrico da válvula que está sendo parafusada.</p>
+          </div>
+
+          <div class="view-content-technical hidden text-xs font-mono text-slate-300 space-y-2 leading-relaxed">
+            <p><strong>A-MEM:</strong> Notas Zettelkasten com 7 atributos $m_i = \{c_i, t_i, K_i, G_i, X_i, e_i, L_i\}$. Reflexão por LLM que altera contexto e tags de notas antigas.</p>
+            <p><strong>CodeRAG:</strong> Base sintática por AST (classes, funções, variáveis), sondagem de log-probabilidade, 3 caminhos de busca e reranking BESTFIT $O(n \log n)$.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 03: OS 5 SIMULADORES INTERATIVOS HANDS-ON -->
+    <section id="simulators" class="space-y-8">
+      <div class="border-b border-slate-800 pb-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-950 text-cyan-400 border border-cyan-800 text-xs font-mono mb-2">
+          Laboratório Interativo Hands-on
+        </div>
+        <h3 class="text-3xl font-extrabold text-white flex items-center gap-3">
+          <span class="text-cyan-400 font-mono">03.</span> Experimente os 5 Mecanismos em Tempo Real
+        </h3>
+        <p class="text-slate-400 text-sm">
+          Manipule parâmetros matemáticos reais, visualize grafos e entenda na prática como cada arquitetura resolve os gargalos da memória inerte.
+        </p>
+      </div>
+
+      <!-- SIMULATOR TABS -->
+      <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+        <button onclick="switchTab('sim-graphrag')" id="tab-btn-sim-graphrag" class="sim-tab-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
+          1. GraphRAG: Leiden & Map-Reduce
+        </button>
+        <button onclick="switchTab('sim-zep')" id="tab-btn-sim-zep" class="sim-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300">
+          2. ZEP: Bitemporalidade & Relato Tardio
+        </button>
+        <button onclick="switchTab('sim-hela')" id="tab-btn-sim-hela" class="sim-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300">
+          3. HeLa-Mem: Plasticidade & Decaimento
+        </button>
+        <button onclick="switchTab('sim-amem')" id="tab-btn-sim-amem" class="sim-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300">
+          4. A-MEM: Zettelkasten & Evolução
+        </button>
+        <button onclick="switchTab('sim-coderag')" id="tab-btn-sim-coderag" class="sim-tab-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all bg-slate-900 hover:bg-slate-800 text-slate-300">
+          5. CodeRAG: AST Cirúrgica & BESTFIT
+        </button>
+      </div>
+
+      <!-- SIMULATOR 1: GRAPHRAG -->
+      <div id="sim-graphrag" class="sim-container block glass-card rounded-3xl p-6 sm:p-8 border-indigo-900/60 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-md border border-indigo-800">Microsoft GraphRAG</span>
+              <span class="text-xs text-slate-400 font-mono">Dataset de Notícias & Podcasts</span>
+            </div>
+            <h4 class="text-xl font-bold text-white mt-1">Lente de Comunidades Hierárquicas e Síntese Global Map-Reduce</h4>
+            <p class="text-xs text-slate-400">Contraste a recuperação míope de trechos isolados (Local Search) contra a cobertura temática integral do corpus (Global Search).</p>
+          </div>
+          
+          <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800 text-xs font-medium">
+            <span class="text-slate-400 px-2">Modo:</span>
+            <button id="btn-graphrag-local" onclick="setGraphRAGMode('local')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold shadow">Busca Local (Vizinhança Top-k)</button>
+            <button id="btn-graphrag-global" onclick="setGraphRAGMode('global')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Busca Global (Map-Reduce C0-C3)</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Interactive SVG Network -->
+          <div class="lg:col-span-7 bg-slate-950/90 rounded-2xl p-4 border border-slate-800/80 relative min-h-[360px] flex items-center justify-center overflow-hidden">
+            <svg id="graphrag-svg" class="w-full h-84" viewBox="0 0 520 330">
+              <!-- Background Grid -->
+              <defs>
+                <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1e293b" stroke-width="0.5" />
+                </pattern>
+              </defs>
+              <rect width="520" height="330" fill="url(#grid-pattern)" opacity="0.4" />
+
+              <!-- Edges -->
+              <g id="graph-edges" stroke="#334155" stroke-width="1.5">
+                <line x1="100" y1="90" x2="160" y2="130" />
+                <line x1="160" y1="130" x2="110" y2="180" />
+                <line x1="100" y1="90" x2="110" y2="180" />
+                <line x1="160" y1="130" x2="260" y2="160" stroke-dasharray="3,3" stroke="#64748b" />
+                <line x1="370" y1="100" x2="420" y2="150" />
+                <line x1="420" y1="150" x2="350" y2="200" />
+                <line x1="370" y1="100" x2="350" y2="200" />
+                <line x1="260" y1="160" x2="350" y2="200" stroke-dasharray="3,3" stroke="#64748b" />
+                <line x1="220" y1="270" x2="290" y2="260" />
+                <line x1="260" y1="160" x2="220" y2="270" stroke-dasharray="3,3" stroke="#64748b" />
+              </g>
+
+              <!-- Community Clusters Hull (Leiden Partitions) -->
+              <ellipse id="cluster-a" cx="125" cy="135" rx="80" ry="70" fill="#4338ca" fill-opacity="0.15" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="4,4" class="transition-all duration-300" />
+              <ellipse id="cluster-b" cx="380" cy="150" rx="80" ry="75" fill="#0891b2" fill-opacity="0.15" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4,4" class="transition-all duration-300" />
+              <ellipse id="cluster-c" cx="255" cy="265" rx="65" ry="45" fill="#9333ea" fill-opacity="0.15" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,4" class="transition-all duration-300" />
+
+              <text x="125" y="55" text-anchor="middle" fill="#818cf8" font-size="11" font-weight="bold">Comunidade A: Autenticação & Sessão</text>
+              <text x="380" y="65" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="bold">Comunidade B: Billing & Subscrições</text>
+              <text x="255" y="318" text-anchor="middle" fill="#c084fc" font-size="10" font-weight="bold">Comunidade C: Auditoria & Logs</text>
+
+              <!-- Nodes -->
+              <g id="graph-nodes">
+                <!-- Cluster A Nodes -->
+                <circle cx="100" cy="90" r="14" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('TokenService', 'Auth')" />
+                <text x="100" y="94" text-anchor="middle" fill="#e0e7ff" font-size="8" font-family="monospace">Token</text>
+
+                <circle cx="160" cy="130" r="16" fill="#312e81" stroke="#818cf8" stroke-width="2.5" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('OAuth2_Provider', 'Auth')" />
+                <text x="160" y="134" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="monospace">OAuth2</text>
+
+                <circle cx="110" cy="180" r="13" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('UserSession', 'Auth')" />
+                <text x="110" y="184" text-anchor="middle" fill="#e0e7ff" font-size="8" font-family="monospace">Session</text>
+
+                <!-- Central Gateway -->
+                <circle cx="260" cy="160" r="15" fill="#0f172a" stroke="#94a3b8" stroke-width="2" class="cursor-pointer hover:stroke-cyan-400 transition-all" onclick="selectGraphNode('APIRouter', 'Gateway')" />
+                <text x="260" y="164" text-anchor="middle" fill="#f1f5f9" font-size="8" font-family="monospace">Router</text>
+
+                <!-- Cluster B Nodes -->
+                <circle cx="370" cy="100" r="15" fill="#083344" stroke="#22d3ee" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('StripeWebhook', 'Billing')" />
+                <text x="370" y="104" text-anchor="middle" fill="#cffafe" font-size="8" font-family="monospace">Stripe</text>
+
+                <circle cx="420" cy="150" r="17" fill="#164e63" stroke="#22d3ee" stroke-width="2.5" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('SubscriptionManager', 'Billing')" />
+                <text x="420" y="154" text-anchor="middle" fill="#ffffff" font-size="8" font-weight="bold" font-family="monospace">SubMgr</text>
+
+                <circle cx="350" cy="200" r="13" fill="#083344" stroke="#22d3ee" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('InvoicePDF', 'Billing')" />
+                <text x="350" y="204" text-anchor="middle" fill="#cffafe" font-size="8" font-family="monospace">Invoice</text>
+
+                <!-- Cluster C Nodes -->
+                <circle cx="220" cy="270" r="12" fill="#3b0764" stroke="#c084fc" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('AuditLogger', 'Audit')" />
+                <text x="220" y="274" text-anchor="middle" fill="#f3e8ff" font-size="7" font-family="monospace">Audit</text>
+
+                <circle cx="290" cy="260" r="12" fill="#3b0764" stroke="#c084fc" stroke-width="2" class="cursor-pointer hover:stroke-white transition-all" onclick="selectGraphNode('SecurityMetrics', 'Audit')" />
+                <text x="290" y="264" text-anchor="middle" fill="#f3e8ff" font-size="7" font-family="monospace">Metrics</text>
+              </g>
+            </svg>
+            <div class="absolute bottom-2 right-2 text-[10px] text-slate-500 font-mono">Clique em qualquer nó ou alterne o nível C0-C3</div>
+          </div>
+
+          <!-- Explanation & Map-Reduce Pipeline Panel -->
+          <div class="lg:col-span-5 space-y-4">
+            <div id="graphrag-info-card" class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span id="graphrag-view-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-900/70 text-indigo-300 border border-indigo-700/60">Busca Local Ativa</span>
+                <span id="graphrag-tokens-metric" class="text-xs font-mono text-cyan-400">Tokens de Contexto: ~1.200</span>
+              </div>
+              
+              <h5 id="graphrag-view-title" class="font-bold text-white text-base">Pergunta Focal: "Como o OAuth2 valida sessões?"</h5>
+              <p id="graphrag-view-desc" class="text-xs text-slate-300 leading-relaxed">
+                Na <strong>Busca Local</strong>, o sistema faz correspondência exata do nome da entidade e recupera sua vizinhança imediata de primeiro grau (TokenService e UserSession). É ótimo para responder fatos pontuais com mínima latência.
+              </p>
+
+              <!-- Map-Reduce Pipeline Visualizer (Ativado na busca global) -->
+              <div id="graphrag-pipeline-box" class="hidden p-3.5 bg-slate-950 rounded-xl border border-indigo-900/60 text-xs font-mono space-y-2">
+                <div class="text-[11px] text-indigo-300 font-bold flex items-center justify-between border-b border-slate-800 pb-1">
+                  <span>Pipeline Map-Reduce do Artigo:</span>
+                  <span class="text-[10px] text-emerald-400">Nível C0/C1</span>
+                </div>
+                <div class="text-[10px] text-slate-300 space-y-1">
+                  <div>1. $\operatorname{Map}(q, B_j) \rightarrow (a_j, h_j)$: Gera respostas parciais com nota $h_j \in [0, 100]$</div>
+                  <div>2. Filtragem de utilidade: Descarta blocos com nota $h_j = 0$</div>
+                  <div>3. $\operatorname{Reduce}(q, \operatorname{Pack}_W(\operatorname{Sort}(A^+)))$: Síntese final com teto de tokens</div>
+                </div>
+                <div class="pt-1 text-[10px] text-amber-300">
+                  Consumo real: 26.657 tokens (Podcasts) vs 1,01 milhão no texto bruto!
+                </div>
+              </div>
+
+              <div id="graphrag-node-details" class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono space-y-1">
+                <div>&bull; Entidade foco: <span class="text-cyan-400">OAuth2_Provider</span></div>
+                <div>&bull; Subgrafo conectado: <span class="text-slate-300">TokenService, UserSession, APIRouter</span></div>
+                <div>&bull; Claims de grafo: <span class="text-slate-300">"emite tokens JWT com validade de 15 minutos"</span></div>
+              </div>
+            </div>
+
+            <!-- Níveis de Granularidade Leiden -->
+            <div class="space-y-1.5">
+              <span class="text-[11px] font-mono text-slate-400">Selecionar Nível de Partição Leiden:</span>
+              <div class="grid grid-cols-4 gap-2 text-xs font-mono">
+                <button onclick="setGraphLevel('c0')" id="btn-lvl-c0" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-center">C0 (Raiz)</button>
+                <button onclick="setGraphLevel('c1')" id="btn-lvl-c1" class="px-2 py-1.5 rounded-lg bg-indigo-900 text-indigo-200 border border-indigo-700 text-center">C1 (Macro)</button>
+                <button onclick="setGraphLevel('c2')" id="btn-lvl-c2" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-center">C2 (Módulos)</button>
+                <button onclick="setGraphLevel('c3')" id="btn-lvl-c3" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-center">C3 (Folhas)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 2: ZEP TEMPORAL -->
+      <div id="sim-zep" class="sim-container hidden glass-card rounded-3xl p-6 sm:p-8 border-amber-900/60 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-amber-400 bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-800">ZEP: Temporal Knowledge Graph</span>
+              <span class="text-xs text-slate-400 font-mono">Artigo ZEP (Jan/2025)</span>
+            </div>
+            <h4 class="text-xl font-bold text-white mt-1">Os Dois Relógios da Verdade: Tempo de Evento vs Tempo do Sistema</h4>
+            <p class="text-xs text-slate-400">Entenda a bitemporalidade estrita ($t_{\text{valid}}$ vs $t'_{\text{created}}$) e teste a injeção de relatos tardios sem corromper a história.</p>
+          </div>
+          
+          <!-- Botão para Injetar Relato Tardio -->
+          <button onclick="injectLateArrivalFact()" id="btn-late-arrival" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-lg shadow-amber-600/30 transition-all flex items-center gap-2">
+            <span>⏰</span> Injetar Relato Tardio (Retroativo)
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Timeline Controls -->
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex flex-wrap justify-between items-center text-xs font-mono">
+              <span class="text-amber-400 font-bold flex items-center gap-1.5">
+                <span>📅</span> Relógio 1 (Tempo do Mundo / Evento $t$): <span id="zep-time-label" class="text-white underline">Setembro 2026 (Hoje)</span>
+              </span>
+              <span class="text-cyan-400 font-mono text-[11px]">
+                Relógio 2 (Tempo do Sistema $t'$): Transacional Contínuo
+              </span>
+            </div>
+            
+            <input type="range" id="zep-slider" min="1" max="4" value="4" oninput="updateZepTimeline(this.value)" class="w-full accent-amber-500 cursor-pointer h-2.5 bg-slate-800 rounded-lg">
+            
+            <div class="flex justify-between text-[11px] font-mono text-slate-500">
+              <span>Janeiro 2024</span>
+              <span>Dezembro 2024</span>
+              <span>Junho 2025</span>
+              <span class="text-amber-400 font-bold">Setembro 2026</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Facts Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="zep-cards-grid">
+            <!-- Fact 1 -->
+            <div id="zep-fact-1" class="p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 space-y-2.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-mono text-slate-400">Fato #F-101</span>
+                <span id="zep-status-1" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">INVÁLIDO</span>
+              </div>
+              <p class="text-sm font-semibold text-slate-200 leading-snug">"Filipe reside em São Paulo e trabalha presencialmente na TechCorp."</p>
+              
+              <div class="text-[10px] font-mono text-slate-400 space-y-1 pt-2 border-t border-slate-800">
+                <div class="flex justify-between">
+                  <span>Validade Real ($t_{\text{valid}} \to t_{\text{invalid}}$):</span>
+                  <span class="text-amber-400">01/Jan/24 $\to$ 15/Dez/24</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Ingestão Sistema ($t'_{\text{created}}$):</span>
+                  <span class="text-cyan-400">01/Jan/2024 às 09:14</span>
+                </div>
+                <div class="text-slate-500 italic">Invalidação: Demissão / Mudança</div>
+              </div>
+            </div>
+
+            <!-- Fact 2 -->
+            <div id="zep-fact-2" class="p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 space-y-2.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-mono text-slate-400">Fato #F-102</span>
+                <span id="zep-status-2" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">INVÁLIDO</span>
+              </div>
+              <p class="text-sm font-semibold text-slate-200 leading-snug">"Filipe mudou-se para Curitiba e atua como consultor remoto."</p>
+              
+              <div class="text-[10px] font-mono text-slate-400 space-y-1 pt-2 border-t border-slate-800">
+                <div class="flex justify-between">
+                  <span>Validade Real ($t_{\text{valid}} \to t_{\text{invalid}}$):</span>
+                  <span class="text-amber-400">15/Dez/24 $\to$ 10/Jun/25</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Ingestão Sistema ($t'_{\text{created}}$):</span>
+                  <span class="text-cyan-400">18/Dez/2024 às 14:02</span>
+                </div>
+                <div class="text-slate-500 italic">Invalidação: Ingresso no Mestrado</div>
+              </div>
+            </div>
+
+            <!-- Fact 3 -->
+            <div id="zep-fact-3" class="p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-emerald-500/40 shadow-lg shadow-emerald-500/10 space-y-2.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-mono text-slate-400">Fato #F-103</span>
+                <span id="zep-status-3" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800">VIGENTE AGORA</span>
+              </div>
+              <p class="text-sm font-semibold text-white leading-snug">"Filipe cursa Mestrado em Deep Learning e pesquisa em Florianópolis."</p>
+              
+              <div class="text-[10px] font-mono text-slate-400 space-y-1 pt-2 border-t border-slate-800">
+                <div class="flex justify-between">
+                  <span>Validade Real ($t_{\text{valid}} \to t_{\text{invalid}}$):</span>
+                  <span class="text-emerald-400">10/Jun/25 $\to$ Vigente ($\infty$)</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Ingestão Sistema ($t'_{\text{created}}$):</span>
+                  <span class="text-cyan-400">12/Jun/2025 às 11:30</span>
+                </div>
+                <div class="text-slate-500 italic">Status: Predicado Ativo</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Late Arrival Alert Banner (Oculto inicialmente) -->
+          <div id="late-arrival-box" class="hidden p-4 rounded-xl bg-cyan-950/40 border border-cyan-800 text-xs text-cyan-200 space-y-2">
+            <div class="font-bold flex items-center gap-2 text-cyan-300 text-sm">
+              <span>🔔</span> Relato Tardio Injetado com Sucesso:
+            </div>
+            <p>
+              O usuário informou hoje (Set/2026): <em>"A propósito, entre Fevereiro e Maio de 2024 eu fiz um intercâmbio em Lisboa antes de me mudar para Curitiba."</em>
+            </p>
+            <div class="font-mono text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+              Novo Nó #F-104 &bull; $t_{\text{valid}} = \text{Fev/2024}$, $t_{\text{invalid}} = \text{Mai/2024}$ &bull; $t'_{\text{created}} = \text{27/Set/2026 (Agora)}$.
+            </div>
+            <p class="text-[11px] text-slate-400">
+              O ZEP insere esse fato no intervalo correto do passado <strong>sem alterar a vigência do Fato atual (#F-103)</strong>. Um RAG plano sem carimbo de intervalo temporal confundiria a resposta e diria que Filipe está em Lisboa hoje!
+            </p>
+          </div>
+
+          <!-- LongMemEval Metrics Box -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 text-center">
+              <span class="text-xs text-slate-400 font-mono">Acurácia LongMemEval (GPT-4o)</span>
+              <div class="text-xl font-bold text-emerald-400 mt-1">71,2% vs 60,2%</div>
+              <span class="text-[10px] text-slate-500 font-mono">+11.0 pp sobre Full Context</span>
+            </div>
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 text-center">
+              <span class="text-xs text-slate-400 font-mono">Latência Média por Resposta</span>
+              <div class="text-xl font-bold text-cyan-400 mt-1">2,58s vs 28,9s</div>
+              <span class="text-[10px] text-slate-500 font-mono">Redução de mais de 10x</span>
+            </div>
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 text-center">
+              <span class="text-xs text-slate-400 font-mono">Tokens Injetados no Prompt</span>
+              <div class="text-xl font-bold text-indigo-400 mt-1">1.600 vs 115.000</div>
+              <span class="text-[10px] text-slate-500 font-mono">Eliminação do "Lost in the Middle"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 3: HELA-MEM -->
+      <div id="sim-hela" class="sim-container hidden glass-card rounded-3xl p-6 sm:p-8 border-emerald-900/60 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800">HeLa-Mem: Hebbian Plasticity</span>
+              <span class="text-xs text-slate-400 font-mono">HKUST & CUHK (Jul/2026)</span>
+            </div>
+            <h4 class="text-xl font-bold text-white mt-1">Plasticidade Sináptica, Decaimento Ativo e Recuperação Dual</h4>
+            <p class="text-xs text-slate-400">"Neurônios que disparam juntos conectam-se". Teste o reforço sináptico por coativação e a propagação associativa.</p>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <button onclick="triggerHelaCoactivation()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 hover:brightness-110 active:scale-95 transition-all">
+              ⚡ Coativar Memória A + Memória B
+            </button>
+            <button onclick="advanceHelaDecay()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 font-bold text-xs transition-all">
+              ⏳ Avançar Tempo Sem Uso (Decaimento)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <!-- Visual SVG Neural Network -->
+          <div class="lg:col-span-7 bg-slate-950/90 rounded-2xl p-6 border border-slate-800 relative min-h-[340px] flex items-center justify-center">
+            <svg id="hela-svg" class="w-full h-76" viewBox="0 0 460 260">
+              <!-- Edge A-B (Coativação Reforçada) -->
+              <line id="hela-edge-ab" x1="120" y1="130" x2="330" y2="80" stroke="#10b981" stroke-width="4.5" stroke-opacity="0.9" class="transition-all duration-300" />
+              <!-- Edge A-C (Abandonada em decaimento) -->
+              <line id="hela-edge-ac" x1="120" y1="130" x2="270" y2="210" stroke="#64748b" stroke-width="1.2" stroke-opacity="0.35" stroke-dasharray="3,3" class="transition-all duration-300" />
+              <!-- Edge B-C -->
+              <line id="hela-edge-bc" x1="330" y1="80" x2="270" y2="210" stroke="#475569" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="2,2" />
+
+              <!-- Node A (Episódico) -->
+              <g class="cursor-pointer" onclick="triggerHelaCoactivation()">
+                <circle id="hela-node-a" cx="120" cy="130" r="26" fill="#064e3b" stroke="#34d399" stroke-width="3" />
+                <text x="120" y="134" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="bold">Memória A</text>
+                <text x="120" y="172" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="monospace">GraphSAGE PPI</text>
+              </g>
+
+              <!-- Node B (Episódico) -->
+              <g class="cursor-pointer" onclick="triggerHelaCoactivation()">
+                <circle id="hela-node-b" cx="330" cy="80" r="26" fill="#064e3b" stroke="#34d399" stroke-width="3" />
+                <text x="330" y="84" text-anchor="middle" fill="#ecfdf5" font-size="11" font-weight="bold">Memória B</text>
+                <text x="330" y="122" text-anchor="middle" fill="#6ee7b7" font-size="9" font-family="monospace">Mini-batch OOM</text>
+              </g>
+
+              <!-- Node C (Obsoleto) -->
+              <g class="cursor-pointer opacity-50" id="hela-node-c-group">
+                <circle cx="270" cy="210" r="18" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5" />
+                <text x="270" y="214" text-anchor="middle" fill="#cbd5e1" font-size="9">Memória C</text>
+                <text x="270" y="238" text-anchor="middle" fill="#94a3b8" font-size="8">Driver CUDA 11</text>
+              </g>
+
+              <!-- Synapse Weight Labels -->
+              <text id="hela-weight-label" x="225" y="95" fill="#34d399" font-size="12" font-mono font-bold>W_AB = 0.82</text>
+              <text id="hela-weight-ac-label" x="180" y="185" fill="#94a3b8" font-size="10" font-mono>W_AC = 0.14 (decaimento)</text>
+            </svg>
+            <div class="absolute bottom-2 right-2 text-[10px] text-slate-500 font-mono">Clique no botão para disparar estímulo conjunto</div>
+          </div>
+
+          <!-- Technical Formulation & Dual Path Breakdown -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-emerald-400 font-bold">Fórmula Operacional Hebbiana:</span>
+                <span class="text-[10px] font-mono text-slate-400">HeLa-Mem [Eq. 1]</span>
+              </div>
+              
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300">
+                \[ w_{ij}^{(t+1)} = (1 - \lambda)w_{ij}^{(t)} + \eta \cdot \mathbb{I}(v_i, v_j \in \mathcal{K}_t) \]
+              </div>
+              
+              <div class="text-xs text-slate-300 space-y-2">
+                <p>
+                  Quando duas memórias são recuperadas juntas ($\mathcal{K}_t$), a aresta recebe reforço $\eta$. Sem reativação, o peso decai continuamente a cada ciclo ($1 - \lambda$).
+                </p>
+                <!-- Alerta metodológico estrito do artigo -->
+                <div class="p-2.5 bg-amber-950/30 rounded-lg border border-amber-800/40 text-[11px] text-amber-300">
+                  <strong>⚠️ Nuance de Rigor Científico:</strong> O artigo declara $\lambda = 0,995$ no apêndice experimental. Se aplicado literalmente à fórmula $(1 - \lambda)$, o peso reteria apenas 0,5% por passo! Uma reprodução rigorosa trata isso como ambiguidade entre fator de retenção ($r$) e taxa de perda.
+                </div>
+              </div>
+
+              <!-- Dual-Path Score Breakdown Panel -->
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs font-mono space-y-2">
+                <div class="text-[11px] font-bold text-slate-200">Recuperação Dual em 2 Caminhos:</div>
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                  <span>1. Score Base Direto ($S_{\text{base}}$):</span>
+                  <span class="text-cyan-400">0.45 (Similaridade baixa)</span>
+                </div>
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                  <span>2. Propagação Associativa ($\beta \sum S_{\text{base}} w_{ij}$):</span>
+                  <span class="text-emerald-400">+0.48 (Forte associação)</span>
+                </div>
+                <div class="flex justify-between border-t border-slate-800 pt-1 font-bold text-white text-[11px]">
+                  <span>Score Total Unificado:</span>
+                  <span class="text-emerald-300">0.93 (Recuperado com sucesso!)</span>
+                </div>
+              </div>
+
+              <div class="space-y-1 text-xs">
+                <div class="flex justify-between text-slate-400">
+                  <span>Força da Sinapse W_AB:</span>
+                  <span id="hela-stat-val" class="font-bold text-emerald-400">0.82 / 1.00</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-2">
+                  <div id="hela-stat-bar" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 82%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 4: A-MEM -->
+      <div id="sim-amem" class="sim-container hidden glass-card rounded-3xl p-6 sm:p-8 border-purple-900/60 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-purple-400 bg-purple-950/80 px-2.5 py-1 rounded-md border border-purple-800">A-MEM: Agentic Self-Evolving Memory</span>
+              <span class="text-xs text-slate-400 font-mono">Rutgers (Fev/2025 - Out/2025)</span>
+            </div>
+            <h4 class="text-xl font-bold text-white mt-1">Mesa de Trabalho Zettelkasten e Reindexação Dinâmica</h4>
+            <p class="text-xs text-slate-400">Veja como uma nova experiência provoca a reorganização contextual e reindexação de notas antigas.</p>
+          </div>
+          
+          <button onclick="runAmemStep()" id="btn-amem-run" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2">
+            <span>▶</span> Avançar Ciclo Cognitivo (<span id="amem-step-label">Passo 1/4</span>)
+          </button>
+        </div>
+
+        <!-- 4 Step Pipeline Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Step 1 -->
+          <div id="amem-step-1" class="bg-slate-900 border border-purple-500/50 p-4 rounded-2xl space-y-2.5 transition-all shadow-md">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800">Etapa 1: Ingestão</span>
+              <span class="text-[10px] font-mono text-cyan-400">Entrada</span>
+            </div>
+            <h6 class="font-bold text-xs text-white">Nova Observação do Agente</h6>
+            <div class="text-[11px] text-slate-300 font-mono bg-slate-950 p-2.5 rounded-xl border border-slate-800 leading-snug">
+              "Treino do GraphSAGE na GPU colapsou com CUDA Out-Of-Memory usando batch 512."
+            </div>
+            <p class="text-[10px] text-slate-400">O LLM analisa a interação bruta e extrai os campos da Nota.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="amem-step-2" class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2.5 transition-all opacity-40">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Etapa 2: Recuperação</span>
+              <span class="text-[10px] font-mono text-indigo-400">Top-k Cosseno</span>
+            </div>
+            <h6 class="font-bold text-xs text-white">Filtro de Vizinhança Vetorial</h6>
+            <div class="text-[11px] text-slate-300 font-mono bg-slate-950 p-2.5 rounded-xl border border-slate-800 leading-snug space-y-1">
+              <div>&bull; Nota #N-34: "Specs da VRAM: 8GB"</div>
+              <div>&bull; Nota #N-12: "Sampling de vizinhos"</div>
+            </div>
+            <p class="text-[10px] text-slate-400">A busca vetorial atua como filtro de escala para submeter candidatos ao modelo.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="amem-step-3" class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2.5 transition-all opacity-40">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Etapa 3: Reflexão</span>
+              <span class="text-[10px] font-mono text-purple-300">Julgamento LLM</span>
+            </div>
+            <h6 class="font-bold text-xs text-white">Decisão de Vínculos & Tags</h6>
+            <div class="text-[11px] text-slate-300 font-mono bg-slate-950 p-2.5 rounded-xl border border-slate-800 leading-snug space-y-1">
+              <div class="text-emerald-400">+ Link gerado: #N-12 $\leftrightarrow$ Nova</div>
+              <div class="text-purple-300">+ Tag: [VRAM_Bottleneck]</div>
+            </div>
+            <p class="text-[10px] text-slate-400">O LLM avalia a semântica profunda e decide quais links criar ou descartar.</p>
+          </div>
+
+          <!-- Step 4 -->
+          <div id="amem-step-4" class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2.5 transition-all opacity-40">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Etapa 4: Evolução</span>
+              <span class="text-[10px] font-mono text-emerald-400">Reindexação</span>
+            </div>
+            <h6 class="font-bold text-xs text-white">Atualização de Nota Antiga</h6>
+            <div class="text-[11px] text-slate-300 font-mono bg-slate-950 p-2.5 rounded-xl border border-slate-800 leading-snug">
+              <span class="text-rose-400 line-through">Contexto antigo: teste isolado</span><br>
+              <span class="text-emerald-300">Contexto evoluído: baseline saturado; usar neighbor sampler [25, 10].</span>
+            </div>
+            <p class="text-[10px] text-slate-400">Nota anterior é reescrita e seu vetor embedding $e_i$ é recalculado.</p>
+          </div>
+        </div>
+
+        <!-- Note Schema Breakdown Box -->
+        <div class="p-5 bg-slate-900 rounded-2xl border border-slate-800 space-y-3">
+          <h5 class="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">A Estrutura Formal de uma Nota Zettelkasten no A-MEM [Eq. 1]:</h5>
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center font-mono text-xs">
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-cyan-400 font-bold">$c_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Interação Original</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-amber-400 font-bold">$t_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Timestamp</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-indigo-400 font-bold">$K_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Palavras-chave</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-emerald-400 font-bold">$G_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Tags Semânticas</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-purple-400 font-bold">$X_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Descrição Contextual</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-sky-400 font-bold">$e_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Embedding Densa</p>
+            </div>
+            <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800">
+              <span class="text-rose-400 font-bold">$L_i$</span>
+              <p class="text-[10px] text-slate-400 mt-1">Links Relacionais</p>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            Ablação comprovada no artigo: Sem links e evolução, o F1 multi-pulo colapsa para <strong>9,65%</strong>. Com a evolução reflexiva completa, o F1 atinge <strong>27,02%</strong> (ganho de quase 3x).
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATOR 5: CODERAG -->
+      <div id="sim-coderag" class="sim-container hidden glass-card rounded-3xl p-6 sm:p-8 border-cyan-900/60 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2.5 py-1 rounded-md border border-cyan-800">CodeRAG: Structural Memory</span>
+              <span class="text-xs text-slate-400 font-mono">Poda AST & Reranking BESTFIT (Nov/2025)</span>
+            </div>
+            <h4 class="text-xl font-bold text-white mt-1">Poda Sintática Cirúrgica vs Dump Ingênuo de Código</h4>
+            <p class="text-xs text-slate-400">"Relevância para a busca não significa utilidade para a conclusão de código". Veja a diferença no prompt.</p>
+          </div>
+          
+          <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800 text-xs">
+            <button id="btn-coderag-naive" onclick="setCodeRAGMode('naive')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">RAG Ingênuo (Arquivos Inteiros)</button>
+            <button id="btn-coderag-surgical" onclick="setCodeRAGMode('surgical')" class="px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold shadow">CodeRAG (AST Cirúrgica)</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Editor Code Preview -->
+          <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-2">
+              <span>src/models/graphsage.py (Em edição pelo dev)</span>
+              <span class="text-amber-400 font-bold">Cursor: Linha 45</span>
+            </div>
+            <pre class="text-slate-300 leading-relaxed overflow-x-auto text-[11px]">
+<span class="text-indigo-400">class</span> <span class="text-cyan-300">GraphSAGENet</span>(nn.Module):
+    <span class="text-indigo-400">def</span> <span class="text-cyan-400">__init__</span>(self, in_channels, hidden_channels, out_channels):
+        super().__init__()
+        self.conv1 = SAGEConv(in_channels, hidden_channels)
+        self.conv2 = SAGEConv(hidden_channels, out_channels)
+        <span class="text-slate-500"># O programador está invocando o classificador externo:</span>
+        <span class="bg-cyan-500/20 px-1 border-b-2 border-cyan-400 text-cyan-200">self.head = Classifier(|)</span></pre>
+            <div class="text-[10px] text-slate-500 pt-1">
+              Sondagem de Log-Probabilidade: O CodeT5p-220m testa blocos candidatos de 3 linhas e calcula o ganho de confiança na completação: $s_i = \sum \max \log p_\theta(v \mid c, c_i)$.
+            </div>
+          </div>
+
+          <!-- Retrieved Prompt Context Comparison -->
+          <div id="coderag-context-card" class="bg-slate-900 p-4 rounded-2xl border border-cyan-800/60 space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-bold text-cyan-300">Contexto Injetado no Prompt do LLM</span>
+              <span id="coderag-tokens-badge" class="font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">420 Tokens (Poda Cirúrgica)</span>
+            </div>
+            
+            <div id="coderag-content-display" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] font-mono text-slate-300 leading-relaxed overflow-x-auto">
+              <span class="text-emerald-400">// Injetado Cirurgicamente via AST & Fluxo de Dados:</span><br>
+              class Classifier(nn.Module):<br>
+              &nbsp;&nbsp;def __init__(self, in_features: int, num_classes: int, dropout: float = 0.5): ...<br>
+              &nbsp;&nbsp;def forward(self, x: torch.Tensor) -&gt; torch.Tensor: ...
+            </div>
+            
+            <p id="coderag-summary" class="text-xs text-slate-300 leading-relaxed">
+              O CodeRAG não jogou 800 linhas de arquivos irrelevantes no prompt. Ele navegou pela Árvore Sintática Abstrata (AST) e pelo grafo de fluxo de dados, pinçando exatamente a assinatura da classe necessária para o cursor.
+            </p>
+
+            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono pt-1">
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800">
+                <span class="text-slate-400">ReccEval Exact Match:</span>
+                <span class="text-emerald-400 font-bold block text-sm">47,48% (vs 39,99%)</span>
+              </div>
+              <div class="p-2 bg-slate-950 rounded-lg border border-slate-800">
+                <span class="text-slate-400">Latência do Reranker Aluno:</span>
+                <span class="text-cyan-400 font-bold block text-sm">0,23s ponta a ponta</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 04: OS 5 PILARES TEÓRICOS APROFUNDADOS -->
+    <section id="deepdive" class="space-y-10">
+      <div class="border-b border-slate-800 pb-4">
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+          <span class="text-cyan-400 font-mono">04.</span> Análise Técnica e Tradução Não-Técnica dos 5 Pilares Teóricos
+        </h3>
+        <p class="text-sm text-slate-400">Conectando a intuição humana às equações formais e às limitações científicas de cada trabalho</p>
+      </div>
+
+      <div class="space-y-8">
+        
+        <!-- PILAR 1: GRAPHRAG -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border-indigo-900/60 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg bg-indigo-950 text-indigo-300 border border-indigo-800 text-xs font-mono font-bold">Pilar 1</span>
+              <h4 class="text-xl font-bold text-white">Microsoft GraphRAG: Da Recuperação Local à Compreensão Global</h4>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Paper: Edge et al. (2024 / 2025)</span>
+          </div>
+
+          <div class="pilar-dynamic-layout" data-pilar="graphrag">
+            <!-- Bloco Intuitivo -->
+            <div class="view-content-intuitive space-y-3 text-sm text-slate-300 leading-relaxed">
+              <h5 class="text-indigo-400 font-bold flex items-center gap-2">
+                <span>💡</span> Tradução Didática (Para Líderes e Executivos)
+              </h5>
+              <p>
+                <strong>A Metáfora da Enciclopédia com Mapa Mental:</strong> Imagine que você tem uma biblioteca com 10.000 notícias sobre tecnologia e finanças. Se você perguntar: <em>"O que o Steve Jobs achava do mercado imobiliário em 2005?"</em>, um sistema tradicional de busca por palavras ou vetores acha a resposta facilmente, porque é como procurar uma palavra exata no sumário (busca por agulha no palheiro).
+              </p>
+              <p>
+                No entanto, se você perguntar: <em>"Quais foram as 5 principais tendências que transformaram a indústria bancária nos últimos dez anos?"</em>, o buscador tradicional colapsa. Ele vai trazer 5 trechos soltos que contêm as palavras "tendência" e "banco", mas não terá a menor ideia da história completa.
+              </p>
+              <p>
+                O GraphRAG resolve isso construindo primeiro uma <strong>árvore temática de capítulos e subcapítulos</strong> (usando detecção de comunidades). Para responder à pergunta ampla, ele lê os relatórios executivos de cada capítulo em paralelo e sintetiza uma resposta global.
+              </p>
+              <div class="p-3 bg-indigo-950/40 rounded-xl border border-indigo-800/50 text-xs text-indigo-200">
+                <strong>Lição Executiva:</strong> Localizar trechos relevantes e produzir uma visão representativa do acervo são capacidades cognitivas completamente distintas.
+              </div>
+            </div>
+
+            <!-- Bloco Técnico -->
+            <div class="view-content-technical hidden space-y-3 text-xs text-slate-300 font-mono leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>🔬</span> Fundamentação Matemática & Rigor Arquitetural
+              </h5>
+              <p>
+                O grafo de conhecimento ponderado é definido por $G = (V, E, w)$, onde $V$ são entidades extraídas, $E$ arestas relacionais e $w$ a frequência agregada de coocorrências. O particionamento hierárquico aplica recursivamente o <strong>algoritmo de Leiden</strong>, maximizando a modularidade sobre o grafo:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-indigo-300">
+                \[ \mathcal{P}_\ell = \{C_{\ell,1}, \dots, C_{\ell,m_\ell}\}, \quad \bigcup_j C_{\ell,j} = V, \quad C_{\ell,i} \cap C_{\ell,j} = \varnothing \ (i \neq j) \]
+              </div>
+              <p>
+                A consulta Global Search executa um pipeline <strong>Map-Reduce com score de utilidade</strong>:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-cyan-300">
+                \[ (a_j, h_j) = \operatorname{Map}(q, B_j), \quad A^+ = \{a_j : h_j > 0\}, \quad y = \operatorname{Reduce}\left(q, \operatorname{Pack}_W(\operatorname{Sort}_{h\downarrow}(A^+))\right) \]
+              </div>
+              <div class="p-3 bg-amber-950/30 rounded-xl border border-amber-800/40 text-amber-300 text-[11px]">
+                <strong>⚠️ Nuances de Rigor Documental:</strong> A resolução de entidades no experimento documentado utiliza correspondência exata de strings (não resolução semântica universal). O artigo investiga busca global; buscas locais são mencionadas como extensões futuras. A economia de tokens de C0 (26k-39k tokens) é comparada contra o processamento exaustivo do texto integral, não contra buscas top-k triviais.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILAR 2: ZEP -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border-amber-900/60 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg bg-amber-950 text-amber-300 border border-amber-800 text-xs font-mono font-bold">Pilar 2</span>
+              <h4 class="text-xl font-bold text-white">ZEP: Memória como Grafo Temporal de Fatos Mutáveis</h4>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Paper: ZEP Architecture (Jan/2025)</span>
+          </div>
+
+          <div class="pilar-dynamic-layout" data-pilar="zep">
+            <!-- Bloco Intuitivo -->
+            <div class="view-content-intuitive space-y-3 text-sm text-slate-300 leading-relaxed">
+              <h5 class="text-amber-400 font-bold flex items-center gap-2">
+                <span>💡</span> Tradução Didática (Para Líderes e Executivos)
+              </h5>
+              <p>
+                <strong>A Metáfora do Diário com Relógio Duplo:</strong> Se você disser a um assistente com memória comum em janeiro: <em>"Sou solteiro"</em> e em maio disser: <em>"Me casei em março"</em>, um sistema comum de banco de dados guarda as duas frases soltas. Quando você perguntar em dezembro: <em>"Sou casado?"</em>, ele pode se confundir porque ambas as frases falam sobre seu estado civil e têm a mesma força semântica.
+              </p>
+              <p>
+                O ZEP funciona como um cartório: ele não apaga seu passado, mas carimba duas datas em cada fato:
+                <br>1. <strong>Quando o evento realmente aconteceu no mundo</strong> (Março);
+                <br>2. <strong>Quando o sistema ficou sabendo disso</strong> (Maio).
+              </p>
+              <p>
+                Dessa forma, se você perguntar <em>"Qual era meu estado civil em fevereiro?"</em>, ele responde corretamente <em>"Solteiro"</em>. E se perguntar hoje, ele responde <em>"Casado"</em>. Atualizar a memória não significa destruir o histórico.
+              </p>
+              <div class="p-3 bg-amber-950/40 rounded-xl border border-amber-800/50 text-xs text-amber-200">
+                <strong>Lição Executiva:</strong> Em ambientes corporativos (CRM, suporte, saúde), fatos mudam o tempo todo. Memórias que sobrescrevem dados apagam auditorias; memórias que acumulam tudo geram contradições catastróficas.
+              </div>
+            </div>
+
+            <!-- Bloco Técnico -->
+            <div class="view-content-technical hidden space-y-3 text-xs text-slate-300 font-mono leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>🔬</span> Fundamentação Matemática & Rigor Arquitetural
+              </h5>
+              <p>
+                O grafo temporal organiza-se em 3 subgrafos sobrepostos: <strong>Episódico</strong> (mensagens literais $\mathcal{E}$), <strong>Semântico</strong> (triplas $N \times E \times N$ com carimbo temporal) e <strong>Comunitário</strong> (resumos clusterizados incrementalmente via Propagação de Rótulos).
+              </p>
+              <p>
+                A bitemporalidade é formalizada por 4 timestamps independentes:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-amber-300">
+                \[ t_{\text{valid}}, t_{\text{invalid}} \in T \ (\text{Tempo do Evento}), \quad t'_{\text{created}}, t'_{\text{expired}} \in T' \ (\text{Tempo do Sistema}) \]
+                \[ \operatorname{Valid}(f, t) \iff (t_{\text{valid}} \leq t) \land (t_{\text{invalid}} = \varnothing \lor t < t_{\text{invalid}}) \]
+              </div>
+              <p>
+                A resolução de entidades utiliza embeddings de 1.024 dimensões + BM25 sobre uma janela de 5 mensagens. A escrita em grafo executa templates <strong>Cypher predefinidos e parametrizados</strong>, mitigando alucinações de schema por LLM.
+              </p>
+              <div class="p-3 bg-amber-950/30 rounded-xl border border-amber-800/40 text-amber-300 text-[11px]">
+                <strong>⚠️ Nuances de Rigor Documental:</strong> A política de invalidação prioriza a ordem transacional da ingestão, mas isso não prova facticidade ontológica (uma informação nova pode ser um erro ou relato malicioso). A clusterização de comunidades usa heurística de Propagação de Rótulos (Label Propagation), divergindo do Leiden global do GraphRAG.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILAR 3: HELA-MEM -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border-emerald-900/60 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-800 text-xs font-mono font-bold">Pilar 3</span>
+              <h4 class="text-xl font-bold text-white">HeLa-Mem: Plasticidade Associativa Hebbiana e Consolidação</h4>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Paper: HKUST / CUHK (Jul/2026)</span>
+          </div>
+
+          <div class="pilar-dynamic-layout" data-pilar="hela">
+            <!-- Bloco Intuitivo -->
+            <div class="view-content-intuitive space-y-3 text-sm text-slate-300 leading-relaxed">
+              <h5 class="text-emerald-400 font-bold flex items-center gap-2">
+                <span>💡</span> Tradução Didática (Para Líderes e Executivos)
+              </h5>
+              <p>
+                <strong>A Metáfora dos Atalhos Criados pelo Uso:</strong> Imagine que você tem dois conhecimentos guardados na mente que não parecem ter nada a ver: <em>"O café da cafeteria central"</em> e <em>"O projeto confidencial da empresa X"</em>. Um buscador comum jamais juntaria essas duas coisas. Mas, na sua vida real, foi exatamente naquela cafeteria que você teve a ideia que salvou o projeto.
+              </p>
+              <p>
+                Na nossa memória biológica, quanto mais pensamos em duas coisas juntas, mais forte fica a conexão física entre elas. O HeLa-Mem replica isso em software: ele cria uma <strong>ponte associativa</strong> entre lembranças que costumam ser recuperadas em conjunto para resolver problemas.
+              </p>
+              <p>
+                Além disso, lembranças antigas que ninguém nunca mais consulta sofrem um decaimento suave. E se um grupo de memórias fica muito forte e interligado, um "agente reflexivo" consolida tudo em um resumo definitivo (como o cérebro faz durante o sono).
+              </p>
+              <div class="p-3 bg-emerald-950/40 rounded-xl border border-emerald-800/50 text-xs text-emerald-200">
+                <strong>Lição Executiva:</strong> Uma memória excelente não é aquela que guarda tudo para sempre com a mesma força, mas aquela que se adapta dinamicamente aos padrões reais de uso do usuário.
+              </div>
+            </div>
+
+            <!-- Bloco Técnico -->
+            <div class="view-content-technical hidden space-y-3 text-xs text-slate-300 font-mono leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>🔬</span> Fundamentação Matemática & Rigor Arquitetural
+              </h5>
+              <p>
+                O HeLa-Mem desacopla a representação em um <strong>Grafo Episódico Ponderado</strong> e um <strong>Repositório Semântico Destilado</strong>. A dinâmica temporal dos pesos sinápticos segue a formulação Hebbiana adaptada:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-emerald-300">
+                \[ w_{ij}^{(t+1)} = (1 - \lambda) w_{ij}^{(t)} + \eta \cdot \mathbb{I}(v_i, v_j \in \mathcal{K}_t) \]
+                \[ \text{Estado Estacionário: } w_\infty = \frac{\eta}{\lambda} \quad (\text{para coativação permanente}) \]
+              </div>
+              <p>
+                A recuperação dual une ativação direta e propagação associativa de primeiro grau:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-cyan-300">
+                \[ S_{\text{base}}(v_i) = \left[\operatorname{sim}(q, e_i) + \alpha \operatorname{kw\_match}(q, v_i)\right] \exp\left(-\frac{\Delta t_i}{\tau}\right) \]
+                \[ S(v_j) = S_{\text{base}}(v_j) + \beta \sum_{i \in \mathcal{N}(j)} S_{\text{base}}(v_i) w_{ij} \]
+              </div>
+              <div class="p-3 bg-amber-950/30 rounded-xl border border-amber-800/40 text-amber-300 text-[11px]">
+                <strong>⚠️ Nuances de Rigor Documental:</strong> O paper discute redes de Hopfield como fundamentação teórica de atratores, mas <em>não implementa convergência de energia de Hopfield no código operacional</em>. O esquecimento exige três condições simultâneas: força $D(v_i) < \delta_{\text{prune}}$, idade $> \delta_{\text{age}}$ e acessos recentes iguais a zero. Há ambiguidade documental no artigo entre o $\lambda=0,995$ declarado e a equação $(1-\lambda)$.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILAR 4: A-MEM -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border-purple-900/60 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg bg-purple-950 text-purple-300 border border-purple-800 text-xs font-mono font-bold">Pilar 4</span>
+              <h4 class="text-xl font-bold text-white">A-MEM: Memória Agêntica Auto-Evolutiva Inspirada em Zettelkasten</h4>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Paper: Xu et al. (Fev/2025 - Out/2025)</span>
+          </div>
+
+          <div class="pilar-dynamic-layout" data-pilar="amem">
+            <!-- Bloco Intuitivo -->
+            <div class="view-content-intuitive space-y-3 text-sm text-slate-300 leading-relaxed">
+              <h5 class="text-purple-400 font-bold flex items-center gap-2">
+                <span>💡</span> Tradução Didática (Para Líderes e Executivos)
+              </h5>
+              <p>
+                <strong>A Metáfora do Secretário Executivo Proativo:</strong> Um arquivista comum se limita a receber um papel, carimbar a data e jogá-lo numa pasta fixa com etiqueta. Se meses depois você descobrir que aquele projeto tinha ligação com uma fraude contábil, o arquivo antigo continuará lá, mudo, sem nenhuma anotação.
+              </p>
+              <p>
+                O A-MEM se inspira no método <strong>Zettelkasten</strong> (fichas inteligentes interligadas). Quando um novo fato acontece, o próprio modelo reflete e diz: <em>"Espera aí: esse novo problema de consumo de memória mostra que aquele código que escrevemos no mês passado não era apenas uma função isolada, mas sim parte de um vazamento estrutural de memória."</em>
+              </p>
+              <p>
+                Ele volta nas fichas antigas, reescreve o contexto delas, adiciona novas etiquetas e atualiza a forma como elas serão encontradas no futuro.
+              </p>
+              <div class="p-3 bg-purple-950/40 rounded-xl border border-purple-800/50 text-xs text-purple-200">
+                <strong>Lição Executiva:</strong> A memória inteligente não é um armazém passivo de textos, mas um processo editorial contínuo que reinterpreta o passado à luz de novas experiências.
+              </div>
+            </div>
+
+            <!-- Bloco Técnico -->
+            <div class="view-content-technical hidden space-y-3 text-xs text-slate-300 font-mono leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>🔬</span> Fundamentação Matemática & Rigor Arquitetural
+              </h5>
+              <p>
+                Cada unidade mnemônica é uma nota atômica formalizada por uma 7-tupla $m_i = \{c_i, t_i, K_i, G_i, X_i, e_i, L_i\}$. O vetor denso é construído a partir da concatenação de todos os metadados gerados:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-purple-300">
+                \[ K_i, G_i, X_i \leftarrow \operatorname{LLM}(c_i \parallel t_i \parallel P_{s1}), \quad e_i = f_{\text{enc}}(\operatorname{concat}(c_i, K_i, G_i, X_i)) \]
+              </div>
+              <p>
+                A evolução não-linear de notas existentes ocorre quando uma nova nota $m_n$ entra. Candidatos são filtrados por cosseno e submetidos ao prompt de evolução contextual:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-cyan-300">
+                \[ m_j^* \leftarrow \operatorname{LLM}\left(m_n \parallel (M_{\text{near}}^n \setminus \{m_j\}) \parallel m_j \parallel P_{s3}\right) \]
+              </div>
+              <div class="p-3 bg-amber-950/30 rounded-xl border border-amber-800/40 text-amber-300 text-[11px]">
+                <strong>⚠️ Nuances de Rigor Documental:</strong> Toda vez que $K_i, G_i$ ou $X_i$ são reescritos, o embedding $e_i$ <em>precisa ser recalculado</em> para preservar a coerência do índice vetorial (uma deriva semântica não formalizada no paper). O A-MEM reorganiza atributos de notas existentes; não cria uma camada formal separada de metanós abstratos em seu algoritmo base.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PILAR 5: CODERAG -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border-cyan-900/60 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800 text-xs font-mono font-bold">Pilar 5</span>
+              <h4 class="text-xl font-bold text-white">CodeRAG: Conhecimento Relevante vs Conhecimento Útil em Código</h4>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Paper: CodeRAG (Nov/2025)</span>
+          </div>
+
+          <div class="pilar-dynamic-layout" data-pilar="coderag">
+            <!-- Bloco Intuitivo -->
+            <div class="view-content-intuitive space-y-3 text-sm text-slate-300 leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>💡</span> Tradução Didática (Para Líderes e Executivos)
+              </h5>
+              <p>
+                <strong>A Metáfora do Engenheiro com a Planta de Precisão:</strong> Se você estiver consertando a turbina de um avião e pedir ajuda, um assistente descuidado jogará os manuais de 1.000 páginas de todos os motores na sua cabeça só porque a palavra "turbina" aparece neles. Você vai demorar horas para achar o que precisa e pode se confundir com especificações de outros modelos.
+              </p>
+              <p>
+                Um engenheiro de precisão faz o contrário: ele analisa o duto exato de combustível que está na sua mão, consulta o <strong>esquema elétrico e a tubulação conectada</strong> e coloca na sua bancada apenas o diagrama da válvula exata que você está apertando.
+              </p>
+              <p>
+                No código de software, o CodeRAG faz exatamente isso: ele recorta os limites exatos de funções e variáveis (usando a árvore sintática da linguagem) e seleciona apenas o que realmente ajuda o programador a completar a linha atual.
+              </p>
+              <div class="p-3 bg-cyan-950/40 rounded-xl border border-cyan-800/50 text-xs text-cyan-200">
+                <strong>Lição Executiva:</strong> Em sistemas técnicos complexos, mais informação gera alucinação. Menos contexto, desde que cirurgicamente selecionado pelas regras estruturais do domínio, produz resultados muito superiores.
+              </div>
+            </div>
+
+            <!-- Bloco Técnico -->
+            <div class="view-content-technical hidden space-y-3 text-xs text-slate-300 font-mono leading-relaxed">
+              <h5 class="text-cyan-400 font-bold flex items-center gap-2">
+                <span>🔬</span> Fundamentação Matemática & Rigor Arquitetural
+              </h5>
+              <p>
+                O postulado central do CodeRAG distingue relevância semântica de utilidade de geração: $\text{Relevância}(q, c) \neq \text{Utilidade}(c \to y)$. A base de conhecimento é particionada nos nós sintáticos da <strong>AST</strong> (funções, métodos, variáveis de classe e globais).
+              </p>
+              <p>
+                A consulta é construída por <strong>sondagem de log-probabilidade</strong> com modelo CodeT5p-220m:
+              </p>
+              <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 text-cyan-300">
+                \[ s_i = \sum_{t=1}^{m} \max_{v \in \mathcal{V}} \log p_\theta(v \mid c_{\text{alvo}}, c_i, \hat{y}_{<t}) \]
+              </div>
+              <p>
+                Recuperação por 3 caminhos complementares: (1) Esparso TF-IDF; (2) Denso CodeT5p; (3) Grafo de Fluxo de Dados (dependências estáticas de variáveis). O reranking <strong>BESTFIT</strong> organiza comparações em árvore heap sort $O(n \log n)$, destilado de um professor Qwen3-8B para um aluno Qwen3-0.6B com filtro de concordância 4/5.
+              </p>
+              <div class="p-3 bg-amber-950/30 rounded-xl border border-amber-800/40 text-amber-300 text-[11px]">
+                <strong>⚠️ Nuances de Rigor Documental:</strong> O CodeRAG documenta AST e fluxo de dados local; <em>não implementa um resolvedor universal de chamadas ou namespaces para linguagens dinâmicas</em>. A avaliação baseia-se em correspondência exata de tokens (Exact Match), não em verificação formal de execução e testes unitários.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 05: MATRIZ COMPARATIVA SISTÊMICA -->
+    <section id="matrix" class="space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+          <span class="text-cyan-400 font-mono">05.</span> Matriz Comparativa Sistemática de Arquiteturas
+        </h3>
+        <p class="text-sm text-slate-400">Trade-offs de engenharia, complexidade computacional e especialização de domínio</p>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-800 glass-card shadow-2xl">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-900/90 border-b border-slate-800 font-mono text-slate-300 uppercase tracking-wider text-[11px]">
+              <th class="p-4">Paradigma / Artigo</th>
+              <th class="p-4">Granularidade</th>
+              <th class="p-4">Mecanismo de Busca</th>
+              <th class="p-4">Dimensão Temporal</th>
+              <th class="p-4">Capacidade Global</th>
+              <th class="p-4">Custo Index vs Query</th>
+              <th class="p-4">Caso de Uso Primário</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/60 font-sans text-slate-300">
+            <!-- G0 -->
+            <tr class="hover:bg-slate-900/40 transition-colors">
+              <td class="p-4 font-bold text-white flex items-center gap-2">
+                <span class="text-xs font-mono text-slate-500">G0</span> Contexto Puro
+              </td>
+              <td class="p-4">Mensagens / Documento integral</td>
+              <td class="p-4 text-slate-400">Inclusão direta no prompt</td>
+              <td class="p-4 text-rose-400 font-mono">Ordem cronológica crua</td>
+              <td class="p-4 text-slate-400">Limitada ao teto da janela</td>
+              <td class="p-4 font-mono text-[11px]">Index: $\sim 0$<br>Query: Recalculo total $O(n^2)$</td>
+              <td class="p-4 text-slate-300">Conversas curtas, protótipos rápidos</td>
+            </tr>
+            <!-- G1 -->
+            <tr class="hover:bg-slate-900/40 transition-colors">
+              <td class="p-4 font-bold text-cyan-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-cyan-400">G1</span> RAG Vetorial Plano
+              </td>
+              <td class="p-4">Chunks de texto fixos (300-600 tokens)</td>
+              <td class="p-4">Top-$k$ por similaridade de cosseno</td>
+              <td class="p-4 text-rose-400 font-mono">Inexistente (Estático)</td>
+              <td class="p-4 text-rose-400">Pobre (Miopia de vizinhança)</td>
+              <td class="p-4 font-mono text-[11px]">Index: Embedding pontual<br>Query: Baixa latência ANN</td>
+              <td class="p-4 text-slate-300">FAQ, busca de agulha no palheiro</td>
+            </tr>
+            <!-- GraphRAG -->
+            <tr class="hover:bg-slate-900/40 transition-colors bg-indigo-950/15">
+              <td class="p-4 font-bold text-indigo-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-indigo-400">G2</span> Microsoft GraphRAG
+              </td>
+              <td class="p-4">Entidades, arestas e relatórios de comunidade</td>
+              <td class="p-4">Map-Reduce sobre sumários Leiden ($C_0-C_3$)</td>
+              <td class="p-4 text-slate-400 font-mono">Capturado nas alegações textuais</td>
+              <td class="p-4 text-emerald-400 font-bold">Excelente (Síntese total de acervo)</td>
+              <td class="p-4 font-mono text-[11px]">Index: Elevado (LLM intensivo)<br>Query: Amortizado em $N$ sínteses</td>
+              <td class="p-4 text-slate-300">Inteligência documental, tendências de mercado</td>
+            </tr>
+            <!-- ZEP -->
+            <tr class="hover:bg-slate-900/40 transition-colors bg-amber-950/15">
+              <td class="p-4 font-bold text-amber-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-amber-400">G3</span> ZEP (t-KG)
+              </td>
+              <td class="p-4">Episódios brutos, triplas factuais e clusters</td>
+              <td class="p-4">Híbrido: Cosseno + BM25 + BFS no Grafo</td>
+              <td class="p-4 text-emerald-400 font-mono font-bold">Bitemporalidade estrita ($t$ vs $t'$)</td>
+              <td class="p-4 text-amber-300">Moderada (Clusters incrementais)</td>
+              <td class="p-4 font-mono text-[11px]">Index: Extração e reconciliação<br>Query: Redução drástica de contexto</td>
+              <td class="p-4 text-slate-300">CRM contínuo, histórico de clientes, saúde</td>
+            </tr>
+            <!-- HeLa-Mem -->
+            <tr class="hover:bg-slate-900/40 transition-colors bg-emerald-950/15">
+              <td class="p-4 font-bold text-emerald-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-emerald-400">G4</span> HeLa-Mem
+              </td>
+              <td class="p-4">Turnos conversacionais e hubs semânticos</td>
+              <td class="p-4">Recuperação Dual (Base direta + Propagação associativa)</td>
+              <td class="p-4 text-emerald-400 font-mono">Decaimento exponencial de acesso</td>
+              <td class="p-4 text-slate-300">Boa (Hubs destilados)</td>
+              <td class="p-4 font-mono text-[11px]">Index: Atualização Hebbiana $O(k^2)$<br>Query: Propagação de 1 salto</td>
+              <td class="p-4 text-slate-300">Agentes conversacionais pessoais, multi-hop</td>
+            </tr>
+            <!-- A-MEM -->
+            <tr class="hover:bg-slate-900/40 transition-colors bg-purple-950/15">
+              <td class="p-4 font-bold text-purple-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-purple-400">G5</span> A-MEM
+              </td>
+              <td class="p-4">Notas Zettelkasten com 7 atributos ricos</td>
+              <td class="p-4">Top-$k$ vetorial guiado por links relacionais</td>
+              <td class="p-4 text-slate-300 font-mono">Timestamp com evolução retroativa</td>
+              <td class="p-4 text-indigo-300">Emergente via links inter-notas</td>
+              <td class="p-4 font-mono text-[11px]">Index: Reflexão e reindexação LLM<br>Query: Contexto sintético ultra-compacto</td>
+              <td class="p-4 text-slate-300">Memória de trabalho de agentes autônomos</td>
+            </tr>
+            <!-- CodeRAG -->
+            <tr class="hover:bg-slate-900/40 transition-colors bg-cyan-950/15">
+              <td class="p-4 font-bold text-cyan-300 flex items-center gap-2">
+                <span class="text-xs font-mono text-cyan-400">ESP</span> CodeRAG
+              </td>
+              <td class="p-4">Nós da AST (funções, classes, variáveis globais)</td>
+              <td class="p-4">Sondagem de Log-Prob + 3 Caminhos + BESTFIT</td>
+              <td class="p-4 text-slate-400 font-mono">Versionamento de commit do repositório</td>
+              <td class="p-4 text-cyan-300">Total no escopo do projeto</td>
+              <td class="p-4 font-mono text-[11px]">Index: Parsing AST + Embeddings<br>Query: Reranker destilado em 0,23s</td>
+              <td class="p-4 text-slate-300">Assistentes de código em repositórios complexos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Nuances Analíticas -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
+          <h5 class="font-bold text-sm text-cyan-300">1. Arestas Não São Intercambiáveis</h5>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Uma aresta no GraphRAG representa uma <em>relação semântica extraída</em>; no ZEP é um <em>fato temporalmente datado</em>; no HeLa-Mem é uma <em>associação comportamental fortalecida por uso</em>; e no CodeRAG é uma <em>dependência estática de dados</em>. Tratar tudo como "grafo" esconde naturezas operacionais antagônicas.
+          </p>
+        </div>
+
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
+          <h5 class="font-bold text-sm text-indigo-300">2. "Atualizar Memória" Significa 7 Coisas</h5>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Dependendo da arquitetura, atualizar pode significar: (1) adicionar registros; (2) corrigir atributos; (3) invalidar fatos por tempo; (4) reponderar conexões Hebbianas; (5) consolidar clusters em resumos; (6) podar nós inativos; ou (7) recomputar embeddings de notas vizinhas.
+          </p>
+        </div>
+
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-2">
+          <h5 class="font-bold text-sm text-emerald-300">3. Inexistência de Vencedor Universal</h5>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            A escolha de arquitetura decorre do tipo de pergunta do usuário: se a demanda é <em>síntese temática ampla</em> $\to$ GraphRAG; se é <em>histórico de mudanças e auditoria</em> $\to$ ZEP; se é <em>aprender atalhos pelo hábito</em> $\to$ HeLa-Mem; se é <em>completar código estruturado</em> $\to$ CodeRAG.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 06: O SISTEMA OPERACIONAL DE MEMÓRIA & GOVERNANÇA -->
+    <section id="so-memoria" class="glass-card rounded-3xl p-8 border-slate-800 space-y-8">
+      <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-cyan-500/20">
+          🧠
+        </div>
+        <div>
+          <h3 class="text-2xl font-bold text-white">O Futuro: Um Sistema Operacional de Memória para Agentes Autônomos</h3>
+          <p class="text-xs text-slate-400">Roteamento Adaptativo, Governança Rigorosa e a Equação de Custo Total Amortizado</p>
+        </div>
+      </div>
+
+      <!-- Arquitetura em Cascata do SO de Memória -->
+      <div class="space-y-4">
+        <h4 class="text-sm font-mono font-bold text-cyan-300 uppercase tracking-wider">Pipeline Arquitetural Unificado (Proposta de Síntese):</h4>
+        
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs font-mono text-center">
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-slate-500 text-[10px]">FASE 1</span>
+            <div class="text-cyan-400 font-bold">Ingestão & Proveniência</div>
+            <p class="text-[10px] text-slate-400 font-sans">Preservação de episódios brutos e metadados de auditoria.</p>
+          </div>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-slate-500 text-[10px]">FASE 2</span>
+            <div class="text-amber-400 font-bold">Estruturação Bitemporal</div>
+            <p class="text-[10px] text-slate-400 font-sans">Separação estrita de $t_{\text{valid}}$ e $t'_{\text{created}}$ com Cypher seguro.</p>
+          </div>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-slate-500 text-[10px]">FASE 3</span>
+            <div class="text-emerald-400 font-bold">Plasticidade & Comunidades</div>
+            <p class="text-[10px] text-slate-400 font-sans">Atualização Hebbiana de pesos e agrupamento Leiden/LP.</p>
+          </div>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-slate-500 text-[10px]">FASE 4</span>
+            <div class="text-purple-400 font-bold">Roteador Cognitivo</div>
+            <p class="text-[10px] text-slate-400 font-sans">Classifica a pergunta e aciona a recuperação de menor custo.</p>
+          </div>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+            <span class="text-slate-500 text-[10px]">FASE 5</span>
+            <div class="text-indigo-400 font-bold">Seleção por Utilidade</div>
+            <p class="text-[10px] text-slate-400 font-sans">Reranking orientado à tarefa e injeção mínima sob orçamento $W$.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Os 3 Grandes Desafios de Governança -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-300 leading-relaxed">
+        
+        <!-- Desafio 1: Esquecimento Real vs Decaimento -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800/80 space-y-2.5">
+          <h5 class="font-bold text-rose-300 flex items-center gap-1.5 text-sm">
+            <span>🔒</span> Esquecimento Biológico vs Direito à Exclusão (LGPD/GDPR)
+          </h5>
+          <p>
+            Na biologia e no HeLa-Mem, "esquecer" significa <em>decaimento de pesos sinápticos</em> (a informação ainda existe no disco, apenas perde prioridade de busca).
+          </p>
+          <div class="p-2.5 bg-rose-950/40 rounded-lg border border-rose-800/50 text-[11px] text-rose-200">
+            <strong>Imperativo Legal:</strong> Para conformidade regulatória, decaimento sináptico <strong>NÃO</strong> é esquecimento. Se o usuário revogar consentimento, o sistema deve rastrear e expurgar a evidência bruta, seus embeddings e <em>todos os resumos comunitários derivados</em>.
+          </div>
+        </div>
+
+        <!-- Desafio 2: Equação de Custo Total Amortizado -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800/80 space-y-2.5">
+          <h5 class="font-bold text-indigo-300 flex items-center gap-1.5 text-sm">
+            <span>⚡</span> Custo Total e Equação de Amortização
+          </h5>
+          <p>
+            Economizar tokens na resposta não significa que o sistema seja mais barato no todo. A contabilidade real de engenharia exige balancear todas as fases:
+          </p>
+          <div class="p-2 bg-slate-950 rounded-lg border border-slate-800 font-mono text-[10px] text-indigo-300">
+            \[ C_{\text{total}} = C_{\text{ingestão}} + C_{\text{index}} + C_{\text{manutenção}} + C_{\text{busca}} + C_{\text{geração}} \]
+            \[ \text{Custo Múltiplo} = \frac{C_{\text{preparação}}}{N_{\text{consultas}}} + C_{\text{consulta}} \]
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Se uma base documental é construída a alto custo de LLM mas consultada apenas duas vezes, o ROI é desastroso. A indexação avançada compensa quando amortizada por milhares de perguntas.
+          </p>
+        </div>
+
+        <!-- Desafio 3: Roteamento Adaptativo -->
+        <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800/80 space-y-2.5">
+          <h5 class="font-bold text-emerald-300 flex items-center gap-1.5 text-sm">
+            <span>🧭</span> Roteador Cognitivo por Complexidade
+          </h5>
+          <p>
+            Uma pergunta simples como <em>"Qual o telefone de contato da filial?"</em> <strong>jamais</strong> deve disparar Map-Reduce sobre comunidades Leiden ou reflexão Zettelkasten em 4 etapas.
+          </p>
+          <p class="text-slate-400">
+            O verdadeiro diferencial do agente maduro não é acionar toda a sua complexidade a cada chamada, mas possuir um classificador leve capaz de direcionar perguntas pontuais para RAG vetorial trivial e reservar grafos temporais/comunitários apenas para demandas multi-hop ou de síntese estratégica.
+          </p>
+        </div>
+      </div>
+
+      <!-- 10 Desafios Experimentais em Aberto -->
+      <div class="p-5 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+        <h5 class="font-bold text-white text-xs font-mono uppercase tracking-wider text-cyan-400">Agenda Científica: Os 10 Desafios Experimentais Ainda Não Resolvidos pela Literatura</h5>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-[11px] text-slate-300">
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-cyan-400">1. Avaliação Fim-a-Fim:</strong> Medir a resposta gerada e não apenas métricas de retrieval.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-indigo-400">2. Relatos Tardios Conflitantes:</strong> Testar contradições maliciosas vs transições legítimas.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-emerald-400">3. Risco do Esquecimento:</strong> Provar que fatos raros mas vitais não são apagados por decaimento.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-amber-400">4. Horizontes Longos:</strong> Validar comportamento de memória com mais de 10.000 turnos.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-purple-400">5. Custo Total de Escrita:</strong> Contabilizar o consumo financeiro da ingestão contínua.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-rose-400">6. Paridade de Hardware:</strong> Comparar sistemas sob idênticos orçamentos de VRAM e GPU.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-sky-400">7. Data Contamination:</strong> Evitar que consultas de teste reforcem indevidamente arestas Hebbianas.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-teal-400">8. Estabilidade Estatística:</strong> Relatar desvio-padrão entre múltiplas sementes e prompts.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-orange-400">9. Exclusão em Cascata:</strong> Deletar derivados resumidos quando o nó fonte for revogado.
+          </div>
+          <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800/80">
+            <strong class="text-violet-400">10. Correção Funcional em Código:</strong> Medir compilação e testes unitários reais além de Exact Match.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-900 bg-slate-950 px-6 py-8 text-center text-xs text-slate-500 font-mono space-y-1">
+    <p>Projeto de Mestrado em Inteligência Artificial &bull; Síntese Unificada de Arquiteturas de Memória para Agentes</p>
+    <p class="text-slate-600">Baseado estritamente nos artigos científicos: <em>Microsoft GraphRAG, ZEP, HeLa-Mem, A-MEM e CodeRAG</em></p>
+  </footer>
+
+  <!-- SCRIPT PARA INTERATIVIDADE E CONTROLES -->
+  <script>
+    // --- ESTADO GLOBAL DA APLICAÇÃO ---
+    let currentMode = 'hybrid'; // 'intuitive', 'technical', 'hybrid'
+
+    // Inicialização do KaTeX
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMath();
+      setExplanationMode('hybrid'); // Inicia em modo híbrido para visualização completa
+    });
+
+    function renderMath() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false },
+            { left: "\\[", right: "\\]", display: true },
+            { left: "\\(", right: "\\)", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Toggle de Modo de Explicação (Intuitivo, Técnico ou Híbrido)
+    function setExplanationMode(mode) {
+      currentMode = mode;
+      const btnIntuitive = document.getElementById('btn-mode-intuitive');
+      const btnTechnical = document.getElementById('btn-mode-technical');
+      const btnHybrid = document.getElementById('btn-mode-hybrid');
+
+      const intuitiveViews = document.querySelectorAll('.view-content-intuitive');
+      const technicalViews = document.querySelectorAll('.view-content-technical');
+      const pilarLayouts = document.querySelectorAll('.pilar-dynamic-layout');
+
+      // Reset dos botões
+      const defaultBtnClass = 'px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-slate-400 hover:text-slate-200';
+      btnIntuitive.className = defaultBtnClass;
+      btnTechnical.className = defaultBtnClass;
+      btnHybrid.className = defaultBtnClass;
+
+      if (mode === 'intuitive') {
+        btnIntuitive.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-amber-400 bg-amber-950/70 border border-amber-500/40 shadow-sm';
+        intuitiveViews.forEach(el => el.classList.remove('hidden'));
+        technicalViews.forEach(el => el.classList.add('hidden'));
+        pilarLayouts.forEach(el => el.className = 'pilar-dynamic-layout');
+      } else if (mode === 'technical') {
+        btnTechnical.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 shadow-sm';
+        intuitiveViews.forEach(el => el.classList.add('hidden'));
+        technicalViews.forEach(el => el.classList.remove('hidden'));
+        pilarLayouts.forEach(el => el.className = 'pilar-dynamic-layout');
+      } else { // Hybrid
+        btnHybrid.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 shadow-sm';
+        intuitiveViews.forEach(el => el.classList.remove('hidden'));
+        technicalViews.forEach(el => el.classList.remove('hidden'));
+        pilarLayouts.forEach(el => el.className = 'pilar-dynamic-layout view-grid-hybrid');
+      }
+
+      // Re-executa renderização de fórmulas matemáticas
+      setTimeout(renderMath, 50);
+    }
+
+    // Navegação de Abas dos Simuladores
+    function switchTab(simId) {
+      document.querySelectorAll('.sim-container').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.sim-tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/30');
+        btn.classList.add('bg-slate-900', 'text-slate-300');
+      });
+
+      const activeContainer = document.getElementById(simId);
+      if (activeContainer) activeContainer.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('tab-btn-' + simId);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-900', 'text-slate-300');
+        activeBtn.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/30');
+      }
+
+      setTimeout(renderMath, 50);
+    }
+
+    // ==========================================
+    // --- SIMULADOR 1: GRAPHRAG (MICROSOFT) ---
+    // ==========================================
+    function setGraphRAGMode(mode) {
+      const btnLocal = document.getElementById('btn-graphrag-local');
+      const btnGlobal = document.getElementById('btn-graphrag-global');
+      const badge = document.getElementById('graphrag-view-badge');
+      const metric = document.getElementById('graphrag-tokens-metric');
+      const title = document.getElementById('graphrag-view-title');
+      const desc = document.getElementById('graphrag-view-desc');
+      const pipelineBox = document.getElementById('graphrag-pipeline-box');
+      const hullA = document.getElementById('cluster-a');
+      const hullB = document.getElementById('cluster-b');
+      const hullC = document.getElementById('cluster-c');
+
+      if (mode === 'local') {
+        btnLocal.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold shadow';
+        btnGlobal.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white';
+        badge.innerText = 'Busca Local Ativa';
+        badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-900/70 text-indigo-300 border border-indigo-700/60';
+        metric.innerText = 'Tokens de Contexto: ~1.200';
+        title.innerText = 'Pergunta Focal: "Como o OAuth2 valida sessões?"';
+        desc.innerHTML = 'Na <strong>Busca Local</strong>, o sistema faz correspondência exata do nome da entidade e recupera sua vizinhança imediata de primeiro grau (TokenService e UserSession). É ótimo para responder fatos pontuais com mínima latência.';
+        pipelineBox.classList.add('hidden');
+
+        hullA.setAttribute('stroke-width', '1.5');
+        hullB.setAttribute('stroke-width', '1.5');
+        hullC.setAttribute('stroke-width', '1.5');
+      } else {
+        btnGlobal.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-semibold shadow';
+        btnLocal.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white';
+        badge.innerText = 'Busca Global Ativa (Map-Reduce C0-C3)';
+        badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-900/70 text-cyan-300 border border-cyan-700/60';
+        metric.innerText = 'Tokens de Contexto: ~32.000 (Sumários)';
+        title.innerText = 'Pergunta Abrangente: "Quais os principais riscos de segurança e faturamento do sistema?"';
+        desc.innerHTML = 'Na <strong>Busca Global</strong>, o modelo não lê fragmentos soltos nem nós individuais. Ele distribui os <em>Community Summaries</em> em paralelo via Map-Reduce, filtrando respostas com score de utilidade $h_j > 0$ até compor a síntese abrangente do corpus.';
+        pipelineBox.classList.remove('hidden');
+
+        hullA.setAttribute('stroke-width', '3.5');
+        hullB.setAttribute('stroke-width', '3.5');
+        hullC.setAttribute('stroke-width', '3.5');
+      }
+      setTimeout(renderMath, 50);
+    }
+
+    function selectGraphNode(name, community) {
+      const title = document.getElementById('graphrag-view-title');
+      const desc = document.getElementById('graphrag-view-desc');
+      const details = document.getElementById('graphrag-node-details');
+
+      title.innerText = `Nó Selecionado: "${name}" (${community})`;
+      desc.innerHTML = `No GraphRAG, o nó <strong>${name}</strong> é vinculado à sua comunidade e às arestas extraídas via LLM. Na indexação, as alegações (claims) são resumidas hierarquicamente para viabilizar tanto buscas locais quanto sumarizações globais.`;
+      
+      details.innerHTML = `
+        <div>&bull; Entidade ativa: <span class="text-cyan-400">${name}</span></div>
+        <div>&bull; Partição Leiden: <span class="text-indigo-300">Comunidade ${community}</span></div>
+        <div>&bull; Status de Resumo: <span class="text-emerald-400">Incorporado no Community Report C1</span></div>
+      `;
+    }
+
+    function setGraphLevel(lvl) {
+      const desc = document.getElementById('graphrag-view-desc');
+      const metric = document.getElementById('graphrag-tokens-metric');
+      ['c0', 'c1', 'c2', 'c3'].forEach(l => {
+        const btn = document.getElementById('btn-lvl-' + l);
+        btn.className = (l === lvl) 
+          ? 'px-2 py-1.5 rounded-lg bg-indigo-900 text-indigo-200 border border-indigo-700 text-center font-bold' 
+          : 'px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-center';
+      });
+
+      if (lvl === 'c0') {
+        desc.innerHTML = '<strong>Nível C0 (Raiz do Corpus):</strong> O sumário mais abstrato possível. Cobre todo o acervo com altíssima taxa de compressão (~26k tokens em podcasts).';
+        metric.innerText = 'Escala C0: 1 Relatório Global';
+      } else if (lvl === 'c1') {
+        desc.innerHTML = '<strong>Nível C1 (Macrocomunidades):</strong> Agrupamento temático em 3 grandes frentes: Autenticação, Faturamento e Auditoria.';
+        metric.innerText = 'Escala C1: 3 Relatórios de Comunidade';
+      } else if (lvl === 'c2') {
+        desc.innerHTML = '<strong>Nível C2 (Sub-comunidades):</strong> Detalhamento intermediário das relações operacionais entre subsistemas.';
+        metric.innerText = 'Escala C2: 8 Relatórios Intermediários';
+      } else {
+        desc.innerHTML = '<strong>Nível C3 (Comunidades-Folha):</strong> O menor nível hierárquico avaliado, preservando detalhes atômicos de entidades e arestas diretas.';
+        metric.innerText = 'Escala C3: 24 Relatórios Detalhados';
+      }
+    }
+
+    // ==========================================
+    // --- SIMULADOR 2: ZEP TEMPORAL ---
+    // ==========================================
+    function updateZepTimeline(val) {
+      const label = document.getElementById('zep-time-label');
+      const f1 = document.getElementById('zep-fact-1');
+      const f2 = document.getElementById('zep-fact-2');
+      const f3 = document.getElementById('zep-fact-3');
+      const s1 = document.getElementById('zep-status-1');
+      const s2 = document.getElementById('zep-status-2');
+      const s3 = document.getElementById('zep-status-3');
+
+      if (val == 1) { // Jan 2024
+        label.innerText = 'Janeiro 2024';
+        f1.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-emerald-500/40 shadow-lg shadow-emerald-500/10 space-y-2.5';
+        s1.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
+        s1.innerText = 'VIGENTE NESTA DATA';
+
+        f2.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-25 space-y-2.5';
+        s2.innerText = 'NÃO OCORREU AINDA';
+        s2.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-500';
+
+        f3.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-25 space-y-2.5';
+        s3.innerText = 'NÃO OCORREU AINDA';
+        s3.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-500';
+      } else if (val == 2) { // Dez 2024
+        label.innerText = 'Dezembro 2024';
+        f1.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-40 space-y-2.5';
+        s1.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800';
+        s1.innerText = 'ENCERRADO / INVÁLIDO';
+
+        f2.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-emerald-500/40 shadow-lg shadow-emerald-500/10 space-y-2.5';
+        s2.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
+        s2.innerText = 'VIGENTE NESTA DATA';
+
+        f3.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-25 space-y-2.5';
+        s3.innerText = 'NÃO OCORREU AINDA';
+        s3.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-500';
+      } else if (val == 3) { // Jun 2025
+        label.innerText = 'Junho 2025';
+        f1.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-30 space-y-2.5';
+        s1.innerText = 'HISTÓRICO ARQUIVADO';
+        s1.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400';
+
+        f2.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-40 space-y-2.5';
+        s2.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800';
+        s2.innerText = 'ENCERRADO / INVÁLIDO';
+
+        f3.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-emerald-500/40 shadow-lg shadow-emerald-500/10 space-y-2.5';
+        s3.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
+        s3.innerText = 'VIGENTE NESTA DATA';
+      } else { // Setembro 2026 (Hoje)
+        label.innerText = 'Setembro 2026 (Atual)';
+        f1.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-40 space-y-2.5';
+        s1.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800';
+        s1.innerText = 'INVÁLIDO';
+
+        f2.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-slate-800 opacity-40 space-y-2.5';
+        s2.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800';
+        s2.innerText = 'INVÁLIDO';
+
+        f3.className = 'p-5 rounded-2xl border transition-all duration-300 bg-slate-900 border-emerald-500/40 shadow-lg shadow-emerald-500/10 space-y-2.5';
+        s3.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
+        s3.innerText = 'VIGENTE AGORA';
+      }
+    }
+
+    function injectLateArrivalFact() {
+      const lateBox = document.getElementById('late-arrival-box');
+      const btn = document.getElementById('btn-late-arrival');
+      lateBox.classList.remove('hidden');
+      btn.innerText = '✅ Relato Tardio Registrado';
+      btn.className = 'px-3.5 py-2 rounded-xl bg-emerald-700 text-white font-bold text-xs shadow-lg transition-all flex items-center gap-2';
+      setTimeout(renderMath, 50);
+    }
+
+    // ==========================================
+    // --- SIMULADOR 3: HELA-MEM (HEBBIANO) ---
+    // ==========================================
+    let helaWeight = 0.82;
+    function triggerHelaCoactivation() {
+      helaWeight = Math.min(1.0, helaWeight + 0.05);
+      updateHelaVisual(true);
+    }
+
+    function advanceHelaDecay() {
+      // Simula decaimento contínuo sem coativação
+      helaWeight = Math.max(0.05, helaWeight * 0.85);
+      updateHelaVisual(false);
+    }
+
+    function updateHelaVisual(isStimulus) {
+      const edge = document.getElementById('hela-edge-ab');
+      const label = document.getElementById('hela-weight-label');
+      const statVal = document.getElementById('hela-stat-val');
+      const bar = document.getElementById('hela-stat-bar');
+
+      edge.setAttribute('stroke-width', (helaWeight * 7.5).toFixed(1));
+      bar.style.width = `${(helaWeight * 100).toFixed(0)}%`;
+      statVal.innerText = `${helaWeight.toFixed(2)} / 1.00`;
+
+      if (isStimulus) {
+        edge.setAttribute('stroke', '#34d399');
+        edge.setAttribute('stroke-opacity', '1.0');
+        label.textContent = `W_AB = ${helaWeight.toFixed(2)} (REFORÇADO!)`;
+        label.setAttribute('fill', '#34d399');
+        setTimeout(() => {
+          label.textContent = `W_AB = ${helaWeight.toFixed(2)}`;
+        }, 1200);
+      } else {
+        edge.setAttribute('stroke', '#059669');
+        edge.setAttribute('stroke-opacity', Math.max(0.2, helaWeight).toFixed(2));
+        label.textContent = `W_AB = ${helaWeight.toFixed(2)} (DECAIU)`;
+        label.setAttribute('fill', '#94a3b8');
+        setTimeout(() => {
+          label.textContent = `W_AB = ${helaWeight.toFixed(2)}`;
+        }, 1200);
+      }
+    }
+
+    // ==========================================
+    // --- SIMULADOR 4: A-MEM (ZETTELKASTEN) ---
+    // ==========================================
+    let currentAmemStep = 1;
+    function runAmemStep() {
+      currentAmemStep++;
+      if (currentAmemStep > 4) currentAmemStep = 1;
+
+      document.getElementById('amem-step-label').innerText = `Passo ${currentAmemStep}/4`;
+
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`amem-step-${i}`);
+        if (i <= currentAmemStep) {
+          el.classList.remove('opacity-40');
+          el.classList.add('border-purple-500/60', 'shadow-lg', 'shadow-purple-500/10');
+        } else {
+          el.classList.add('opacity-40');
+          el.classList.remove('border-purple-500/60', 'shadow-lg', 'shadow-purple-500/10');
+        }
+      }
+    }
+
+    // ==========================================
+    // --- SIMULADOR 5: CODERAG (AST) ---
+    // ==========================================
+    function setCodeRAGMode(mode) {
+      const btnNaive = document.getElementById('btn-coderag-naive');
+      const btnSurgical = document.getElementById('btn-coderag-surgical');
+      const badge = document.getElementById('coderag-tokens-badge');
+      const display = document.getElementById('coderag-content-display');
+      const summary = document.getElementById('coderag-summary');
+
+      if (mode === 'naive') {
+        btnNaive.className = 'px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold shadow';
+        btnSurgical.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white';
+        badge.innerText = '4.850 Tokens (Desperdício & Ruído)';
+        badge.className = 'font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800';
+        display.innerHTML = `<span class="text-rose-400">// Dump bruto dos arquivos inteiros recuperados por similaridade:</span><br>
+# File: src/models/graphsage.py (completo: 280 linhas com comentários e testes)<br>
+# File: src/data/ppi_loader.py (completo: 340 linhas de I/O e download de dataset)<br>
+# File: src/training/trainer.py (completo: 450 linhas de rotinas do PyTorch Lightning)<br>
+... centenas de linhas de imports redundantes que poluem o mecanismo de atenção ...`;
+        summary.innerText = 'O RAG ingênuo jogou 3 arquivos completos na janela de contexto. Risco de saturação do orçamento de tokens e efeito "Lost in the Middle".';
+      } else {
+        btnSurgical.className = 'px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-semibold shadow';
+        btnNaive.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white';
+        badge.innerText = '420 Tokens (Poda Cirúrgica)';
+        badge.className = 'font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800';
+        display.innerHTML = `<span class="text-emerald-400">// Injetado Cirurgicamente via AST & Fluxo de Dados:</span><br>
+class Classifier(nn.Module):<br>
+&nbsp;&nbsp;def __init__(self, in_features: int, num_classes: int, dropout: float = 0.5): ...<br>
+&nbsp;&nbsp;def forward(self, x: torch.Tensor) -&gt; torch.Tensor: ...`;
+        summary.innerText = 'O CodeRAG não jogou 800 linhas de arquivos irrelevantes no prompt. Ele navegou pela Árvore Sintática Abstrata (AST) e pelo grafo de fluxo de dados, pinçando exatamente a assinatura da classe necessária para o cursor.';
+      }
+    }
+  </script>
+</body>
+</html>
