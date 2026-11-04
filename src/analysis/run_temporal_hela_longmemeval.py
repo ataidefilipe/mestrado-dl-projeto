@@ -190,6 +190,7 @@ def evaluate_single_temporal_item(
     top_k: int = 15,
     semantic_top_k: int = 5,
     results_dir: Optional[str] = None,
+    ablation: str = "none",
 ) -> Dict[str, Any]:
     """Evaluates a single item using ValidityAwareRetriever and LLM judge."""
     item_id = item["question_id"]
@@ -240,7 +241,9 @@ def evaluate_single_temporal_item(
 
     memory_graph = HebbianMemoryGraph(file_path=mem_path)
     temporal_kb = TemporalKnowledgeMemory(file_path=kb_path)
-    retriever = ValidityAwareRetriever(memory_graph=memory_graph, temporal_knowledge=temporal_kb)
+    retriever = ValidityAwareRetriever(
+        memory_graph=memory_graph, temporal_knowledge=temporal_kb, ablation=ablation
+    )
 
     try:
         gen_ans, ep_ret, sem_ret = retriever.answer_question(
@@ -280,6 +283,7 @@ def evaluate_single_temporal_item(
         "judge_response": judge_resp,
         "num_episodic_retrieved": len(ep_ret),
         "num_semantic_retrieved": len(sem_ret),
+        "ablation": ablation,
         "eval_time": eval_time,
     }
 
@@ -304,8 +308,20 @@ def run_pipeline(
     workers: int = 5,
     top_k: int = 15,
     semantic_top_k: int = 5,
+    ablation: str = "none",
+    results_subdir: str = "eval_results",
 ) -> None:
     """Orchestrates encoding, evaluation, and comparative report generation."""
+    if ablation != "none" and stage != "eval":
+        raise ValueError(
+            "Ablations only re-run the eval stage on already-encoded Proposal B memories. "
+            "Use --stage eval."
+        )
+    if ablation != "none" and results_subdir == "eval_results":
+        raise ValueError(
+            "Use a separate --results_subdir for ablations (e.g. eval_results_b0) "
+            "so Proposal B checkpoints are not reused or overwritten."
+        )
     os.makedirs(output_dir, exist_ok=True)
     with open(data_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
@@ -325,6 +341,7 @@ def run_pipeline(
     print(f"Output: {output_dir}")
     print(f"Reuse Episodic: {reuse_episodic_dir or 'None'}")
     print(f"Workers: {workers} | Top-K: {top_k} | Semantic Top-K: {semantic_top_k}")
+    print(f"Ablation: {ablation} | Results subdir: {results_subdir}")
     print("=" * 80)
 
     # Pre-warm embedding model in main thread before spawning workers
@@ -370,7 +387,7 @@ def run_pipeline(
     t0_eval = time.time()
     if stage in ("all", "eval"):
         print("\n>>> ETAPA 2: Avaliação Validity-Aware + Juiz LLM <<<")
-        results_dir = os.path.join(output_dir, "eval_results")
+        results_dir = os.path.join(output_dir, results_subdir)
         os.makedirs(results_dir, exist_ok=True)
         eval_results = []
 
@@ -385,6 +402,7 @@ def run_pipeline(
                     top_k,
                     semantic_top_k,
                     results_dir,
+                    ablation,
                 ): item["question_id"]
                 for i, item in enumerate(items)
             }
@@ -419,6 +437,7 @@ def run_pipeline(
 
         summary = {
             "timestamp": datetime.now().isoformat(),
+            "ablation": ablation,
             "total_items": total,
             "total_correct": total_corr,
             "overall_accuracy": acc,
@@ -431,8 +450,9 @@ def run_pipeline(
         with open(sum_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
 
+        run_label = "PROPOSTA B (Validade Temporal)" if ablation == "none" else f"ABLACAO B0 ({ablation})"
         print("\n" + "=" * 80)
-        print(f"RESULTADOS DA PROPOSTA B (Validade Temporal)")
+        print(f"RESULTADOS DA {run_label}")
         print(f"Total: {total} | Acertos: {total_corr} | Acurácia: {acc:.2f}%")
         print(f"Tempo Total: Encoding={t_enc_total/60:.2f}min | Eval={t_eval_total/60:.2f}min | Total={(t_enc_total+t_eval_total)/60:.2f}min")
         for qt, stats in sorted(per_type.items()):
@@ -471,13 +491,15 @@ def run_pipeline(
 
         # Salvar relatório Markdown em reports/analysis/
         ts_tag = datetime.now().strftime("%Y%m%d_%H%M%S")
-        report_md_path = ROOT_DIR / "reports" / "analysis" / f"R04_proposta_temporal_{len(items)}itens_{ts_tag}.md"
+        report_prefix = "R04_proposta_temporal" if ablation == "none" else f"R05_ablacao_{ablation}"
+        report_md_path = ROOT_DIR / "reports" / "analysis" / f"{report_prefix}_{len(items)}itens_{ts_tag}.md"
         report_lines = [
-            f"# Relatório Experimental — Proposta B (Validade Temporal)",
+            f"# Relatório Experimental — {run_label}",
             f"",
             f"**Data da Execução:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"**Amostra:** {len(items)} itens (fatia [{start_item}:{start_item + len(items)}])",
-            f"**Diretório:** `{output_dir}`",
+            f"**Diretório:** `{output_dir}` (resultados em `{results_subdir}/`)",
+            f"**Ablação:** `{ablation}`",
             f"**Tempo de Execução:**",
             f"- Encoding: {t_enc_total:.1f}s ({t_enc_total/60:.2f} min)",
             f"- Evaluation: {t_eval_total:.1f}s ({t_eval_total/60:.2f} min)",
@@ -487,7 +509,7 @@ def run_pipeline(
             f"",
             f"---",
             f"",
-            f"## Resultados Consolidados da Proposta B",
+            f"## Resultados Consolidados — {run_label}",
             f"",
             f"**Acurácia Geral:** **{acc:.2f}%** ({total_corr}/{total})",
             f"",
@@ -532,6 +554,18 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=5)
     parser.add_argument("--top_k", type=int, default=15)
     parser.add_argument("--semantic_top_k", type=int, default=5)
+    parser.add_argument(
+        "--ablation",
+        choices=["none", "no_temporal"],
+        default="none",
+        help="no_temporal = B0: Proposal B facts without validity/supersession, original HeLa-Mem prompt (eval stage only)",
+    )
+    parser.add_argument(
+        "--results_subdir",
+        type=str,
+        default="eval_results",
+        help="Subfolder of output_dir for per-item results (e.g. eval_results_b0)",
+    )
 
     args = parser.parse_args()
     target_ids = [s.strip() for s in args.target_ids.split(",")] if args.target_ids else None
@@ -547,6 +581,8 @@ def main() -> None:
         workers=args.workers,
         top_k=args.top_k,
         semantic_top_k=args.semantic_top_k,
+        ablation=args.ablation,
+        results_subdir=args.results_subdir,
     )
 
 

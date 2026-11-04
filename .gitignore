@@ -20,3 +20,5 @@ results/**
 !results/longmemeval_temporal_full/
 !results/longmemeval_temporal_full/eval_results/
 !results/longmemeval_temporal_full/eval_results/eval_summary.json
+!results/longmemeval_temporal_full/eval_results_*/
+!results/longmemeval_temporal_full/eval_results_*/eval_summary.json

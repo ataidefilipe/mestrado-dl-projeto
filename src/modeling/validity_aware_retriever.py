@@ -23,22 +23,36 @@ from hela_mem.utils import (
     gpt_generate_answer_with_rotation,
     compute_time_decay,
 )
+from hela_mem.eval_longmemeval import build_longmemeval_prompt as hela_original_prompt
 from src.modeling.temporal_knowledge_memory import TemporalKnowledgeMemory, parse_date
+
+ABLATIONS = ("none", "no_temporal")
 
 
 class ValidityAwareRetriever:
     """
     Retriever that incorporates query timestamp t_query into both
     semantic fact pertinence and episodic temporal presentation.
+
+    ablation="no_temporal" (B0): same facts and retrieval code, but the temporal
+    mechanism is switched off in the knowledge memory and the prompt falls back to
+    HeLa-Mem's original template (untagged "- fact" lines, original system prompt),
+    i.e. exactly the Baseline A prompt fed with session-wise extracted facts.
     """
 
     def __init__(
         self,
         memory_graph: HebbianMemoryGraph,
         temporal_knowledge: Optional[TemporalKnowledgeMemory] = None,
+        ablation: str = "none",
     ):
+        if ablation not in ABLATIONS:
+            raise ValueError(f"Unknown ablation '{ablation}'. Expected one of {ABLATIONS}.")
         self.graph = memory_graph
         self.temporal_kb = temporal_knowledge
+        self.ablation = ablation
+        if ablation == "no_temporal" and self.temporal_kb is not None:
+            self.temporal_kb.disable_temporal_mechanism()
 
     def format_knowledge_base_text(
         self,
@@ -51,6 +65,10 @@ class ValidityAwareRetriever:
         """
         if not kb_results:
             return ""
+
+        if self.ablation == "no_temporal":
+            # HeLa-Mem original format (eval_longmemeval.answer_question)
+            return "\n".join(f"- {kn.get('knowledge', '')}" for kn in kb_results)
 
         lines = []
         for kn in kb_results:
@@ -93,6 +111,12 @@ class ValidityAwareRetriever:
         Builds the prompt pair (system_prompt, user_prompt) following
         the exact template of HeLa-Mem, with enhanced knowledge base grounding.
         """
+        if self.ablation == "no_temporal":
+            return hela_original_prompt(
+                context_text, knowledge_text, profile_text,
+                assistant_knowledge_text, question, question_date,
+            )
+
         system_prompt = (
             "You are a helpful assistant with access to the user's conversation history and structured knowledge base.\n"
             "Your task is to answer questions about the user or past conversations in an extremely concise manner.\n"
