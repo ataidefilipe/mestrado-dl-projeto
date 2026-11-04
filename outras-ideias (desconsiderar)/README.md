@@ -1,0 +1,196 @@
+# kg-reforma-tributaria
+
+Grafo de conhecimento incremental sobre a Reforma Tributária brasileira, usado para responder a uma
+pergunta comparativa:
+
+> A construção incremental de um grafo de conhecimento a partir de documentos legais se beneficia de
+> **validação semântica** e **pós-processamento estrutural (GNN)**, ou a **extração incremental direta
+> por LLM** já é suficiente?
+
+Projeto da disciplina de Deep Learning (mestrado, CIn/UFPE — Prof. Cleber Zanchettin), concebido
+também como ensaio metodológico para o TCC.
+
+---
+
+## Estado
+
+| | |
+|---|---|
+| **Fase** | Semana 1 de 8 — camada de reprodução |
+| **Reprodução do baseline** | ✅ concluída ([R02](reports/analysis/R02-reproducao-fiel-ppi.md)) |
+| **Ingestão do corpus** | ⏳ próxima etapa (semanas 2-3) |
+| **Entregável** | Relatório de até 8 páginas |
+
+---
+
+## A pergunta, em três braços
+
+O desenho espelha as três arquiteturas comparadas:
+
+| Braço | Composição | Representa |
+|---|---|---|
+| **1. Extração direta** | GLiNER / LLM → triplas → grafo | a tese do [iText2KG](https://arxiv.org/abs/2409.03284), que afirma dispensar pós-processamento |
+| **2. + validação semântica** | deduplicação, canonicalização, filtro de plausibilidade | pipeline estático com validação |
+| **3. + pós-processamento** | GraphSAGE propõe arestas faltantes e pontua as implausíveis | arquitetura híbrida |
+
+Baselines que funcionam como hipótese nula: **BM25** (lexical) e **retrieval denso** (as features de
+texto sozinhas, sem grafo). Se a estrutura do grafo não acrescentar nada além do conteúdo textual,
+isso é um resultado — e vai no relatório.
+
+---
+
+## Corpus
+
+~1.950 artigos de cinco normas, com split **temporal** (nenhum nó de teste existe no treino):
+
+| Documento | Publicação | Artigos | Partição |
+|---|---|---|---|
+| EC 132/2023 | 20/12/2023 | ~20 | treino |
+| LC 214/2025 | 16/01/2025 | 499 | treino |
+| LC 227/2026 | 13/01/2026 | ~197 | teste indutivo 1 |
+| Decreto 12.955/2026 (Regulamento da CBS) | 29/04/2026 | 620 | teste indutivo 2 |
+| Resolução CGIBS 6/2026 (Regulamento do IBS) | 30/04/2026 | 617 | teste indutivo 2 |
+
+Detalhes e ressalvas: [docs/01-levantamento-corpus.md](docs/01-levantamento-corpus.md).
+
+### Três tipos de aresta, com dificuldade crescente
+
+| Tipo | Como aparece | Ground truth |
+|---|---|---|
+| **A** citação explícita | "nos termos do art. 12 da LC nº 214, de 2025" | regex (automático) |
+| **B** citação relativa | "o disposto no caput", "o artigo anterior" | resolução de contexto |
+| **C** relação semântica | não está escrita em lugar nenhum | co-citação (automático) |
+
+---
+
+## Resultados até aqui
+
+### Reprodução do GraphSAGE em PPI (supervisionado, agregador mean)
+
+| Fonte | micro-F1 |
+|---|---|
+| Artigo original (Hamilton et al., 2017), GraphSAGE-mean | 0,598 |
+| **Esta reprodução** | **0,738** |
+| GAT (Veličković et al., 2018), Tabela 3, `GraphSAGE*` | 0,768 |
+
+O número **não bate** com o do artigo. A literatura documenta que o GraphSAGE alcança 0,768 em PPI
+com ajuste de arquitetura, então nosso valor fica dentro da faixa conhecida — mas a causa da
+diferença não foi determinada. Isso está declarado, não mascarado.
+
+### Ablações
+
+| Configuração | test micro-F1 | Δ |
+|---|---:|---:|
+| Fiel ao artigo | 0,7378 | — |
+| Sem corte de grau | 0,7411 | +0,003 |
+| Sem normalização L2 | 0,7558 | +0,018 |
+| **Sem amostragem** (vizinhança completa) | **0,8252** | **+0,087** |
+
+A amostragem custa 8,7 pontos de F1 — confirmando que ela troca **acurácia por escalabilidade**,
+como o artigo afirma. Consequência prática: o grafo da Reforma tem 1.950 nós e usará agregação
+exata, sem amostragem.
+
+---
+
+## Implementação própria do artigo base
+
+O `SAGEConv`/`NeighborLoader` do PyG **não** são usados no caminho principal. O mecanismo do artigo
+foi reimplementado para demonstrar entendimento do código base (exigência da disciplina) e porque o
+`NeighborLoader` exige `pyg-lib`/`torch-sparse`, sem wheel para Python 3.13 + torch 2.14 no Windows.
+
+| Arquivo | O que faz | Validação |
+|---|---|---|
+| [`src/modeling/sage_manual.py`](src/modeling/sage_manual.py) | Agregador mean (Algoritmo 1) | equivalência **exata** com `SAGEConv` (diferença 0,000e+00) |
+| [`src/modeling/sage_sampler.py`](src/modeling/sage_sampler.py) | Amostragem de vizinhança (Algoritmo 2) | 4 testes: vizinhos válidos, reposição, norma L2, shapes |
+| [`src/modeling/reproduce_ppi.py`](src/modeling/reproduce_ppi.py) | Treino e avaliação em PPI | varredura de lr + 3 ablações |
+
+### Três detalhes de fidelidade que bibliotecas omitem
+
+1. **A ordem de S1 e S2 é invertida.** O apêndice do artigo adverte: do nó-semente para fora, o
+   primeiro salto usa **S2** (=10) e o segundo, **S1** (=25).
+2. **Normalização L2 a cada camada** (Algoritmo 1, linha 7). O `SAGEConv` tem `normalize=False`
+   por padrão — usar o default já modifica o artigo silenciosamente.
+3. **Subamostragem de grau ≤ 128** como pré-processamento. No PPI o grau máximo é 720.
+
+---
+
+## Como rodar
+
+Ambiente CPU-only (não há GPU NVIDIA na máquina de desenvolvimento).
+
+```bash
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Validar a implementação própria contra a referência:
+
+```bash
+python -m src.modeling.sage_manual
+python -m src.modeling.sage_sampler
+```
+
+Reproduzir o artigo (baixa o PPI na primeira execução, ~34 s em CPU):
+
+```bash
+python -m src.modeling.reproduce_ppi
+```
+
+Varredura e ablações:
+
+```bash
+python -m src.modeling.reproduce_ppi --lr-sweep
+python -m src.modeling.reproduce_ppi --sampling full
+python -m src.modeling.reproduce_ppi --no-normalize
+python -m src.modeling.reproduce_ppi --max-degree 0
+```
+
+Métricas por época são gravadas em `reports/analysis/*.csv`.
+
+---
+
+## Estrutura
+
+```
+AGENT.MD                    metodologia de trabalho (parceiro de análise, não executor)
+PROJETO.md                  definição do projeto
+PROPOSTA.md                 proposta formal
+5. Projeto.pdf              briefing do professor
+
+docs/
+  01-levantamento-corpus.md      corpus medido e dimensionado
+  02-decisoes-abertas.md         registro de decisões (D1-D9, Q1-Q6)
+  03-requisitos-professor.md     auditoria contra o briefing, com GAPs
+  04-reenquadramento.md          por que o cenário C, e as opções descartadas
+  05-orcamento-api.md            custo de LLM medido (US$ 12-61 no projeto)
+  06-plano-execucao.md           plano de 8 semanas, portões e riscos
+
+src/
+  ingestion/  cleaning/  analysis/  modeling/  visualization/
+
+reports/analysis/
+  R01-...    primeira execução (SUPERADO)
+  R02-...    reprodução fiel + ablações
+  *.csv      métricas por época
+```
+
+---
+
+## Referências
+
+| Papel | Trabalho |
+|---|---|
+| **Artigo base, a reproduzir** | Hamilton, Ying & Leskovec. *Inductive Representation Learning on Large Graphs*. NeurIPS 2017. [arXiv:1706.02216](https://arxiv.org/abs/1706.02216) |
+| **Adversário do estudo comparativo** | Lairgi et al. *iText2KG: Incremental Knowledge Graphs Construction Using LLMs*. WISE 2024. [arXiv:2409.03284](https://arxiv.org/abs/2409.03284) · [código](https://github.com/AuvaLab/itext2kg) |
+| **Referência de domínio e métricas** | Tang et al. *CaseLink: Inductive Graph Learning for Legal Case Retrieval*. SIGIR 2024. [código](https://github.com/yanran-tang/CaseLink) |
+| **Faixa conhecida do GraphSAGE em PPI** | Veličković et al. *Graph Attention Networks*. ICLR 2018. [arXiv:1710.10903](https://arxiv.org/abs/1710.10903) |
+
+---
+
+## Nota metodológica
+
+Este projeto segue o `AGENT.MD`: fatos, hipóteses, resultados analíticos e decisões são mantidos
+separados; resultados negativos são preservados; e toda conclusão carrega um nível de certeza
+explícito. Quando um número não pode ser explicado — como a diferença de +0,14 para o artigo
+original — isso é registrado como tal, não contornado.

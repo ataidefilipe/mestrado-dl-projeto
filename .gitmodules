@@ -1,0 +1,3 @@
+[submodule "external/HeLa-Mem"]
+	path = external/HeLa-Mem
+	url = https://github.com/ReinerBRO/HeLa-Mem.git

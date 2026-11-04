@@ -6,3 +6,17 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 .venv/
+.env
+scratch/
+
+# Resultados brutos (manter apenas zips e sumários)
+results/**
+!results/
+!results/baseline_episodic_500.zip
+!results/temporal_encoded_*.zip
+!results/longmemeval_baseline_full/
+!results/longmemeval_baseline_full/eval_results/
+!results/longmemeval_baseline_full/eval_results/eval_summary.json
+!results/longmemeval_temporal_full/
+!results/longmemeval_temporal_full/eval_results/
+!results/longmemeval_temporal_full/eval_results/eval_summary.json
