@@ -90,11 +90,41 @@ class TemporalKnowledgeMemory:
         self.assistant_knowledge: List[Dict[str, Any]] = []
         self.fallback_kb: List[Dict[str, Any]] = []
 
+        # Ablation B0: when False, validity windows, supersession edges and
+        # temporal pertinence are ignored (see disable_temporal_mechanism).
+        self.temporal_enabled = True
+
         # Hebbian Graph for Semantic Knowledge Base
         self.hebbian_kb_path = file_path.replace(".json", "_kb_graph.json")
         self.knowledge_graph = HebbianMemoryGraph(self.hebbian_kb_path)
 
         self.load()
+
+    def disable_temporal_mechanism(self) -> None:
+        """
+        Ablation B0 ("A corrigida"): keeps the exact same extracted facts, profile
+        and assistant knowledge produced by Proposal B's session-wise extraction,
+        but removes everything the temporal mechanism added on top of them:
+        - every fact is treated as active (no valid_to / superseded status);
+        - classifier-derived edges (SUPERSEDES w=0.8, EXTENDS w=eta) are dropped,
+          leaving only HeLa-Mem's standard temporal chain (i-1 <-> i, w=0.5);
+        - temporal pertinence V(f, t_query) is fixed at 1.0.
+        Changes are in-memory only; save() is blocked so encoded B files stay intact.
+        """
+        self.temporal_enabled = False
+        graph = self.knowledge_graph
+
+        for node in graph.nodes.values():
+            meta = node.setdefault("metadata", {})
+            meta["status"] = "active"
+            meta["valid_to"] = None
+            meta["superseded_by"] = None
+            meta["supersedes"] = []
+
+        graph.edges.clear()
+        ids = sorted(graph.nodes.keys(), key=int)
+        for prev_id, cur_id in zip(ids, ids[1:]):
+            graph.add_edge(prev_id, cur_id, weight=0.5, bidirectional=True)
 
     def update_user_profile(self, user_id: str, new_data: Any, merge: bool = False) -> None:
         """Update user profile compatible with HeLa-Mem interface."""
@@ -287,6 +317,9 @@ class TemporalKnowledgeMemory:
         exp(-|t_query - valid_to| / tau): if t_query > valid_to (superseded/expired)
         0.0: if t_query < valid_from (future)
         """
+        if not self.temporal_enabled:
+            return 1.0
+
         if not query_date_str:
             return 1.0
 
@@ -381,6 +414,11 @@ class TemporalKnowledgeMemory:
         return results
 
     def save(self) -> None:
+        if not self.temporal_enabled:
+            raise RuntimeError(
+                "TemporalKnowledgeMemory is in ablation mode (temporal disabled); "
+                "refusing to overwrite the encoded Proposal B files."
+            )
         data = {
             "user_profiles": self.user_profiles,
             "assistant_knowledge": self.assistant_knowledge,
