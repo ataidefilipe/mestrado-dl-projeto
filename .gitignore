@@ -22,3 +22,9 @@ results/**
 !results/longmemeval_temporal_full/eval_results/eval_summary.json
 !results/longmemeval_temporal_full/eval_results_*/
 !results/longmemeval_temporal_full/eval_results_*/eval_summary.json
+!results/longmemeval_temporal_v2/
+!results/longmemeval_temporal_v2/eval_results/
+!results/longmemeval_temporal_v2/eval_results/eval_summary.json
+!results/longmemeval_baseline_fiel/
+!results/longmemeval_baseline_fiel/eval_results/
+!results/longmemeval_baseline_fiel/eval_results/eval_summary.json

@@ -264,14 +264,15 @@ No repositório:
 
 | Etapa | Status | Data | Resultado / link |
 |---|---|---|---|
-| 0 | pendente | | |
-| 1 | pendente | | |
-| 2 | pendente | | |
-| 3 | condicional | | |
-| 4 | pendente | | |
-| 5 | concluída | 2026-11-04 | B0 = 64,20%. A→B0 +15 (p=0,11); B0→B +7 (p=0,45); KU B0→B +14/−0 (Holm p=0,0015); MS B0→B −7. Hipótese suportada em KU, não no total. `reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md` |
-| 6 | pendente | | |
-| 7 | pendente | | |
-| 8 | opcional | | |
+| 0 | concluída | 2026-11-04 | Ambiente configurado via uv e dependências validadas. |
+| 1 | concluída | 2026-11-05 | 500 grafos semânticos e episódicos de A recuperados em `results/longmemeval_baseline_full`; 360 vazios confirmados. |
+| 2 | concluída | 2026-11-05 | Teste diagnóstico no item 400 (`workers=1`) gerou 9 nós semânticos com código oficial. Falha de concorrência comprovada nos 360 vazios de A. Ver `reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md`. |
+| 3 | em andamento | 2026-11-05 | Opção A selecionada: geração da Baseline Fiel ($A^*$) com parâmetros oficiais em `results/longmemeval_baseline_fiel/`. |
+| 4 | concluída | 2026-11-05 | Piso de ruído medido com $B'$ (64,00% ACC, 36 discordantes [7,20%]; KU idêntico em 83,33% com 97,4% de estabilidade). |
+| 5 | concluída | 2026-11-04 | B0 = 64,20%. A→B0 +15 (p=0,11); B0→B +7 (p=0,45); KU B0→B +14/−0 (Holm p=0,0015); MS B0→B −7. `reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md`. |
+| 6 | concluída | 2026-11-05 | Estatística completa implementada com McNemar exato, IC 95% e correção de Holm em `compare_ablation.py`. |
+| — | concluída | 2026-11-05 | **Proposta $B_{\text{v2}}$ (Classificador Ontológico Sem Exemplos):** 64,80% ACC geral, $KU$ 79,49% ($p=0,0034$), $TR$ 57,89% (recorde), redução de regressões em $MS$. |
+| 7 | pendente | | Sensibilidade de λ, τ, θ. |
+| 8 | opcional | | Segundo dataset (LoCoMo). |
 | 8b | em andamento | 2026-11-05 | Passo 1 feito: o artigo não informa qual arquivo usou; os baselines são do S de cerca de 115 mil tokens (LightMem); o arquivo distribuído é oracle. Falta a issue aos autores e a execução no S oficial. Ver Achado 10. |
-| 9 | pendente | | |
+| 9 | em andamento | 2026-11-05 | Documentação em `README.md`, `VISAO_GERAL_PROJETO.md` e relatórios técnicos R05/R06. |

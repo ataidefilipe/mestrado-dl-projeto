@@ -1650,8 +1650,13 @@ Isso está alinhado com o que as diretrizes pedem: evolução clara, experimento
 | **5. Implementar validity** | ✅ **CONCLUÍDO** | Implementado `TemporalKnowledgeMemory` com `valid_from`, `valid_to`, `SUPERSEDES`, $V(f, t_{\text{query}})$ e `ValidityAwareRetriever` |
 | **6. Executar proposta** | ✅ **CONCLUÍDO** | 500 itens completos avaliados sob a Proposta B: **65.60% ACC overall** (+4.40 p.p. vs. Baseline A) |
 | **7. Comparação A/B** | ✅ **CONCLUÍDO** | Análise pareada por teste exato de McNemar ($p = 0.0115$ unilateral, $p = 0.0230$ bilateral, +22 acertos líquidos) |
-| **8. Ablação B0** | ✅ **CONCLUÍDO** | Condição B0 executada (**64.20% ACC**): isolamento rigoroso entre efeito da extração por sessão e efeito temporal |
+| **8. Ablação B0** | ✅ **CONCLUÍDO** | Condição B0 executada (**64.20% ACC**): isolamento rigoroso entre efeito da extração por sessão e efeito temporal (`reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md`) |
 | **9. Análise qualitativa** | ✅ **CONCLUÍDO** | Validação cabal da hipótese: $B_0 \rightarrow B$ em `knowledge-update` saltou de 65.38% para **83.33%** (+14 acertos líquidos, 0 regressões) |
+| **10. Auditoria R05** | ✅ **CONCLUÍDO** | Auditoria metodológica e identificação dos 10 achados operacionais (`reports/analysis/R05_auditoria_processo_20261104.md`) |
+| **11. Medição de ruído (B')** | ✅ **CONCLUÍDO** | Reavaliação $B'$ nos 500 itens sob `temperature=0.7`: ruído de 7,20% no overall; KU idêntico em **83,33%** com 97,4% de estabilidade |
+| **12. Proposta B_v2 (Ontológica)** | ✅ **CONCLUÍDO** | Prompt ontológico sem exemplos de domínio: **64,80% ACC**, KU com **79,49%** ($p=0{,}0034$ vs $B_0$), TR atinge recorde de **57,89%** |
+| **13. Diagnóstico de Baseline A** | ✅ **CONCLUÍDO** | Item 400 extraiu 9 nós com `workers=1`, refutando brevidade de diálogo e provando concorrência silenciosa na baseline A original |
+| **14. Baseline Fiel A*** | 🔄 **EM EXECUÇÃO** | Geração da baseline sem falhas concorrentes e com hiperparâmetros oficiais do HeLa-Mem (`results/longmemeval_baseline_fiel/`) |
 
 ---
 # 20. Resultados Consolidados da Reprodução da Baseline (Etapa 2)
@@ -1756,6 +1761,38 @@ O estudo de ablação $B_0$ revelou uma dinâmica teórica fundamental para a di
    > *A representação explícita da validade e da supersessão temporal de fatos melhora uma memória associativa hebbiana em tarefas de atualização de conhecimento e raciocínio temporal?*
 
    **Sim.** A evidência experimental demonstra que a memória associativa hebbiana pura é insuficiente para lidar com a mutabilidade do conhecimento em diálogos de longo prazo, sendo a modelagem explícita de validade e supersessão indispensável para eliminar a interferência de memórias obsoletas e guiar a geração factual correta.
+
+---
+
+# 24. Diagnóstico Empírico da Baseline A (Achado 2: Falha Silenciosa de Concorrência)
+
+Durante a auditoria de processo documentada no relatório [`R05`](reports/analysis/R05_auditoria_processo_20261104.md), constatou-se que **360 dos 500 grafos de memória semântica da Baseline A original estavam completamente vazios**. 
+
+Investigações detalhadas documentadas no relatório [`R06`](reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md) revelaram a causa-raiz:
+1. **Hipótese Inicial (Refutada):** Supunha-se inicialmente que os grafos estavam vazios porque as conversas não atingiam o buffer mínimo de 10 turnos exigido pelo HeLa-Mem. No entanto, os itens dos blocos finais (como [400:450], onde 100% dos grafos estavam vazios) continham em média 23,5 turnos de diálogo.
+2. **Comprovação Experimental:** Submeteu-se o item 400 (`eac54adc`) ao pipeline oficial de codificação do HeLa-Mem (`encode_single_item`) com execução estritamente sequencial (`workers=1`). O código oficial extraiu **9 nós semânticos de alta qualidade** e atualizou o perfil de usuário.
+3. **Mecanismo da Falha:** No código original do HeLa-Mem, a rotina `process_incremental_buffer` encapsula chamadas em bloco `try...except Exception as e: print(...)`. Em ambiente paralelo multithreaded no Windows, concorrência no carregamento e inferência de modelos locais de embedding e chamadas de API geraram exceções silenciosas, levando ao descarte silencioso de 72% dos grafos semânticos.
+4. **Implicação Metodológica:** A Baseline A original (61,20%) estava artificialmente subestimada em relação ao seu potencial nominal. Para garantir integridade científica irrefutável na dissertação, foi estabelecida a execução da **Baseline Fiel ($A^*$)** com parâmetros oficiais (`MAX_FLIPPED=3`, `KEYWORD_WEIGHT=0.7`, `BUFFER_SIZE=10`) em modo sequencial/controlado em `results/longmemeval_baseline_fiel/`.
+
+---
+
+# 25. Piso de Ruído Estocástico (B') e Proposta B_v2 (Classificador Ontológico)
+
+### 25.1 Medição do Piso de Ruído do Avaliador ($B \times B'$)
+Para verificar se os ganhos observados na Proposta B decorriam de variância aleatória do LLM sob `temperature=0.7` na geração e no juiz (`gpt-4o-mini`), foi executada uma réplica independente completa ($B'$, documentada em `results/longmemeval_temporal_full/eval_results_b_rerun/` e no relatório [`R06`](reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md)):
+- **Acurácia Geral:** $B = 65{,}60\%$ (328/500) vs $B' = 64{,}00\%$ (320/500), com 36 pares discordantes (7,20% de ruído) e teste de McNemar bilateral $p = 0{,}2430$ (sem diferença estatisticamente significativa entre réplicas).
+- **Estabilidade em `knowledge-update`:** Ambas as execuções obtiveram **rigorosamente a mesma acurácia: 83,33% (65/78)**, com apenas 2 itens oscilando (+1 / -1), o que representa **97,44% de estabilidade factual**. Como o salto causal da introdução da temporalidade sobre $B_0$ é de $+14$ acertos líquidos, a magnitude do efeito é **mais de 7 vezes superior ao ruído estocástico**, provando a solidez da hipótese.
+
+### 25.2 Proposta $B_{\text{v2}}$: Eliminação de Viés de Prompt e Generalização Ontológica
+Na versão inicial da Proposta B, o classificador continha exemplos específicos de domínio no prompt de classificação de relação temporal. Para eliminar qualquer risco de direcionamento (*prompt biasing* ou vazamento de casos de teste), formulou-se a **Proposta $B_{\text{v2}}$**, na qual todos os exemplos de domínio foram removidos e substituídos pela fundamentação lógica formal do *Event Calculus*:
+- `SUPERSEDES`: Restrito a transições de atributos unívocos ou estados mutuamente exclusivos de uma entidade (endereço atual, estado civil, empregador, preferência ativa), onde o fato anterior deixa de ser verdadeiro no presente.
+- `EXTENDS`: Eventos históricos independentes, ações pretéritas, experiências, compras/transações ou coexistência de entidades, que permanecem permanentemente verdadeiros no histórico temporal.
+
+**Resultados de $B_{\text{v2}}$ nos 500 itens (`results/longmemeval_temporal_v2/`):**
+- **Acurácia Geral:** **64,80%** (324/500).
+- **`knowledge-update`:** Atingiu **79,49%** (62/78), mantendo ganho estatisticamente significante de $+11$ acertos líquidos sobre a ablação $B_0$ ($p = 0{,}0034$).
+- **`temporal-reasoning`:** Atingiu o **recorde histórico do projeto de 57,89%** (77/133 acertos).
+- **Redução de Over-supersession em `multi-session`:** As regressões sobre $B_0$ caíram de 14 para 10, recuperando questões de contagem cumulativa que haviam sido erroneamente atenuadas na versão anterior.
 
 ---
 

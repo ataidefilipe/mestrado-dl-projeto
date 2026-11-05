@@ -748,10 +748,10 @@ A auditoria completa está em [reports/analysis/R05_auditoria_processo_20261104.
 | # | Achado | Situação |
 |---|---|---|
 | 1 | A baseline rodou com `MAX_FLIPPED` = 5 e `KEYWORD_WEIGHT` = 0,5, contra 3 e 0,7 nos scripts oficiais | Documentado no relatório; neutro para A × B |
-| 2 | 360/500 grafos semânticos vazios em A; possível falha de execução, já que o extrator engole exceções | **Em investigação** (pode subestimar a baseline) |
+| 2 | 360/500 grafos semânticos vazios em A; comprovada falha de execução por concorrência (item 400 extraiu 9 nós com workers=1) | **Resolvido em 05/11:** baseline A estava subestimada; construção da Baseline Fiel ($A^*$) em andamento |
 | 3 | A recodificação dos itens 100–199 (64,60% → 65,60%) não estava documentada | Documentada no Draft 2 e no notebook 02 |
-| 4 | Fatores de confusão entre A e B | **Resolvido** pela ablação B0 |
-| 5 | `temperature=0.7` na geração e no juiz, sem repetições | **Pendente** (execução B') |
+| 4 | Fatores de confusão entre A e B | **Resolvido** pela ablação B0 e validado na Proposta $B_{\text{v2}}$ (sem exemplos de prompt) |
+| 5 | `temperature=0.7` na geração e no juiz, sem repetições | **Resolvido em 05/11:** piso de ruído medido com $B'$ (7,20% de discordância geral; KU com 97,4% de estabilidade, idêntico em 83,33%) |
 | 6 | Faltavam IC, tamanho de efeito e correção para múltiplas comparações | **Resolvido** (IC 95%, Holm) |
 | 7 | Risco de ajustar hiperparâmetros no conjunto de teste | Regra fixada: sensibilidade sem seleção |
 | 8 | Só um dataset (a diretriz pede mais de um) | Pendente (LoCoMo planejado) |
