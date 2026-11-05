@@ -267,7 +267,7 @@ No repositório:
 | 0 | concluída | 2026-11-04 | Ambiente configurado via uv e dependências validadas. |
 | 1 | concluída | 2026-11-05 | 500 grafos semânticos e episódicos de A recuperados em `results/longmemeval_baseline_full`; 360 vazios confirmados. |
 | 2 | concluída | 2026-11-05 | Teste diagnóstico no item 400 (`workers=1`) gerou 9 nós semânticos com código oficial. Falha de concorrência comprovada nos 360 vazios de A. Ver `reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md`. |
-| 3 | em andamento | 2026-11-05 | Opção A selecionada: geração da Baseline Fiel ($A^*$) com parâmetros oficiais em `results/longmemeval_baseline_fiel/`. |
+| 3 | concluída | 2026-11-05 | Baseline Fiel ($A^*$) concluída: 63,40% ACC geral (317/500); 100% dos grafos íntegros (0 vazios); `multi-session` atingiu 57,14% idêntico ao paper; $A^* \rightarrow B$ em KU tem +12 acertos líquidos ($p=0{,}0042$). Ver `reports/analysis/R03_reproducao_hela_fiel_500itens.md`. |
 | 4 | concluída | 2026-11-05 | Piso de ruído medido com $B'$ (64,00% ACC, 36 discordantes [7,20%]; KU idêntico em 83,33% com 97,4% de estabilidade). |
 | 5 | concluída | 2026-11-04 | B0 = 64,20%. A→B0 +15 (p=0,11); B0→B +7 (p=0,45); KU B0→B +14/−0 (Holm p=0,0015); MS B0→B −7. `reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md`. |
 | 6 | concluída | 2026-11-05 | Estatística completa implementada com McNemar exato, IC 95% e correção de Holm em `compare_ablation.py`. |

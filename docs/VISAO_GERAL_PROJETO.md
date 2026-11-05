@@ -656,15 +656,15 @@ Relatório da terceira entrega com 65,60%, figuras em padrão IEEE e análise qu
 
 ### 10.1 Acurácia por categoria
 
-| Categoria | N | Artigo | A | B0 | B | Δ(B0−A) | Δ(B−B0) |
+| Categoria | N | Artigo | A (Inicial) | A* (Fiel) | B0 (Ablação) | B (Temporal) | B_v2 (Ontológica) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| knowledge-update | 78 | 78,21% | 57 (73,08%) | 51 (65,38%) | **65 (83,33%)** | −7,69 | **+17,95** |
-| temporal-reasoning | 133 | 50,38% | 69 (51,88%) | **76 (57,14%)** | 74 (55,64%) | +5,26 | −1,50 |
-| multi-session | 133 | 57,14% | 62 (46,62%) | **72 (54,14%)** | 65 (48,87%) | +7,52 | −5,26 |
-| single-session-preference | 30 | — | 8 (26,67%) | 12 (40,00%) | **14 (46,67%)** | +13,33 | +6,67 |
-| single-session-assistant | 56 | — | 49 (87,50%) | 50 (89,29%) | **52 (92,86%)** | +1,79 | +3,57 |
-| single-session-user | 70 | — | **61 (87,14%)** | 60 (85,71%) | 58 (82,86%) | −1,43 | −2,86 |
-| **Total** | **500** | **65,40%** | **306 (61,20%)** | **321 (64,20%)** | **328 (65,60%)** | **+3,00** | **+1,40** |
+| knowledge-update | 78 | 78,21% | 57 (73,08%) | 53 (67,95%) | 51 (65,38%) | **65 (83,33%)** | 62 (79,49%) |
+| temporal-reasoning | 133 | 50,38% | 69 (51,88%) | 71 (53,38%) | 76 (57,14%) | 74 (55,64%) | **77 (57,89%)** |
+| multi-session | 133 | 57,14% | 62 (46,62%) | **76 (57,14%)** | 72 (54,14%) | 65 (48,87%) | 68 (51,13%) |
+| single-session-preference | 30 | — | 8 (26,67%) | 10 (33,33%) | 12 (40,00%) | **14 (46,67%)** | 12 (40,00%) |
+| single-session-assistant | 56 | — | 49 (87,50%) | 51 (91,07%) | 50 (89,29%) | **52 (92,86%)** | 49 (87,50%) |
+| single-session-user | 70 | — | **61 (87,14%)** | 56 (80,00%) | 60 (85,71%) | 58 (82,86%) | 56 (80,00%) |
+| **Total** | **500** | **65,40%** | **306 (61,20%)** | **317 (63,40%)** | **321 (64,20%)** | **328 (65,60%)** | **324 (64,80%)** |
 
 As colunas Δ estão em pontos percentuais (p.p.): a diferença simples entre duas porcentagens. O artigo reporta as três categorias de sessão única **agregadas** (78,85%). No agregado (n = 156): A = 75,64%, B0 = 78,21%, B = 79,49%.
 
@@ -747,8 +747,8 @@ A auditoria completa está em [reports/analysis/R05_auditoria_processo_20261104.
 
 | # | Achado | Situação |
 |---|---|---|
-| 1 | A baseline rodou com `MAX_FLIPPED` = 5 e `KEYWORD_WEIGHT` = 0,5, contra 3 e 0,7 nos scripts oficiais | Documentado no relatório; neutro para A × B |
-| 2 | 360/500 grafos semânticos vazios em A; comprovada falha de execução por concorrência (item 400 extraiu 9 nós com workers=1) | **Resolvido em 05/11:** baseline A estava subestimada; construção da Baseline Fiel ($A^*$) em andamento |
+| 1 | A baseline rodou com `MAX_FLIPPED` = 5 e `KEYWORD_WEIGHT` = 0,5, contra 3 e 0,7 nos scripts oficiais | **Resolvido em 05/11:** Baseline Fiel ($A^*$) executada rigorosamente com MAX_FLIPPED=3 e KEYWORD_WEIGHT=0,7 |
+| 2 | 360/500 grafos semânticos vazios em A; comprovada falha de execução por concorrência | **Resolvido em 05/11:** Baseline Fiel ($A^*$) executada com 100% dos grafos íntegros (0 vazios; 63,40% ACC; multi-session reproduziu exatamente os 57,14% do artigo ACL 2026) |
 | 3 | A recodificação dos itens 100–199 (64,60% → 65,60%) não estava documentada | Documentada no Draft 2 e no notebook 02 |
 | 4 | Fatores de confusão entre A e B | **Resolvido** pela ablação B0 e validado na Proposta $B_{\text{v2}}$ (sem exemplos de prompt) |
 | 5 | `temperature=0.7` na geração e no juiz, sem repetições | **Resolvido em 05/11:** piso de ruído medido com $B'$ (7,20% de discordância geral; KU com 97,4% de estabilidade, idêntico em 83,33%) |
