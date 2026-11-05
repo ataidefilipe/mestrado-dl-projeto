@@ -343,7 +343,7 @@ def generate_fig4():
     ax.axis('off')
 
     ax.text(0.5, 0.97,
-            'Análise Qualitativa nos Grafos Persistidos: Três Regimes Operacionais da Memória Temporal',
+            'Análise Qualitativa nos Grafos de B: Casos em que o Mecanismo Temporal Muda a Resposta',
             ha='center', va='top', fontsize=11.5, fontweight='bold', color='#1a1a2e')
 
     # --- CASO 1: Atualização de Estado (852ce960) ---
@@ -351,17 +351,17 @@ def generate_fig4():
                             boxstyle="round,pad=0.01,rounding_size=0.018",
                             ec="#1b8a5a", fc="#f3faf6", lw=1.5)
     ax.add_patch(c1_box)
-    ax.text(0.03, 0.885, 'Caso 1 — Resolução de Estado Atual via Supersessão (ID: 852ce960 | Knowledge-Update | Ganho 0 → 1)',
+    ax.text(0.03, 0.885, 'Caso 1 — Estado atual recuperado pela supersessão (ID: a2f3aa27 | Knowledge-Update | A ✗   B0 ✗   B ✓)',
             ha='left', va='center', fontsize=9.0, fontweight='bold', color='#0f5132')
 
     # Caixas internas Caso 1
     b1_a = FancyBboxPatch((0.03, 0.665), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#6c757d", fc="white", lw=1.0)
     ax.add_patch(b1_a)
     ax.text(0.17, 0.755,
-            'Nó KB #0 [11/Ago/2023 → 30/Nov/2023]\n'
-            'Status: HISTORICAL / SUPERSEDED (por #6)\n'
-            '"User is buying a house priced at $325k\n'
-            'and pre-approved for a $350,000 loan."',
+            'Nó KB #0 [28/Mai/2023 06:23 → 14:10]\n'
+            'Status: HISTORICAL / SUPERSEDED (por #5)\n'
+            '"User has 1250 followers on Instagram\n'
+            'as of May 28, 2023."',
             ha='center', va='center', fontsize=7.4, color='#333')
 
     ax.annotate('', xy=(0.355, 0.755), xytext=(0.315, 0.755),
@@ -371,18 +371,19 @@ def generate_fig4():
     b1_b = FancyBboxPatch((0.36, 0.665), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#1b8a5a", fc="white", lw=1.2)
     ax.add_patch(b1_b)
     ax.text(0.50, 0.755,
-            'Nó KB #6 [30/Nov/2023 → ∞]\n'
-            'Status: CURRENT / ACTIVE (V = 1,00)\n'
-            '"User is moving into a new home soon and\n'
-            'pre-approved for a mortgage of $400,000."',
+            'Nó KB #5 [28/Mai/2023 14:10 → ∞]\n'
+            'Status: CURRENT / ACTIVE\n'
+            '"User is nearing 1300 followers\n'
+            'on Instagram."',
             ha='center', va='center', fontsize=7.4, color='#111')
 
     b1_c = FancyBboxPatch((0.66, 0.665), 0.31, 0.18, boxstyle="round,pad=0.008", ec="#0f5132", fc="#d1f2e1", lw=1.1)
     ax.add_patch(b1_c)
     ax.text(0.815, 0.755,
-            'Query: "What was the amount I was pre-approved\nfor when I got my mortgage from Wells Fargo?"\n'
-            '• Baseline A: "$350,000" (Fato obsoleto ✗ Score=0)\n'
-            '• Proposta B: "$400,000" (Fato ativo ✓ Score=1)',
+            'Pergunta: "How many followers do I have\non Instagram now?"  (gabarito: 1300)\n'
+            '• Baseline A: "1250" ✗\n'
+            '• B0 (sem validade): "1250" ✗\n'
+            '• Proposta B: "1300 followers" ✓',
             ha='center', va='center', fontsize=7.4, fontweight='bold', color='#0f5132')
 
     # --- CASO 2: Consulta a Estado Passado / Histórico (50635ada) ---
@@ -390,37 +391,38 @@ def generate_fig4():
                             boxstyle="round,pad=0.01,rounding_size=0.018",
                             ec="#2b5c8f", fc="#f4f7fb", lw=1.5)
     ax.add_patch(c2_box)
-    ax.text(0.03, 0.575, 'Caso 2 — Preservação Não-Destrutiva e Consulta a Estado Anterior (ID: 50635ada | Knowledge-Update | Ganho 0 → 1)',
+    ax.text(0.03, 0.575, 'Caso 2 — Sem validade, o fato obsoleto é somado ao atual (ID: 01493427 | Knowledge-Update | A ✓   B0 ✗   B ✓)',
             ha='left', va='center', fontsize=9.0, fontweight='bold', color='#1d3f63')
 
-    b2_a = FancyBboxPatch((0.03, 0.355), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#2b5c8f", fc="white", lw=1.2)
+    b2_a = FancyBboxPatch((0.03, 0.355), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#6c757d", fc="white", lw=1.0)
     ax.add_patch(b2_a)
     ax.text(0.17, 0.445,
-            'Nó KB #2 [16/Set/2022 → 30/Mai/2023]\n'
-            'Tag: [HISTORICAL / SUPERSEDED]\n'
-            '"User is eligible for Premier Silver\n'
-            'status on United Airlines."',
-            ha='center', va='center', fontsize=7.4, color='#111')
+            'Nó KB #0 [11/Ago/2023 → 30/Nov/2023]\n'
+            'Status: HISTORICAL / SUPERSEDED (por #5)\n'
+            '"User mentioned adding 17 new\n'
+            'postcards to their collection."',
+            ha='center', va='center', fontsize=7.4, color='#333')
 
     ax.annotate('', xy=(0.355, 0.445), xytext=(0.315, 0.445),
                 arrowprops=dict(arrowstyle="-|>,head_width=0.22,head_length=0.3", color="#e76f51", lw=1.8, linestyle="--"))
     ax.text(0.335, 0.48, 'SUPERSEDES', ha='center', va='center', fontsize=6.5, fontweight='bold', color='#d9480f')
 
-    b2_b = FancyBboxPatch((0.36, 0.355), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#6c757d", fc="white", lw=1.0)
+    b2_b = FancyBboxPatch((0.36, 0.355), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#2b5c8f", fc="white", lw=1.2)
     ax.add_patch(b2_b)
     ax.text(0.50, 0.445,
-            'Nó KB #8 [30/Mai/2023 → ∞]\n'
-            'Tag: [CURRENT / ACTIVE]\n'
-            '"User has a United MileagePlus account\n'
-            'and recently reached Premier Gold status."',
-            ha='center', va='center', fontsize=7.4, color='#333')
+            'Nó KB #5 [30/Nov/2023 → ∞]\n'
+            'Status: CURRENT / ACTIVE\n'
+            '"User mentioned adding 25 new postcards\n'
+            'since restarting collecting."',
+            ha='center', va='center', fontsize=7.4, color='#111')
 
     b2_c = FancyBboxPatch((0.66, 0.355), 0.31, 0.18, boxstyle="round,pad=0.008", ec="#1d3f63", fc="#dbeafe", lw=1.1)
     ax.add_patch(b2_c)
     ax.text(0.815, 0.445,
-            'Query: "What was my previous frequent flyer\nstatus on United before the current status?"\n'
-            '• Baseline A: "None" (Perdeu histórico ✗ Score=0)\n'
-            '• Proposta B: "Premier Silver" (Tag Hist. ✓ Score=1)',
+            'Pergunta: "How many new postcards have I added\nsince I started collecting again?"  (gabarito: 25)\n'
+            '• Baseline A: "25" ✓\n'
+            '• B0 (sem validade): "42" ✗  (17 + 25)\n'
+            '• Proposta B: "25" ✓',
             ha='center', va='center', fontsize=7.2, fontweight='bold', color='#1d3f63')
 
     # --- CASO 3: Mudança Correta de Estado vs. Granularidade do Juiz (07741c45) ---
@@ -428,7 +430,7 @@ def generate_fig4():
                             boxstyle="round,pad=0.01,rounding_size=0.018",
                             ec="#e07a5f", fc="#fff8f5", lw=1.5)
     ax.add_patch(c3_box)
-    ax.text(0.03, 0.265, 'Caso 3 — Correção Semântica com Penalização por Granularidade Lexical (ID: 07741c45 | Estudo de Caso da Entrega 1)',
+    ax.text(0.03, 0.265, 'Caso 3 — Estado correto, detalhe perdido na extração (ID: 07741c45 | Knowledge-Update | A ✗   B0 ✗   B ✗)',
             ha='left', va='center', fontsize=9.0, fontweight='bold', color='#9c4221')
 
     b3_a = FancyBboxPatch((0.03, 0.045), 0.28, 0.18, boxstyle="round,pad=0.008", ec="#6c757d", fc="white", lw=1.0)
@@ -456,10 +458,11 @@ def generate_fig4():
     b3_c = FancyBboxPatch((0.66, 0.045), 0.31, 0.18, boxstyle="round,pad=0.008", ec="#9c4221", fc="#ffedd5", lw=1.1)
     ax.add_patch(b3_c)
     ax.text(0.815, 0.135,
-            'Query: "Where do I currently keep my old sneakers?"\n'
-            '• Baseline A: "under my bed" (Anacrônico ✗)\n'
-            '• Proposta B: "in a shoe rack" (Eliminou anacronismo!)\n'
-            '• Limitação: Juiz exigiu "in a shoe rack in my closet".',
+            'Pergunta: "Where do I currently keep my old sneakers?"\n'
+            '• Baseline A: "under my bed" ✗ (estado antigo)\n'
+            '• B0 (sem validade): "under your bed" ✗ (estado antigo)\n'
+            '• Proposta B: "in a shoe rack" ✗ (estado certo; o juiz\n'
+            '  exigiu "in a shoe rack in my closet")',
             ha='center', va='center', fontsize=7.3, fontweight='bold', color='#9c4221')
 
     plt.tight_layout()

@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{stfloats}
+\usepackage{pifont}
 \usepackage{hyperref}
 
 \hypersetup{
@@ -133,7 +134,7 @@ A Tabela~\ref{tab:evolucao} resume a trajetória dos resultados desde a Entrega 
 \toprule
 \textbf{Marco} & \textbf{Global} & \textbf{KU} & \textbf{Observação} \\
 \midrule
-Entrega 1: reprodução de A & 61,20\% & 57/78 & 43,8\% dos erros em TR e KU \\
+Entrega 1: reprodução de A & 61,20\% & 57/78 & código oficial, sem alterações \\
 B, 1ª rodada completa & 64,60\% & 57/78 & 99 grafos semânticos vazios \\
 B, após recodificação & 65,60\% & 65/78 & 100 questões recodificadas \\
 B0 (ablação) & 64,20\% & 51/78 & mesmos fatos de B, sem mecanismo temporal \\
@@ -231,18 +232,20 @@ A inspeção dos 500 grafos semânticos gerados (\texttt{<id>\_long\_term\_kb\_g
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig4_estudo_caso_supersessao.pdf}
-\caption{Estudos de caso extraídos dos grafos persistidos: (Caso 1) resolução do estado atual via \texttt{SUPERSEDES} em \texttt{852ce960}; (Caso 2) recuperação não-destrutiva de estado passado em \texttt{50635ada}; (Caso 3) eliminação do anacronismo em \texttt{07741c45}, com penalização pelo juiz por perda de detalhe na extração.}
+\caption{Estudos de caso extraídos dos grafos de B, com as respostas de A, B0 e B: (Caso 1) estado atual recuperado apenas com o mecanismo temporal em \texttt{a2f3aa27}; (Caso 2) sem validade, a B0 soma o valor obsoleto ao atual em \texttt{01493427}; (Caso 3) estado correto em \texttt{07741c45}, mas penalizado pelo juiz por um detalhe perdido na extração.}
 \label{fig:estudo_caso}
 \end{figure*}
 
-\subsection{Três Regimes: Atualização, Histórico e Granularidade Lexical}
-A Fig.~\ref{fig:estudo_caso} apresenta três casos reais extraídos dos arquivos gerados:
+\subsection{Casos de Atualização: Extração vs. Mecanismo Temporal}
+Comparar as respostas de A, B0 e B indica qual componente resolveu cada caso. Casos que B0 já acerta, como \texttt{852ce960} (pré-aprovação de financiamento: \texttt{\$350,000} $\rightarrow$ \texttt{\$400,000}) e \texttt{50635ada} (status anterior no programa de milhas), foram resolvidos pela \textbf{extração por sessão}, não pela supersessão. A Fig.~\ref{fig:estudo_caso} mostra três casos de \textit{Knowledge Update} em que B0 e B respondem diferente ou em que ambas erram:
 
-\textbf{1) Resolução de Estado Atual (\texttt{852ce960}, $0 \to 1$)}: em 11/ago/2023 (nó KB \#0), o usuário relata pré-aprovação de financiamento de \texttt{\$350,000}; em 30/nov/2023 (nó KB \#6), menciona pré-aprovação de \texttt{\$400,000} pelo Wells Fargo. A Baseline A respondeu \texttt{``\$350,000''} (incorreto). Na Proposta B, o nó \#6 substituiu o \#0, cuja vigência foi fechada em \texttt{[2023/08/11, 2023/11/30]}, e o modelo respondeu \texttt{``\$400,000''} (correto). O mesmo padrão ocorreu em \texttt{a2f3aa27} (seguidores no Instagram: \texttt{1250} $\rightarrow$ \texttt{1300}), \texttt{b6019101} (filmes da Marvel assistidos: \texttt{4} $\rightarrow$ \texttt{5}) e \texttt{c6853660} (limite matinal de café: uma $\rightarrow$ duas xícaras).
+\textbf{1) Estado atual recuperado pela supersessão (\texttt{a2f3aa27}; A \ding{55}, B0 \ding{55}, B \ding{51})}: na manhã de 28/mai/2023 o usuário tem 1.250 seguidores (nó KB \#0); à tarde do mesmo dia, está perto de 1.300 (nó KB \#5). Com os mesmos fatos e sem validade, a B0 responde \texttt{``1250''}, como A. Em B, o nó \#0 foi marcado como substituído pelo \#5, e o modelo responde \texttt{``1300 followers''}. O mesmo padrão aparece em \texttt{b6019101} (filmes da Marvel: 4 $\rightarrow$ 5).
 
-\textbf{2) Preservação Não-Destrutiva para Consultas ao Passado (\texttt{50635ada}, $0 \to 1$)}: mecanismos de sobrescrita apagam estados que ainda podem ser perguntados. Aqui a pergunta é \textit{``What was my \textbf{previous} frequent flyer status on United Airlines before I got the current status?''}. Em 16/set/2022 (nó KB \#2), o usuário era elegível ao \textit{Premier Silver}; em 30/mai/2023 (nó KB \#8), atingiu o \textit{Premier Gold}. A Baseline A respondeu \texttt{``None''}; a Proposta B manteve o nó \#2 com a tag \texttt{[HISTORICAL / SUPERSEDED (Valid: 2022/09/16 to 2023/05/30)]} e respondeu \texttt{``Premier Silver''} (correto).
+\textbf{2) Sem validade, o fato obsoleto é somado ao atual (\texttt{01493427}; A \ding{51}, B0 \ding{55}, B \ding{51})}: em agosto o usuário relata ter adicionado 17 cartões-postais à coleção; em novembro, 25 desde que voltou a colecionar. A Baseline A, sem fatos semânticos, acerta a partir dos trechos episódicos. A B0 recebe os dois fatos sem marcação de vigência e responde \texttt{``42''} (17 + 25). Em B, o fato de agosto aparece como \texttt{HISTORICAL} e a resposta volta a ser \texttt{``25''}. Em 8 dos 14 ganhos B0$\rightarrow$B em \textit{Knowledge Update}, a Baseline A também acertava: a B0 errou questões que a baseline resolvia, e o mecanismo temporal desfez o dano. Em parte desses casos, como este, a resposta da B0 reflete o estado anterior ou a soma dos dois estados.
 
-\textbf{3) Caso dos Tênis (\texttt{07741c44} e \texttt{07741c45}) --- Acerto Temporal vs. Detalhe Lexical}: o usuário guardava os tênis velhos debaixo da cama em 20/mai/2023 (nó KB \#4) e passou a guardá-los em uma sapateira em 26/mai/2023 (nó KB \#9). Na pergunta retrospectiva \texttt{07741c44}, A e B acertaram (\texttt{``under my bed''}). Na pergunta sobre o estado atual \texttt{07741c45}, a Baseline A respondeu o estado antigo (\texttt{``under my bed''}); a Proposta B marcou o nó \#4 como substituído e respondeu \texttt{``in a shoe rack''}. Como o extrator resumiu o fato sem o complemento \textit{``in my closet''} presente no gabarito, o juiz atribuiu nota 0. O caso separa \textit{erro de memória temporal}, que a proposta corrigiu, de \textit{compressão lexical na extração}, que permanece.
+\textbf{3) Estado correto, detalhe perdido (\texttt{07741c45}; A \ding{55}, B0 \ding{55}, B \ding{55})}: o usuário guardava os tênis velhos debaixo da cama (20/mai/2023) e passou a guardá-los numa sapateira no armário (26/mai/2023). A e B0 respondem o estado antigo (\texttt{``under my bed''}); B marca o fato antigo como substituído e responde \texttt{``in a shoe rack''}. Como o extrator resumiu o fato sem o complemento \textit{``in my closet''} do gabarito, o juiz atribuiu nota 0. O caso separa \textit{erro de memória temporal}, que a proposta corrigiu, de \textit{compressão lexical na extração}, que permanece.
+
+Nem todo ganho B0$\rightarrow$B é tão claro: em \texttt{c6853660}, B0 respondeu \texttt{``increase''} (reprovado) e B, \texttt{``increased''} (aprovado), o que sugere variação do juiz e reforça a necessidade de medir o ruído entre execuções.
 
 \subsection{Ranking ou Tags?}
 Com $\lambda = 0{,}6$, um fato substituído perde no máximo $0{,}4\,(1-\mathcal{V})$ no score, e a Fig.~\ref{fig:decaimento} mostra que o fato obsoleto pode continuar à frente por alguns dias após a supersessão. Como cada questão tem em média 9,18 fatos e são recuperados 5, fatos substituídos podem continuar entre os recuperados, agora com a tag \texttt{HISTORICAL}; a frequência com que isso ocorre ainda será medida. A hipótese de trabalho é que boa parte do efeito venha das tags no prompt, e não da reordenação por $\mathcal{V}$. A B0 remove os dois componentes ao mesmo tempo e, portanto, mostra que juntos eles produzem o ganho em \textit{Knowledge Update}, mas não diz qual deles é responsável; duas variantes adicionais (só tags e só $\mathcal{V}$) farão essa separação.
@@ -267,7 +270,7 @@ As 32 questões em que A acertou e B errou concentram-se em \texttt{multi-sessio
 \end{itemize}
 
 \section{Conclusão e Próximos Passos}
-A extensão temporal foi implementada e avaliada nas 500 questões. A Proposta B obteve 65,60\% (+4,40 p.p. sobre a Baseline A; McNemar bilateral $p = 0{,}023$), mas a ablação B0 mostra que a maior parte desse ganho vem da extração por sessão. A hipótese do trabalho é \textbf{suportada em \textit{Knowledge Update}}: o mecanismo temporal corrige 14 questões sem regressões ($p_{Holm} = 0{,}0015$) e preserva o histórico para perguntas retrospectivas. Ela \textbf{não é suportada no total}, porque a supersessão excessiva prejudica perguntas de agregação em \textit{Multi-Session}. Para a entrega final: (i) ajustar o classificador para distinguir estados mutuamente exclusivos (\texttt{SUPERSEDES}) de eventos acumulativos (\texttt{EXTENDS}), alvo direto das regressões medidas; (ii) executar a repetição B' para medir o ruído entre execuções; (iii) concluir a investigação da baseline e, se necessário, refazê-la com os scripts oficiais; (iv) separar o efeito das tags do efeito de $\mathcal{V}$; e (v) analisar a sensibilidade a $\lambda \in \{0{,}4; 0{,}6; 0{,}8\}$ e $\tau_{decay} \in \{30, 60, 90\}$ dias, sem escolher a configuração pelo resultado.
+A extensão temporal foi implementada e avaliada nas 500 questões. A Proposta B obteve 65,60\% (+4,40 p.p. sobre a Baseline A; McNemar bilateral $p = 0{,}023$), mas a ablação B0 mostra que a maior parte desse ganho vem da extração por sessão. A hipótese do trabalho é \textbf{suportada em \textit{Knowledge Update}}: o mecanismo temporal corrige 14 questões sem regressões ($p_{Holm} = 0{,}0015$), 8 delas questões que a Baseline A acertava e a B0 passou a errar. O benefício para perguntas retrospectivas, que motivou a supersessão não-destrutiva, ainda não foi isolado: os casos observados também são resolvidos pela B0. Ela \textbf{não é suportada no total}, porque a supersessão excessiva prejudica perguntas de agregação em \textit{Multi-Session}. Para a entrega final: (i) ajustar o classificador para distinguir estados mutuamente exclusivos (\texttt{SUPERSEDES}) de eventos acumulativos (\texttt{EXTENDS}), alvo direto das regressões medidas; (ii) executar a repetição B' para medir o ruído entre execuções; (iii) concluir a investigação da baseline e, se necessário, refazê-la com os scripts oficiais; (iv) separar o efeito das tags do efeito de $\mathcal{V}$; e (v) analisar a sensibilidade a $\lambda \in \{0{,}4; 0{,}6; 0{,}8\}$ e $\tau_{decay} \in \{30, 60, 90\}$ dias, sem escolher a configuração pelo resultado.
 
 \begin{thebibliography}{00}
 \bibitem{helamem2026} R.~Bro et al., ``HeLa-Mem: Hebbian Learning and Associative Memory for LLM Agents,'' in \textit{Proc. ACL}, 2026, pp. 625--639.
