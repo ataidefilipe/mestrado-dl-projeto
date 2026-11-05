@@ -135,9 +135,33 @@ As diretrizes pedem datasets diferentes, com dificuldades distintas e usados no 
 
 - Nos 500 itens de `external/HeLa-Mem/data/longmemeval_s.json`, `haystack_session_ids` é **igual** a `answer_session_ids`: o histórico tem apenas as sessões de evidência.
 - Sessões por item: 1 a 6. A média é 1,0 nas categorias de sessão única e de 2,0 a 2,6 nas demais. O arquivo tem 15 MB.
-- Segundo o README oficial do LongMemEval, o `longmemeval_s.json` tem cerca de 40 sessões por item (aprox. 115 mil tokens), e a variante `longmemeval_oracle.json` inclui "only the evidence sessions".
+- Segundo o artigo do LongMemEval (Wu et al., arXiv 2410.10813), o LongMemEval-S tem "approximately 115k tokens per problem" (cerca de 50 sessões, com as de evidência inseridas entre sessões de distração). O cenário *oracle* responde "with only the evidence sessions as the context".
 - **Consequência:** o cenário avaliado equivale à variante *oracle*, que não testa encontrar o fato no meio de sessões de distração. Também explica a ausência de supersessão nas categorias de sessão única, que acontece por construção do método e não mede a precisão do classificador.
-- **Em aberto:** confirmar se o artigo do HeLa-Mem reportou 65,40% com este mesmo arquivo. Se não, a comparação com o artigo não vale.
+
+#### Atualização em 2026-11-05: o que dizem as fontes
+
+Os três artigos foram lidos em arxiv.org. O README do LongMemEval no GitHub e o cartão do dataset no Hugging Face não puderam ser acessados.
+
+| Fonte | O que afirma |
+|---|---|
+| HeLa-Mem, Apêndice D ([arXiv 2604.16839](https://arxiv.org/html/2604.16839)) | Avalia no "LongMemEval-S, a 500-item long-term conversational memory benchmark", com gpt-4o-mini como gerador e juiz. Não traz estatísticas do histórico (sessões ou tokens) nem menciona filtragem ou oracle. Os baselines das Tabelas 6 e 7 são "reported from Fang et al. (2025)". |
+| LightMem (Fang et al., [arXiv 2510.18866](https://arxiv.org/html/2510.18866)), Apêndice D.1 | É a origem dos baselines (FullText 56,80; NaiveRAG 61,00; A-MEM 62,60). Usa "specifically the LongMemEval-S split", descrito com "approximately 115k tokens per problem". |
+| LongMemEval ([arXiv 2410.10813](https://arxiv.org/html/2410.10813)), Fig. 3b | Mostra o tamanho da diferença: GPT-4o lendo o histórico inteiro acerta 87,0% no oracle e 60,6% no S. |
+| README do HeLa-Mem (commit `68f19b3`) | "The complete `500`-item LongMemEval-S file is bundled in this repository", apontando para `data/longmemeval_s.json`. |
+| Medição local do arquivo | 500 itens, 1 a 6 sessões (média 1,9), cerca de 26 mil caracteres (aprox. 6,6 mil tokens) por item. É cerca de 17 vezes menor que o LongMemEval-S. |
+
+**Conclusão (fato observado):** o arquivo que o repositório oficial do HeLa-Mem apresenta como "o LongMemEval-S completo" para reproduzir os resultados corresponde, na verdade, à variante oracle. Os baselines que o artigo compara foram medidos pelo LightMem no LongMemEval-S de cerca de 115 mil tokens.
+
+**Ainda indeterminado:** com qual arquivo o artigo obteve os 65,40%.
+- **Se foi com o arquivo distribuído:** a Tabela 6 do artigo compara o HeLa-Mem no oracle com baselines medidos no S. A vantagem reportada sobre os baselines estaria inflada.
+- **Se foi com o LongMemEval-S oficial:** o repositório distribui o arquivo errado, e a nossa reprodução (61,20%) e a Proposta B não são comparáveis aos 65,40%.
+
+**Nos dois casos:**
+1. Os resultados deste projeto devem ser descritos como "LongMemEval, 500 questões, histórico apenas de evidência (equivalente ao oracle)".
+2. A comparação numérica com o artigo e com os baselines da Tabela 6 não é válida.
+3. A comparação interna A → B0 → B continua válida, porque as três condições usam o mesmo arquivo.
+
+**Como fechar a questão:** abrir uma issue no repositório do HeLa-Mem perguntando qual arquivo gerou as Tabelas 6 e 7 (Etapa 8b do plano) e, se houver orçamento, rodar no LongMemEval-S oficial.
 
 ## 4. Pontos atendidos
 

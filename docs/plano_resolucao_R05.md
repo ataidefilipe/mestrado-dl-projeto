@@ -16,6 +16,7 @@ A ordem abaixo segue o impacto na conclusão e o custo: primeiro o que é barato
 | 6. Estatística completa | Achado 6 | nenhum | 4, 5 |
 | 7. Sensibilidade de λ, τ, θ | Achado 7 | médio | 5 |
 | 8. LoCoMo (opcional) | Achado 8 | alto | 3 ou A atual |
+| 8b. Dataset completo | Achado 10 | nenhum (issue) / **muito alto** (rodar no S) | — |
 | 9. Corrigir relatório e documentação | Achados 1, 3, 6, 9 | nenhum | 1–6 |
 
 ---
@@ -228,8 +229,10 @@ Se não houver tempo: registrar como limitação explícita no artigo final, cit
 
 ## Etapa 8b — Dataset completo (Achado 10)
 
-1. Confirmar no artigo do HeLa-Mem (seção de experimentos e apêndice) qual arquivo do LongMemEval foi usado para os 65,40%.
-2. Se houver tempo, rodar A e B no `longmemeval_s_cleaned.json` oficial (cerca de 40 sessões por item). O custo é alto, porque a codificação cresce com o número de sessões. Começar com uma amostra estratificada (por exemplo, os 78 itens de KU) para estimar custo e efeito.
+1. ~~Confirmar no artigo do HeLa-Mem (seção de experimentos e apêndice) qual arquivo do LongMemEval foi usado para os 65,40%.~~ **Feito em 2026-11-05, sem conclusão:** o Apêndice D diz apenas "LongMemEval-S, a 500-item … benchmark", sem estatísticas do histórico. Os baselines vêm do LightMem, que usa o S de cerca de 115 mil tokens. O README do HeLa-Mem chama de "complete 500-item LongMemEval-S" o arquivo que, na verdade, é oracle. Detalhes no Achado 10 da auditoria.
+2. Abrir uma issue no repositório do HeLa-Mem (github.com/ReinerBRO/HeLa-Mem) perguntando qual arquivo gerou as Tabelas 6 e 7 do Apêndice D e se `data/longmemeval_s.json` é intencionalmente a variante oracle. É a única forma barata de fechar a questão.
+3. No relatório, descrever os resultados como "LongMemEval, 500 questões, histórico apenas de evidência (equivalente ao oracle)" e não comparar numericamente com o artigo nem com os baselines da Tabela 6 (Etapa 9, item 5).
+4. Se houver tempo, rodar A e B no `longmemeval_s_cleaned.json` oficial (cerca de 40 sessões por item). O custo é alto, porque a codificação cresce com o número de sessões. Começar com uma amostra estratificada (por exemplo, os 78 itens de KU) para estimar custo e efeito.
 
 ---
 
@@ -270,4 +273,5 @@ No repositório:
 | 6 | pendente | | |
 | 7 | pendente | | |
 | 8 | opcional | | |
+| 8b | em andamento | 2026-11-05 | Passo 1 feito: o artigo não informa qual arquivo usou; os baselines são do S de cerca de 115 mil tokens (LightMem); o arquivo distribuído é oracle. Falta a issue aos autores e a execução no S oficial. Ver Achado 10. |
 | 9 | pendente | | |

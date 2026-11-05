@@ -588,7 +588,7 @@ São 500 questões do arquivo `data/longmemeval_s.json` que vem com o código do
 > **Atenção — apesar do nome, o arquivo não é o LongMemEval-S.** Verificou-se que, nas 500 questões, o histórico contém **apenas as sessões de evidência** (1 a 6 sessões; média de 1,0 nas categorias de sessão única e de 2,0 a 2,6 nas demais). Ou seja, ele corresponde à variante *oracle*. Consequências:
 > - o experimento testa **raciocinar sobre fatos que mudam**, que é o foco da proposta, mas **não** testa encontrar esses fatos no meio de dezenas de sessões irrelevantes;
 > - nas categorias de sessão única há uma só sessão, então a supersessão é impossível por construção;
-> - ainda é preciso confirmar se o artigo do HeLa-Mem usou o mesmo arquivo; se não usou, a comparação com os números do artigo não vale.
+> - **o próprio repositório do HeLa-Mem chama este arquivo de "the complete 500-item LongMemEval-S file"**. O artigo (Apêndice D) não informa o tamanho do histórico e copia os baselines do LightMem, que os mediu no LongMemEval-S verdadeiro (cerca de 115 mil tokens por questão). Não se sabe com qual arquivo o HeLa-Mem obteve os 65,40%. Se foi com este, o artigo compara oracle com S. Se não foi, a nossa reprodução mede outra coisa. **Em qualquer caso, a comparação numérica com o artigo não vale.** A comparação interna A → B0 → B continua válida (Achado 10 da auditoria, atualizado em 05/11).
 
 ### 8.3 Métrica
 
@@ -756,7 +756,7 @@ A auditoria completa está em [reports/analysis/R05_auditoria_processo_20261104.
 | 7 | Risco de ajustar hiperparâmetros no conjunto de teste | Regra fixada: sensibilidade sem seleção |
 | 8 | Só um dataset (a diretriz pede mais de um) | Pendente (LoCoMo planejado) |
 | 9 | Reprodutibilidade (requirements desatualizado, `tests/` vazio, semântica de A não versionada) | Parcialmente pendente |
-| 10 | O arquivo de dados só tem as sessões de evidência (variante *oracle*) | Documentado; avaliação no LongMemEval-S completo planejada |
+| 10 | O arquivo de dados só tem as sessões de evidência (variante *oracle*) | Fontes verificadas em 05/11: o README do HeLa-Mem chama o arquivo de LongMemEval-S, mas os baselines do artigo são do S de cerca de 115 mil tokens; falta perguntar aos autores e avaliar no S oficial |
 
 **Por que o Achado 2 importa tanto.** Se os 360 grafos vazios forem falha de execução, a baseline A ficou artificialmente fraca, porque respondeu sem a memória semântica em 72% das questões. Nesse caso:
 
