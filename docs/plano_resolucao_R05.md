@@ -226,6 +226,13 @@ Se não houver tempo: registrar como limitação explícita no artigo final, cit
 
 ---
 
+## Etapa 8b — Dataset completo (Achado 10)
+
+1. Confirmar no artigo do HeLa-Mem (seção de experimentos e apêndice) qual arquivo do LongMemEval foi usado para os 65,40%.
+2. Se houver tempo, rodar A e B no `longmemeval_s_cleaned.json` oficial (cerca de 40 sessões por item). O custo é alto, porque a codificação cresce com o número de sessões. Começar com uma amostra estratificada (por exemplo, os 78 itens de KU) para estimar custo e efeito.
+
+---
+
 ## Etapa 9 — Corrigir o relatório e a documentação
 
 No relatório (`relatorio_entrega2_draft2.md` e `.tex`, ou na versão final):

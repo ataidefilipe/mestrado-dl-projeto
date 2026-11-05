@@ -130,6 +130,15 @@ As diretrizes pedem datasets diferentes, com dificuldades distintas e usados no 
 - Memória semântica de A não versionada, o que impede auditar o Achado 2.
 - Código e relatórios do GraphSAGE/PPI (R01, R02) misturados ao projeto atual (§25).
 
+### Achado 10 — O arquivo `longmemeval_s.json` contém só as sessões de evidência
+**Nível:** fato observado (adicionado em 2026-11-04, durante a revisão do Draft 2)
+
+- Nos 500 itens de `external/HeLa-Mem/data/longmemeval_s.json`, `haystack_session_ids` é **igual** a `answer_session_ids`: o histórico tem apenas as sessões de evidência.
+- Sessões por item: 1 a 6. A média é 1,0 nas categorias de sessão única e de 2,0 a 2,6 nas demais. O arquivo tem 15 MB.
+- Segundo o README oficial do LongMemEval, o `longmemeval_s.json` tem cerca de 40 sessões por item (aprox. 115 mil tokens), e a variante `longmemeval_oracle.json` inclui "only the evidence sessions".
+- **Consequência:** o cenário avaliado equivale à variante *oracle*, que não testa encontrar o fato no meio de sessões de distração. Também explica a ausência de supersessão nas categorias de sessão única, que acontece por construção do método e não mede a precisão do classificador.
+- **Em aberto:** confirmar se o artigo do HeLa-Mem reportou 65,40% com este mesmo arquivo. Se não, a comparação com o artigo não vale.
+
 ## 4. Pontos atendidos
 
 | Premissa | Evidência |

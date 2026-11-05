@@ -42,7 +42,7 @@ def generate_fig1():
     ax.axis('off')
 
     ax.text(0.5, 0.968,
-            'Arquitetura Comparativa e Resultados Empíricos: Baseline A vs. Proposta B (Validade Temporal)',
+            'Arquitetura: Baseline A (HeLa-Mem) vs. Proposta B (Validade Temporal)',
             ha='center', va='top', fontsize=11.8, fontweight='bold', color='#1a1a2e')
 
     # Painel Esquerdo: HeLa-Mem Baseline A
@@ -59,8 +59,8 @@ def generate_fig1():
     ax.add_patch(b1)
     ax.text(0.2475, 0.74,
             '1. Memória Episódica (Grafo Hebbiano)\n'
-            'Nós: Turnos de diálogo | Arestas: Força Sináptica ($w_{ij}$)\n'
-            'Reforço associativo por coativação ($\\Delta w_{ij} = \\eta = 0,02$)',
+            'Nós: turnos de diálogo | Arestas: força sináptica ($w_{ij}$), $\\eta = 0{,}02$\n'
+            'Decaimento temporal neutralizado no código (bug mantido em A e B)',
             ha='center', va='center', fontsize=8.1, color='#111')
 
     b2 = FancyBboxPatch((0.045, 0.48), 0.405, 0.12,
@@ -69,8 +69,8 @@ def generate_fig1():
     ax.add_patch(b2)
     ax.text(0.2475, 0.54,
             '2. Memória Semântica Estática (HebbianKnowledgeMemory)\n'
-            'Extração em blocos de 10 turnos sem data original da sessão\n'
-            'Metadado fixo: {"type": "fact"} (360/500 grafos KB vazios)',
+            'Extração em blocos de 10 turnos, sem a data da sessão\n'
+            '360/500 grafos semânticos vazios (causa em investigação)',
             ha='center', va='center', fontsize=8.0, color='#111')
 
     b3 = FancyBboxPatch((0.045, 0.28), 0.405, 0.12,
@@ -78,9 +78,9 @@ def generate_fig1():
                         ec="#b83b3b", fc="#fff5f5", lw=1.3)
     ax.add_patch(b3)
     ax.text(0.2475, 0.34,
-            '3. Gargalo no Retrieval (Cego à Validade Temporal):\n'
-            'Busca vetorial ignora $t_{query}$ e falha silenciosamente em $\\tau$.\n'
-            'Fatos obsoletos competem igualmente com o estado atual!',
+            '3. Busca Semântica sem Noção de Validade:\n'
+            'Fatos não têm vigência e a busca ignora $t_{query}$;\n'
+            'fato obsoleto e estado atual competem só por similaridade',
             ha='center', va='center', fontsize=8.0, fontweight='bold', color='#b83b3b')
 
     b4 = FancyBboxPatch((0.045, 0.08), 0.405, 0.12,
@@ -88,7 +88,7 @@ def generate_fig1():
                         ec="#495057", fc="#e9ecef", lw=1.2)
     ax.add_patch(b4)
     ax.text(0.2475, 0.14,
-            '4. Desempenho na Replicação (500 instâncias):\n'
+            '4. Reprodução (500 instâncias):\n'
             'Acurácia Global: 61,20% (306/500) | 194 erros totais\n'
             'Knowledge Update: 73,08% | Temporal Reasoning: 51,88%',
             ha='center', va='center', fontsize=8.0, fontweight='bold', color='#343a40')
@@ -111,9 +111,9 @@ def generate_fig1():
                         ec="#1b8a5a", fc="#ffffff", lw=1.1)
     ax.add_patch(p1)
     ax.text(0.7525, 0.74,
-            '1. Reuso Episódico Controlado + Extração por Sessão\n'
-            'Ancoragem estrita nas datas reais das sessões (haystack_dates)\n'
-            '4.591 fatos semânticos extraídos (100% dos 500 grafos populados)',
+            '1. Mesmos grafos episódicos de A + Extração por Sessão\n'
+            'Fatos ancorados na data real da sessão (haystack_dates)\n'
+            '4.591 fatos semânticos (500/500 grafos populados)',
             ha='center', va='center', fontsize=8.0, color='#111')
 
     p2 = FancyBboxPatch((0.55, 0.48), 0.405, 0.12,
@@ -141,10 +141,10 @@ def generate_fig1():
                         ec="#0f5132", fc="#d1f2e1", lw=1.3)
     ax.add_patch(p4)
     ax.text(0.7525, 0.14,
-            '4. Resultado Empírico Obtido (500 instâncias):\n'
-            'Acurácia Global: 65,60% (+4,40 pp vs Base | +0,20 pp vs Paper)\n'
-            'Knowledge Update: 83,33% (+10,26 pp) | Temporal: 55,64% (+3,76 pp)',
-            ha='center', va='center', fontsize=7.0, fontweight='bold', color='#0f5132')
+            '4. Resultado Preliminar (500 instâncias):\n'
+            'Acurácia Global: 65,60% (+4,40 p.p. sobre A)\n'
+            'Knowledge Update: 83,33% | Temporal Reasoning: 55,64%',
+            ha='center', va='center', fontsize=8.0, fontweight='bold', color='#0f5132')
 
     arrow_kw_right = dict(arrowstyle="-|>,head_width=0.3,head_length=0.45", color="#1b8a5a", lw=1.6)
     ax.annotate('', xy=(0.7525, 0.612), xytext=(0.7525, 0.668), arrowprops=arrow_kw_right)
@@ -162,84 +162,76 @@ def generate_fig1():
 # FIGURA 2: Evolução de Desempenho por Categoria (Paper vs Baseline A vs Proposta B)
 # -------------------------------------------------------------------------
 def generate_fig2():
-    categories = [
-        "Single-Sess. Preference\n(n=30)",
-        "Multi-Sess. Reasoning\n(n=133)",
-        "Temporal Reasoning\n(n=133)",
-        "Knowledge Update\n(n=78)",
-        "Single-Sess. User\n(n=70)",
-        "Single-Sess. Assistant\n(n=56)",
-        "OVERALL (Global)\n(N=500)"
+    # (rótulo, n, acertos A, acertos B, % artigo ou None quando o artigo não reporta a categoria)
+    rows = [
+        ("Single-Sess. Preference", 30, 8, 14, None),
+        ("Single-Sess. Assistant", 56, 49, 52, None),
+        ("Single-Sess. User", 70, 61, 58, None),
+        ("Single-Session (agregado)", 156, 118, 124, 78.85),
+        ("Multi-Session", 133, 62, 65, 57.14),
+        ("Temporal Reasoning", 133, 69, 74, 50.38),
+        ("Knowledge Update", 78, 57, 65, 78.21),
+        ("OVERALL", 500, 306, 328, 65.40),
     ]
-
-    # None indica que o paper original agregou sob Single-Session (78,85%)
-    paper_scores = [78.85, 57.14, 50.38, 78.21, 78.85, 78.85, 65.40]
-    base_scores  = [26.67, 46.62, 51.88, 73.08, 87.14, 87.50, 61.20]
-    prop_scores  = [46.67, 48.87, 55.64, 83.33, 82.86, 92.86, 65.60]
+    categories = [f"{r[0]}\n(n={r[1]})" for r in rows]
+    base_scores = [100.0 * r[2] / r[1] for r in rows]
+    prop_scores = [100.0 * r[3] / r[1] for r in rows]
+    paper_scores = [r[4] for r in rows]
+    pct = lambda v: f"{v:.1f}".replace(".", ",") + "%"
 
     y = np.arange(len(categories))
     height = 0.26
 
-    fig, ax = plt.subplots(figsize=(6.8, 4.4))
+    fig, ax = plt.subplots(figsize=(6.8, 5.0))
 
     c_paper = "#6c757d"   # Cinza azulado (Referência ACL 2026)
     c_base  = "#e07a5f"   # Coral (Baseline A Replicada)
     c_prop  = "#1b8a5a"   # Verde Esmeralda (Proposta B)
 
-    rects_paper = ax.barh(y + height, paper_scores, height,
-                          label='Paper Oficial (ACL 2026)',
+    paper_y = [yy + height for yy, p in zip(y, paper_scores) if p is not None]
+    paper_v = [p for p in paper_scores if p is not None]
+    rects_paper = ax.barh(paper_y, paper_v, height,
+                          label='Artigo (ACL 2026, valor reportado)',
                           color=c_paper, edgecolor='black', linewidth=0.5, alpha=0.75)
     rects_base  = ax.barh(y, base_scores, height,
-                          label='Baseline A (Replicação)',
+                          label='Baseline A (reprodução)',
                           color=c_base, edgecolor='black', linewidth=0.6, alpha=0.90)
     rects_prop  = ax.barh(y - height, prop_scores, height,
-                          label='Proposta B (Validade Temporal)',
+                          label='Proposta B (validade temporal)',
                           color=c_prop, edgecolor='black', linewidth=0.6, alpha=0.95)
 
-    for rect in rects_paper:
-        w = rect.get_width()
-        ax.annotate(f'{w:.1f}%',
-                    xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
-                    ha='right', va='center', fontsize=6.5, fontweight='bold', color='white')
+    for rects in (rects_paper, rects_base, rects_prop):
+        for rect in rects:
+            w = rect.get_width()
+            ax.annotate(pct(w),
+                        xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
+                        ha='right', va='center', fontsize=6.5, fontweight='bold', color='white')
 
-    for rect in rects_base:
-        w = rect.get_width()
-        ax.annotate(f'{w:.1f}%',
-                    xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
-                    ha='right', va='center', fontsize=6.5, fontweight='bold', color='white')
-
-    for rect in rects_prop:
-        w = rect.get_width()
-        ax.annotate(f'{w:.1f}%',
-                    xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
-                    ha='right', va='center', fontsize=6.8, fontweight='bold', color='white')
-
-    # Badges de ganho (Proposta B vs Baseline A) na direita
-    for i, (b, p) in enumerate(zip(base_scores, prop_scores)):
-        diff = p - b
-        sign = "+" if diff > 0 else ""
+    # Δ A→B calculado a partir das contagens (consistente com a tabela)
+    for i, r in enumerate(rows):
+        diff = 100.0 * (r[3] - r[2]) / r[1]
         color_diff = "#0f5132" if diff >= 0 else "#b83b3b"
         bg_diff = "#d1f2e1" if diff >= 0 else "#ffe3e3"
-        max_w = max(paper_scores[i], b, p)
-        ax.text(max_w + 1.8, y[i] - height/2, f"Δ A→B: {sign}{diff:.2f} pp",
-                ha='left', va='center', fontsize=7.2, fontweight='bold', color=color_diff,
+        max_w = max(v for v in (paper_scores[i], base_scores[i], prop_scores[i]) if v is not None)
+        label = f"Δ A→B: {diff:+.2f}".replace(".", ",") + " p.p."
+        ax.text(max_w + 1.8, y[i] - height / 2, label,
+                ha='left', va='center', fontsize=7.0, fontweight='bold', color=color_diff,
                 bbox=dict(boxstyle="round,pad=0.18", fc=bg_diff, ec=color_diff, lw=0.8))
 
-    # Destacar linha divisória para o OVERALL
+    # Separadores: sessão única detalhada | agregado | OVERALL
+    ax.axhline(2.5, color='#333333', linestyle=':', linewidth=0.9, alpha=0.5)
     ax.axhline(len(categories) - 1.5, color='#333333', linestyle='-', linewidth=1.0, alpha=0.5)
 
-    ax.set_xlabel('Acurácia no Benchmark LongMemEval-S (%)', fontsize=9.0, fontweight='bold')
-    ax.set_title('Evolução de Acurácia por Categoria: Paper (ACL 2026) vs. Baseline A vs. Proposta B',
-                 fontsize=10.0, fontweight='bold', pad=22)
+    ax.set_xlabel('Acurácia (%)', fontsize=9.0, fontweight='bold')
     ax.set_yticks(y)
-    ax.set_yticklabels(categories, fontsize=8.0, fontweight='bold')
-    ax.set_xlim(0, 118)
+    ax.set_yticklabels(categories, fontsize=7.8, fontweight='bold')
+    ax.set_xlim(0, 120)
     ax.set_xticks([0, 20, 40, 60, 80, 100])
     ax.grid(axis='x', linestyle='--', alpha=0.35)
 
     ax.legend(frameon=True, facecolor='white', edgecolor='#cccccc',
-              loc='upper center', bbox_to_anchor=(0.5, 1.11), ncol=3,
-              fontsize=7.8, borderpad=0.3)
+              loc='upper center', bbox_to_anchor=(0.5, -0.11), ncol=3,
+              fontsize=7.4, borderpad=0.3)
 
     plt.tight_layout()
     fig.savefig(out_dir / "fig2_baseline_vs_paper.png", dpi=300, bbox_inches='tight')
@@ -301,7 +293,7 @@ def generate_fig3():
     ax1.invert_yaxis()
     ax1.set_xlim(-16, 26)
     ax1.set_xlabel('Mudanças de Estado (A vs. B)', fontsize=8.5, fontweight='bold')
-    ax1.set_title('(A) Transições Pareadas (Saldo: +22, p = 0,0115)',
+    ax1.set_title('(A) Transições Pareadas A→B (saldo +22; McNemar bilateral p = 0,023)',
                   fontsize=8.8, fontweight='bold', pad=22)
     ax1.grid(axis='x', linestyle='--', alpha=0.35)
     ax1.legend(loc='upper center', bbox_to_anchor=(0.45, 1.11), ncol=2,
@@ -332,15 +324,13 @@ def generate_fig3():
     ax2.set_xticklabels(multi_cats, fontsize=8.2, fontweight='bold')
     ax2.set_ylim(0, 112)
     ax2.set_ylabel('Frequência Relativa (%)', fontsize=8.5, fontweight='bold')
-    ax2.set_title('(B) Supersessão Multi-Sessão (0% Single-Sess.)',
+    ax2.set_title('(B) Supersessão nas Categorias Multi-Sessão',
                   fontsize=8.8, fontweight='bold', pad=22)
     ax2.grid(axis='y', linestyle='--', alpha=0.35)
     ax2.legend(loc='upper center', bbox_to_anchor=(0.5, 1.11), ncol=2,
                frameon=True, facecolor='white', edgecolor='#cccccc', fontsize=7.3, borderpad=0.25)
 
     plt.tight_layout(w_pad=2.5)
-    fig.savefig(out_dir / "fig3_distribuicao_erros_categorias.png", dpi=300, bbox_inches='tight')
-    fig.savefig(out_dir / "fig3_distribuicao_erros_categorias.pdf", bbox_inches='tight')
     fig.savefig(out_dir / "fig3_analise_pareada_ab.png", dpi=300, bbox_inches='tight')
     fig.savefig(out_dir / "fig3_analise_pareada_ab.pdf", bbox_inches='tight')
     plt.close()
@@ -507,7 +497,8 @@ def generate_fig5():
     ax1.plot(days, v_f1, label='Fato Antigo $f_1$ ($[t_1=0, t_2=30]$)', color='#e63946', lw=2.2)
     ax1.plot(days, v_f2, label='Fato Novo $f_2$ ($[t_2=30, \\infty)$)', color='#1b8a5a', lw=2.2, linestyle='--')
     ax1.axvline(30, color='#333', linestyle=':', lw=1.2)
-    ax1.text(31.5, 0.52, 'Evento SUPERSEDES\n($t_{event} = 30$d)', fontsize=7.5, fontweight='bold', color='#333')
+    ax1.text(33, 0.45, 'Evento SUPERSEDES\n($t_{event} = 30$d)', fontsize=7.5, fontweight='bold', color='#333',
+             bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.85))
 
     ax1.fill_between(days, 0, v_f1, where=(days >= 0) & (days <= 30), color='#e63946', alpha=0.12)
     ax1.fill_between(days, 0, v_f2, where=(days >= 30), color='#1b8a5a', alpha=0.12)
@@ -537,8 +528,8 @@ def generate_fig5():
 
     ax2.plot(q_days, s_f1_after, label='Score Proposta $f_1$ ($\\text{Sim}=0,85$, expirado)', color='#e63946', lw=2.2)
     ax2.plot(q_days, s_f2_after, label='Score Proposta $f_2$ ($\\text{Sim}=0,78$, ativo)', color='#1b8a5a', lw=2.2)
-    ax2.axhline(sim_f1, color='#e63946', linestyle=':', lw=1.2, alpha=0.7, label='Baseline $f_1$ (estático = 0,85)')
-    ax2.axhline(sim_f2, color='#1b8a5a', linestyle=':', lw=1.2, alpha=0.7, label='Baseline $f_2$ (estático = 0,78)')
+    ax2.axhline(sim_f1, color='#e63946', linestyle=':', lw=1.2, alpha=0.7, label='Só similaridade $f_1$ (0,85)')
+    ax2.axhline(sim_f2, color='#1b8a5a', linestyle=':', lw=1.2, alpha=0.7, label='Só similaridade $f_2$ (0,78)')
 
     # Ponto de cruzamento (crossover)
     cross_idx = np.where(s_f2_after >= s_f1_after)[0][0]
@@ -552,7 +543,7 @@ def generate_fig5():
 
     ax2.set_xlabel('Data da Consulta $t_{query}$ após Supersessão (dias)', fontsize=8.5, fontweight='bold')
     ax2.set_ylabel('Score de Recuperação ($\\lambda=0,6$)', fontsize=8.5, fontweight='bold')
-    ax2.set_title('(B) Superação do Viés de Similaridade Lexical ($t_{query} > t_{end}$)', fontsize=9.0, fontweight='bold')
+    ax2.set_title('(B) Exemplo Ilustrativo de Inversão de Ranking ($t_{query} > t_{end}$)', fontsize=9.0, fontweight='bold')
     ax2.set_xlim(30, 120)
     ax2.set_ylim(0.55, 0.96)
     ax2.grid(True, linestyle='--', alpha=0.35)
