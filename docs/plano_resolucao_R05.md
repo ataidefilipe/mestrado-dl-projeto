@@ -266,7 +266,7 @@ No repositório:
 | 2 | pendente | | |
 | 3 | condicional | | |
 | 4 | pendente | | |
-| 5 | pendente | | |
+| 5 | concluída | 2026-11-04 | B0 = 64,20%. A→B0 +15 (p=0,11); B0→B +7 (p=0,45); KU B0→B +14/−0 (Holm p=0,0015); MS B0→B −7. Hipótese suportada em KU, não no total. `reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md` |
 | 6 | pendente | | |
 | 7 | pendente | | |
 | 8 | opcional | | |

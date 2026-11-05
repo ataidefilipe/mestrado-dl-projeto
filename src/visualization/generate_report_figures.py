@@ -162,59 +162,63 @@ def generate_fig1():
 # FIGURA 2: Evolução de Desempenho por Categoria (Paper vs Baseline A vs Proposta B)
 # -------------------------------------------------------------------------
 def generate_fig2():
-    # (rótulo, n, acertos A, acertos B, % artigo ou None quando o artigo não reporta a categoria)
+    # (rótulo, n, acertos A, acertos B, % artigo ou None quando o artigo não reporta, acertos B0)
     rows = [
-        ("Single-Sess. Preference", 30, 8, 14, None),
-        ("Single-Sess. Assistant", 56, 49, 52, None),
-        ("Single-Sess. User", 70, 61, 58, None),
-        ("Single-Session (agregado)", 156, 118, 124, 78.85),
-        ("Multi-Session", 133, 62, 65, 57.14),
-        ("Temporal Reasoning", 133, 69, 74, 50.38),
-        ("Knowledge Update", 78, 57, 65, 78.21),
-        ("OVERALL", 500, 306, 328, 65.40),
+        ("Single-Sess. Preference", 30, 8, 14, None, 12),
+        ("Single-Sess. Assistant", 56, 49, 52, None, 50),
+        ("Single-Sess. User", 70, 61, 58, None, 60),
+        ("Single-Session (agregado)", 156, 118, 124, 78.85, 122),
+        ("Multi-Session", 133, 62, 65, 57.14, 72),
+        ("Temporal Reasoning", 133, 69, 74, 50.38, 76),
+        ("Knowledge Update", 78, 57, 65, 78.21, 51),
+        ("OVERALL", 500, 306, 328, 65.40, 321),
     ]
     categories = [f"{r[0]}\n(n={r[1]})" for r in rows]
     base_scores = [100.0 * r[2] / r[1] for r in rows]
     prop_scores = [100.0 * r[3] / r[1] for r in rows]
+    b0_scores = [100.0 * r[5] / r[1] for r in rows]
     paper_scores = [r[4] for r in rows]
     pct = lambda v: f"{v:.1f}".replace(".", ",") + "%"
 
     y = np.arange(len(categories))
-    height = 0.26
+    height = 0.2
 
-    fig, ax = plt.subplots(figsize=(6.8, 5.0))
+    fig, ax = plt.subplots(figsize=(6.8, 5.8))
 
     c_paper = "#6c757d"   # Cinza azulado (Referência ACL 2026)
     c_base  = "#e07a5f"   # Coral (Baseline A Replicada)
     c_prop  = "#1b8a5a"   # Verde Esmeralda (Proposta B)
 
-    paper_y = [yy + height for yy, p in zip(y, paper_scores) if p is not None]
+    paper_y = [yy + 1.5 * height for yy, p in zip(y, paper_scores) if p is not None]
     paper_v = [p for p in paper_scores if p is not None]
     rects_paper = ax.barh(paper_y, paper_v, height,
-                          label='Artigo (ACL 2026, valor reportado)',
+                          label='Artigo (valor reportado)',
                           color=c_paper, edgecolor='black', linewidth=0.5, alpha=0.75)
-    rects_base  = ax.barh(y, base_scores, height,
-                          label='Baseline A (reprodução)',
+    rects_base  = ax.barh(y + 0.5 * height, base_scores, height,
+                          label='Baseline A',
                           color=c_base, edgecolor='black', linewidth=0.6, alpha=0.90)
-    rects_prop  = ax.barh(y - height, prop_scores, height,
-                          label='Proposta B (validade temporal)',
+    rects_b0    = ax.barh(y - 0.5 * height, b0_scores, height,
+                          label='B0 (extração por sessão, sem tempo)',
+                          color='#8d99ae', edgecolor='black', linewidth=0.6, alpha=0.95)
+    rects_prop  = ax.barh(y - 1.5 * height, prop_scores, height,
+                          label='Proposta B',
                           color=c_prop, edgecolor='black', linewidth=0.6, alpha=0.95)
 
-    for rects in (rects_paper, rects_base, rects_prop):
+    for rects in (rects_paper, rects_base, rects_b0, rects_prop):
         for rect in rects:
             w = rect.get_width()
             ax.annotate(pct(w),
                         xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
                         ha='right', va='center', fontsize=6.5, fontweight='bold', color='white')
 
-    # Δ A→B calculado a partir das contagens (consistente com a tabela)
+    # Δ B0→B (efeito do mecanismo temporal), calculado a partir das contagens
     for i, r in enumerate(rows):
-        diff = 100.0 * (r[3] - r[2]) / r[1]
+        diff = 100.0 * (r[3] - r[5]) / r[1]
         color_diff = "#0f5132" if diff >= 0 else "#b83b3b"
         bg_diff = "#d1f2e1" if diff >= 0 else "#ffe3e3"
-        max_w = max(v for v in (paper_scores[i], base_scores[i], prop_scores[i]) if v is not None)
-        label = f"Δ A→B: {diff:+.2f}".replace(".", ",") + " p.p."
-        ax.text(max_w + 1.8, y[i] - height / 2, label,
+        max_w = max(v for v in (paper_scores[i], base_scores[i], b0_scores[i], prop_scores[i]) if v is not None)
+        label = f"Δ B0→B: {diff:+.2f}".replace(".", ",") + " p.p."
+        ax.text(max_w + 1.8, y[i] - height, label,
                 ha='left', va='center', fontsize=7.0, fontweight='bold', color=color_diff,
                 bbox=dict(boxstyle="round,pad=0.18", fc=bg_diff, ec=color_diff, lw=0.8))
 
@@ -230,7 +234,7 @@ def generate_fig2():
     ax.grid(axis='x', linestyle='--', alpha=0.35)
 
     ax.legend(frameon=True, facecolor='white', edgecolor='#cccccc',
-              loc='upper center', bbox_to_anchor=(0.5, -0.11), ncol=3,
+              loc='upper center', bbox_to_anchor=(0.5, -0.09), ncol=2,
               fontsize=7.4, borderpad=0.3)
 
     plt.tight_layout()
@@ -252,52 +256,44 @@ def generate_fig3():
         "Single-Sess. Asst.\n(n=56)",
         "Single-Sess. User\n(n=70)"
     ]
-    gains = np.array([11, 8, 15, 14, 3, 3])
-    regs  = np.array([-3, -2, -10, -11, 0, -6])
-    nets  = gains + regs
-
-    # Taxa de supersessão (% de diálogos com >= 1 supersessão e % de fatos substituídos)
-    dialog_sup_rate = [92.3, 0.0, 54.1, 78.9, 0.0, 0.0]
-    fact_sup_rate   = [20.4, 0.0, 13.0, 15.7, 0.0, 0.0]
+    # Transições pareadas por etapa (ganhos, regressões), mesma ordem de cats_short
+    a_b0 = [(5, 11), (6, 2), (16, 9), (16, 6), (2, 1), (2, 3)]
+    b0_b = [(14, 0), (3, 1), (8, 10), (7, 14), (2, 0), (1, 3)]
+    net_a_b0 = np.array([g - r for g, r in a_b0])
+    net_b0_b = np.array([g - r for g, r in b0_b])
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.2, 4.0), gridspec_kw={'width_ratios': [1.35, 1.0]})
 
     y = np.arange(len(cats_short))
+    hh = 0.36
 
-    # Subplot A: Diverging Bar Chart de Transições Pareadas (McNemar)
-    bars_gain = ax1.barh(y, gains, height=0.52, color='#2a9d8f', edgecolor='black',
-                         linewidth=0.6, label='Ganhos ($0 \\rightarrow 1$): +54')
-    bars_reg  = ax1.barh(y, regs, height=0.52, color='#e63946', edgecolor='black',
-                         linewidth=0.6, label='Regressões ($1 \\rightarrow 0$): -32')
-
+    # Subplot A: decomposição do saldo líquido por etapa
+    ax1.barh(y - hh / 2, net_a_b0, height=hh, color='#8d99ae', edgecolor='black', linewidth=0.6,
+             label='A → B0: extração por sessão (saldo +15)')
+    ax1.barh(y + hh / 2, net_b0_b, height=hh, color='#1b8a5a', edgecolor='black', linewidth=0.6,
+             label='B0 → B: mecanismo temporal (saldo +7)')
     ax1.axvline(0, color='black', linewidth=1.0)
 
     for i in range(len(cats_short)):
-        if gains[i] > 0:
-            ax1.text(gains[i] + 0.4, y[i], f"+{gains[i]}", ha='left', va='center',
-                     fontsize=7.8, fontweight='bold', color='#1b7268')
-        if regs[i] < 0:
-            ax1.text(regs[i] - 0.4, y[i], f"{regs[i]}", ha='right', va='center',
-                     fontsize=7.8, fontweight='bold', color='#b81d2a')
-
-        # Badge de Saldo Líquido
-        net_val = nets[i]
-        net_str = f"Saldo: {net_val:+d}"
-        net_col = "#0f5132" if net_val >= 0 else "#842029"
-        net_bg  = "#d1f2e1" if net_val >= 0 else "#f8d7da"
-        ax1.text(21.5, y[i], net_str, ha='center', va='center', fontsize=7.2, fontweight='bold',
-                 color=net_col, bbox=dict(boxstyle="round,pad=0.18", fc=net_bg, ec=net_col, lw=0.7))
+        for dy, net, (g, r) in ((-hh / 2, net_a_b0[i], a_b0[i]), (hh / 2, net_b0_b[i], b0_b[i])):
+            x = net + (0.4 if net >= 0 else -0.4)
+            label = f"{net:+d} (+{g}/−{r})"
+            if i == 0 and dy > 0:
+                label += "  Holm p = 0,0015"
+            ax1.text(x, y[i] + dy, label, ha='left' if net >= 0 else 'right',
+                     va='center', fontsize=6.8, fontweight='bold',
+                     color='#0f5132' if (i == 0 and dy > 0) else '#222')
 
     ax1.set_yticks(y)
     ax1.set_yticklabels(cats_short, fontsize=8.2, fontweight='bold')
     ax1.invert_yaxis()
-    ax1.set_xlim(-16, 26)
-    ax1.set_xlabel('Mudanças de Estado (A vs. B)', fontsize=8.5, fontweight='bold')
-    ax1.set_title('(A) Transições Pareadas A→B (saldo +22; McNemar bilateral p = 0,023)',
+    ax1.set_xlim(-16, 30)
+    ax1.set_xlabel('Saldo líquido de questões (ganhos − regressões)', fontsize=8.5, fontweight='bold')
+    ax1.set_title('(A) Decomposição do Ganho por Etapa e Categoria',
                   fontsize=8.8, fontweight='bold', pad=22)
     ax1.grid(axis='x', linestyle='--', alpha=0.35)
     ax1.legend(loc='upper center', bbox_to_anchor=(0.45, 1.11), ncol=2,
-               frameon=True, facecolor='white', edgecolor='#cccccc', fontsize=7.3, borderpad=0.25)
+               frameon=True, facecolor='white', edgecolor='#cccccc', fontsize=6.8, borderpad=0.25)
 
     # Subplot B: Ativação da Supersessão por Categoria
     x_pos = np.arange(3)
