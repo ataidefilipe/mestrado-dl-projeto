@@ -1,31 +1,27 @@
-# Projeto: Grafo de Conhecimento Indutivo — Reforma Tributaria (GraphSAGE)
-# Python 3.13.5 | CPU-only (sem GPU NVIDIA disponivel)
-# Instalar torch via: --index-url https://download.pytorch.org/whl/cpu
+# Projeto: Validade Temporal e Supersessão de Fatos em Memória Associativa Hebbiana (HeLa-Mem)
+# Disciplina: Deep Learning — Mestrado CIn/UFPE (Prof. Cleber Zanchettin)
+# Ambiente validado: Python 3.12.9 (CPU-only)
+# Nota: Para torch CPU-only, instalar com --index-url https://download.pytorch.org/whl/cpu
 
-# --- Nucleo Deep Learning ---
-torch
-torch_geometric
+# --- LLM & Configuração ---
+openai==2.54.0
+python-dotenv==1.2.3
 
-# --- Dados / analise ---
-numpy
-pandas
-scipy
-scikit-learn
-networkx
+# --- Embeddings & Deep Learning ---
+torch==2.14.0+cpu
+sentence-transformers==6.1.0
 
-# --- Texto / embeddings ---
-sentence-transformers
-rank_bm25
+# --- Análise de Dados, Estatística & Grafos ---
+numpy==2.5.2
+pandas==3.0.6
+scipy==1.18.1
+scikit-learn==1.9.1
+networkx==3.6.1
 
-# --- Coleta ---
-requests
-beautifulsoup4
-lxml
-pypdf
-
-# --- Visualizacao ---
-matplotlib
-seaborn
+# --- Visualização ---
+matplotlib==3.11.2
+seaborn==0.13.2
 
 # --- Notebooks ---
-jupyterlab
+ipykernel==7.4.0
+nbclient==0.11.0

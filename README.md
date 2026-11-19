@@ -1657,6 +1657,9 @@ Isso está alinhado com o que as diretrizes pedem: evolução clara, experimento
 | **12. Proposta B_v2 (Ontológica)** | ✅ **CONCLUÍDO** | Prompt ontológico sem exemplos de domínio: **64,80% ACC**, KU com **79,49%** ($p=0{,}0034$ vs $B_0$), TR atinge recorde de **57,89%** |
 | **13. Diagnóstico de Baseline A** | ✅ **CONCLUÍDO** | Item 400 extraiu 9 nós com `workers=1`, refutando brevidade de diálogo e provando concorrência silenciosa na baseline A original |
 | **14. Baseline Fiel A*** | ✅ **CONCLUÍDO** | Baseline oficial restaurada com 100% dos grafos íntegros: **63,40% ACC** (317/500); `multi-session` reproduziu exatamente os **57,14%** do paper ACL 2026; confirmação causal em KU ($A^* \rightarrow B$ com $p=0{,}0042$) (`reports/analysis/R03_reproducao_hela_fiel_500itens.md`) |
+| **15. Auditoria de Supersessão (R07)** | ✅ **CONCLUÍDO** | Amostra estratificada ($n=45$/sistema): precisão subiu de **33,3%** ($B$) para **48,9%** ($B_{\text{v2}}$) com -53,6% menos arestas; 34 itens do dataset têm `haystack_dates` fora de ordem (`reports/analysis/R07_auditoria_supersessao_B_vs_Bv2.md`) |
+| **16. Ablação Fatorial 2×2 (R08)** | ✅ **CONCLUÍDO** | Isolamento `score_only` vs. `tags_only`: `tags_only` atingiu **66,20% overall** e **85,90% em KU** (+16/-0, $p<0{,}0001$), enquanto `score_only` teve efeito nulo em KU (`65,38%`) (`reports/analysis/R08_ablacao_fatorial_score_vs_tags_20261119.md`) |
+| **17. Sensibilidade $\lambda, \tau$ (R09)** | ✅ **CONCLUÍDO** | $\lambda \in \{0{,}4; 0{,}8\}$ e $\tau \in \{30\text{d}, 90\text{d}\}$: resultado classificado como **ROBUSTO** (`65,60%–66,80%` overall; KU `79,49%–84,62%`, todos $p \le 0{,}0034$ vs. $B_0$) (`reports/analysis/R09_sensibilidade_lambda_tau_20261119.md`) |
 
 ---
 # 20. Resultados Consolidados da Reprodução da Baseline (Etapa 2)
@@ -1681,7 +1684,7 @@ A reprodução estrita do código oficial do HeLa-Mem no benchmark completo **Lo
 2. **Resolução de Infraestrutura:** Foi superado o limite de 10.000 requisições diárias da OpenAI (Tier 1 RPD) através da separação modular dos processos e resolvido o problema de codec de console Windows (`cp1252`) reconfigurando os streams de saída para UTF-8.
 3. **Documentação Didática Produzida:** Foi desenvolvido o guia interativo em HTML ([`docs/explicacao_codigo_hela_mem.html`](file:///d:/Python%20Projetos/mestrado-dl-projeto/docs/explicacao_codigo_hela_mem.html)) com tradução das rotinas técnicas para metáforas leigas e simulador visual de redes sinápticas.
 
-A **Baseline A está formalmente congelada em 61.20%**. O projeto está apto para iniciar a **Etapa 5 (Implementação da Validade Temporal)**.
+> **Nota histórica:** A Baseline A inicial (61,20%) serviu como marco da Etapa 2, mas posteriormente a Auditoria R05/R06 identificou 360 grafos semânticos vazios por falha silenciosa de concorrência, levando à execução da **Baseline Fiel ($A^*$ = 63,40%, 0 grafos vazios)** documentada na Seção 26.
 
 ---
 
@@ -1824,6 +1827,23 @@ Para sanar em definitivo as limitações identificadas na auditoria de integrida
      - **$A^* \rightarrow B$:** $+14$ ganhos e apenas $2$ regressões (saldo: $+12$ acertos líquidos), com significância estatística de **$p = 0{,}0042$**.
      - **$A^* \rightarrow B_{\text{v2}}$:** $+10$ ganhos e apenas $1$ regressão (saldo: $+9$ acertos líquidos), com significância estatística de **$p = 0{,}0117$**.
 3. **Validade Científica Inquestionável:** A hipótese de pesquisa da dissertação encontra respaldo estatístico rigoroso ($p < 0{,}01$ e $p < 0{,}05$) tanto em relação à ablação controlada ($B_0$) quanto em relação à reprodução fiel da baseline oficial ($A^*$).
+
+---
+
+# 27. Fechamento Experimental: Ablação Fatorial 2×2, Sensibilidade e Auditoria da Supersessão (`R07`–`R09`)
+
+Em 19/11/2026 foram concluídos os experimentos finais de isolamento causal, robustez e auditoria qualitativa:
+
+1. **Ablação Fatorial 2×2 — Score $\mathcal{V}$ vs. Etiquetas no Prompt ([`R08`](reports/analysis/R08_ablacao_fatorial_score_vs_tags_20261119.md)):**
+   - `score_only` ($\mathcal{V}$ ligado, sem etiquetas): **61,80%** geral e **65,38%** (51/78) em `knowledge-update` (efeito nulo frente a $B_0$, `+3/-3`, $p=1{,}000$).
+   - `tags_only` ($\mathcal{V} \equiv 1$, etiquetas `[CURRENT]`/`[HISTORICAL]` ligadas): **66,20%** geral (maior acurácia absoluta do projeto) e **85,90%** (67/78) em `knowledge-update` (**+16/-0** vs. $B_0$, $p < 0{,}0001$).
+   - **Conclusão:** No recorte *oracle* (~9 fatos/grafo, `top_k=5`), ambos os fatos chegam ao contexto; o motor causal do ganho em `knowledge-update` é a sinalização explícita de vigência no prompt.
+2. **Análise de Sensibilidade de $\lambda$ e $\tau$ ([`R09`](reports/analysis/R09_sensibilidade_lambda_tau_20261119.md)):**
+   - Variações em $\lambda \in \{0{,}4; 0{,}8\}$ e $\tau \in \{30\text{d}, 90\text{d}\}$ mantiveram o desempenho geral entre **65,60% e 66,80%** (amplitude de 1,20 p.p., menor que o piso de ruído de 1,60 p.p.) e `knowledge-update` entre **79,49% e 84,62%** (todos $p \le 0{,}0034$ vs. $B_0$). Resultado classificado como **ROBUSTO**; configuração reportada mantida em $\lambda = 0{,}6, \tau = 60\text{d}$.
+3. **Auditoria de Precisão da Supersessão ([`R07`](reports/analysis/R07_auditoria_supersessao_B_vs_Bv2.md)):**
+   - Em amostra estratificada ($n = 45$ transições por sistema), a formulação ontológica $B_{\text{v2}}$ cortou o volume de supersessões em **53,6%** (612 → 284) e elevou a precisão de **33,3%** ($B$) para **48,9%** ($B_{\text{v2}}$), com salto de **13,3% → 53,3%** em `temporal-reasoning`.
+   - Identificou-se que **34/500 itens** do dataset possuem `haystack_dates` fora de ordem cronológica, causando supersessões reversas (`valid_to < valid_from`) exclusivamente em `temporal-reasoning`.
+4. **Higiene de Reprodutibilidade:** `requirements.txt` atualizado com versões fixadas e suíte de testes unitários offline criada em `tests/test_temporal_memory.py` (7/7 testes passando).
 
 ---
 

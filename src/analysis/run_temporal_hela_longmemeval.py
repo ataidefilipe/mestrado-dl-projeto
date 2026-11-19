@@ -438,6 +438,8 @@ def run_pipeline(
         summary = {
             "timestamp": datetime.now().isoformat(),
             "ablation": ablation,
+            "temporal_lambda": float(os.environ.get("TEMPORAL_LAMBDA", 0.6)),
+            "temporal_tau_decay": float(os.environ.get("TEMPORAL_TAU_DECAY", 60 * 86400)),
             "total_items": total,
             "total_correct": total_corr,
             "overall_accuracy": acc,
@@ -450,7 +452,7 @@ def run_pipeline(
         with open(sum_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
 
-        run_label = "PROPOSTA B (Validade Temporal)" if ablation == "none" else f"ABLACAO B0 ({ablation})"
+        run_label = "PROPOSTA B (Validade Temporal)" if ablation == "none" else f"ABLACAO ({ablation})"
         print("\n" + "=" * 80)
         print(f"RESULTADOS DA {run_label}")
         print(f"Total: {total} | Acertos: {total_corr} | Acurácia: {acc:.2f}%")
@@ -556,9 +558,9 @@ def main() -> None:
     parser.add_argument("--semantic_top_k", type=int, default=5)
     parser.add_argument(
         "--ablation",
-        choices=["none", "no_temporal"],
+        choices=["none", "no_temporal", "score_only", "tags_only"],
         default="none",
-        help="no_temporal = B0: Proposal B facts without validity/supersession, original HeLa-Mem prompt (eval stage only)",
+        help="Ablation mode (eval stage only): none=full, no_temporal=B0, score_only=V without tags, tags_only=tags without V",
     )
     parser.add_argument(
         "--results_subdir",

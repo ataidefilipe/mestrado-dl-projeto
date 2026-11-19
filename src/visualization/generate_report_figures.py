@@ -70,7 +70,7 @@ def generate_fig1():
     ax.text(0.2475, 0.54,
             '2. Memória Semântica Estática (HebbianKnowledgeMemory)\n'
             'Extração em blocos de 10 turnos, sem a data da sessão\n'
-            '360/500 grafos semânticos vazios (causa em investigação)',
+            'Baseline Fiel A*: 500/500 grafos íntegros (4.978 fatos)',
             ha='center', va='center', fontsize=8.0, color='#111')
 
     b3 = FancyBboxPatch((0.045, 0.28), 0.405, 0.12,
@@ -88,9 +88,9 @@ def generate_fig1():
                         ec="#495057", fc="#e9ecef", lw=1.2)
     ax.add_patch(b4)
     ax.text(0.2475, 0.14,
-            '4. Reprodução (500 instâncias):\n'
-            'Acurácia Global: 61,20% (306/500) | 194 erros totais\n'
-            'Knowledge Update: 73,08% | Temporal Reasoning: 51,88%',
+            '4. Baseline Fiel A* (500 instâncias, parâmetros oficiais):\n'
+            'Acurácia Global: 63,40% (317/500) | Multi-Session: 57,14%\n'
+            'Knowledge Update: 67,95% | Temporal Reasoning: 53,38%',
             ha='center', va='center', fontsize=8.0, fontweight='bold', color='#343a40')
 
     arrow_kw_left = dict(arrowstyle="-|>,head_width=0.3,head_length=0.45", color="#2b5c8f", lw=1.6)
@@ -141,10 +141,10 @@ def generate_fig1():
                         ec="#0f5132", fc="#d1f2e1", lw=1.3)
     ax.add_patch(p4)
     ax.text(0.7525, 0.14,
-            '4. Resultado Preliminar (500 instâncias):\n'
-            'Acurácia Global: 65,60% (+4,40 p.p. sobre A)\n'
-            'Knowledge Update: 83,33% | Temporal Reasoning: 55,64%',
-            ha='center', va='center', fontsize=8.0, fontweight='bold', color='#0f5132')
+            '4. Resultados Consolidados (500 instâncias):\n'
+            'B: 65,60% (KU 83,33%) | B_v2: 64,80% (TR 57,89%)\n'
+            'Ablação tags_only: 66,20% (KU 85,90%, +16/-0 vs. B0)',
+            ha='center', va='center', fontsize=7.9, fontweight='bold', color='#0f5132')
 
     arrow_kw_right = dict(arrowstyle="-|>,head_width=0.3,head_length=0.45", color="#1b8a5a", lw=1.6)
     ax.annotate('', xy=(0.7525, 0.612), xytext=(0.7525, 0.668), arrowprops=arrow_kw_right)
@@ -162,63 +162,57 @@ def generate_fig1():
 # FIGURA 2: Evolução de Desempenho por Categoria (Paper vs Baseline A vs Proposta B)
 # -------------------------------------------------------------------------
 def generate_fig2():
-    # (rótulo, n, acertos A, acertos B, % artigo ou None quando o artigo não reporta, acertos B0)
+    # (rótulo, n, acertos A*, acertos B0, acertos B, acertos B_v2)
     rows = [
-        ("Single-Sess. Preference", 30, 8, 14, None, 12),
-        ("Single-Sess. Assistant", 56, 49, 52, None, 50),
-        ("Single-Sess. User", 70, 61, 58, None, 60),
-        ("Single-Session (agregado)", 156, 118, 124, 78.85, 122),
-        ("Multi-Session", 133, 62, 65, 57.14, 72),
-        ("Temporal Reasoning", 133, 69, 74, 50.38, 76),
-        ("Knowledge Update", 78, 57, 65, 78.21, 51),
-        ("OVERALL", 500, 306, 328, 65.40, 321),
+        ("Single-Sess. Preference", 30, 10, 12, 14, 12),
+        ("Single-Sess. Assistant", 56, 51, 50, 52, 49),
+        ("Single-Sess. User", 70, 56, 60, 58, 56),
+        ("Single-Session (agregado)", 156, 117, 122, 124, 117),
+        ("Multi-Session", 133, 76, 72, 65, 68),
+        ("Temporal Reasoning", 133, 71, 76, 74, 77),
+        ("Knowledge Update", 78, 53, 51, 65, 62),
+        ("OVERALL", 500, 317, 321, 328, 324),
     ]
     categories = [f"{r[0]}\n(n={r[1]})" for r in rows]
-    base_scores = [100.0 * r[2] / r[1] for r in rows]
-    prop_scores = [100.0 * r[3] / r[1] for r in rows]
-    b0_scores = [100.0 * r[5] / r[1] for r in rows]
-    paper_scores = [r[4] for r in rows]
+    astar_scores = [100.0 * r[2] / r[1] for r in rows]
+    b0_scores = [100.0 * r[3] / r[1] for r in rows]
+    b_scores = [100.0 * r[4] / r[1] for r in rows]
+    bv2_scores = [100.0 * r[5] / r[1] for r in rows]
     pct = lambda v: f"{v:.1f}".replace(".", ",") + "%"
 
     y = np.arange(len(categories))
     height = 0.2
 
-    fig, ax = plt.subplots(figsize=(6.8, 5.8))
+    fig, ax = plt.subplots(figsize=(7.0, 6.0))
 
-    c_paper = "#6c757d"   # Cinza azulado (Referência ACL 2026)
-    c_base  = "#e07a5f"   # Coral (Baseline A Replicada)
-    c_prop  = "#1b8a5a"   # Verde Esmeralda (Proposta B)
-
-    paper_y = [yy + 1.5 * height for yy, p in zip(y, paper_scores) if p is not None]
-    paper_v = [p for p in paper_scores if p is not None]
-    rects_paper = ax.barh(paper_y, paper_v, height,
-                          label='Artigo (valor reportado)',
-                          color=c_paper, edgecolor='black', linewidth=0.5, alpha=0.75)
-    rects_base  = ax.barh(y + 0.5 * height, base_scores, height,
-                          label='Baseline A',
-                          color=c_base, edgecolor='black', linewidth=0.6, alpha=0.90)
-    rects_b0    = ax.barh(y - 0.5 * height, b0_scores, height,
+    rects_astar = ax.barh(y + 1.5 * height, astar_scores, height,
+                          label='Baseline Fiel A* (parâmetros oficiais)',
+                          color='#e07a5f', edgecolor='black', linewidth=0.5, alpha=0.90)
+    rects_b0    = ax.barh(y + 0.5 * height, b0_scores, height,
                           label='B0 (extração por sessão, sem tempo)',
                           color='#8d99ae', edgecolor='black', linewidth=0.6, alpha=0.95)
-    rects_prop  = ax.barh(y - 1.5 * height, prop_scores, height,
-                          label='Proposta B',
-                          color=c_prop, edgecolor='black', linewidth=0.6, alpha=0.95)
+    rects_b     = ax.barh(y - 0.5 * height, b_scores, height,
+                          label='Proposta B (validade temporal)',
+                          color='#1b8a5a', edgecolor='black', linewidth=0.6, alpha=0.95)
+    rects_bv2   = ax.barh(y - 1.5 * height, bv2_scores, height,
+                          label='Proposta B_v2 (Event Calculus)',
+                          color='#2b5c8f', edgecolor='black', linewidth=0.6, alpha=0.92)
 
-    for rects in (rects_paper, rects_base, rects_b0, rects_prop):
+    for rects in (rects_astar, rects_b0, rects_b, rects_bv2):
         for rect in rects:
             w = rect.get_width()
             ax.annotate(pct(w),
                         xy=(w - 1.2, rect.get_y() + rect.get_height() / 2),
-                        ha='right', va='center', fontsize=6.5, fontweight='bold', color='white')
+                        ha='right', va='center', fontsize=6.4, fontweight='bold', color='white')
 
-    # Δ B0→B (efeito do mecanismo temporal), calculado a partir das contagens
+    # Δ B - A* (efeito contra a baseline fiel)
     for i, r in enumerate(rows):
-        diff = 100.0 * (r[3] - r[5]) / r[1]
+        diff = 100.0 * (r[4] - r[2]) / r[1]
         color_diff = "#0f5132" if diff >= 0 else "#b83b3b"
         bg_diff = "#d1f2e1" if diff >= 0 else "#ffe3e3"
-        max_w = max(v for v in (paper_scores[i], base_scores[i], b0_scores[i], prop_scores[i]) if v is not None)
-        label = f"Δ B0→B: {diff:+.2f}".replace(".", ",") + " p.p."
-        ax.text(max_w + 1.8, y[i] - height, label,
+        max_w = max(astar_scores[i], b0_scores[i], b_scores[i], bv2_scores[i])
+        label = f"Δ B−A*: {diff:+.2f}".replace(".", ",") + " p.p."
+        ax.text(max_w + 1.8, y[i], label,
                 ha='left', va='center', fontsize=7.0, fontweight='bold', color=color_diff,
                 bbox=dict(boxstyle="round,pad=0.18", fc=bg_diff, ec=color_diff, lw=0.8))
 
@@ -555,10 +549,73 @@ def generate_fig5():
     print("Figura 5 gerada com sucesso.")
 
 
+# -------------------------------------------------------------------------
+# FIGURA 6: Ablação Fatorial 2x2 (R08) e Análise de Sensibilidade (R09)
+# -------------------------------------------------------------------------
+def generate_fig6():
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.1), gridspec_kw={'width_ratios': [1.0, 1.15]})
+
+    # --- Subplot A: Ablação Fatorial 2x2 ---
+    conds = ["B0\n(sem V,\nsem tags)", "score_only\n(só V,\nsem tags)", "tags_only\n(sem V,\nsó tags)", "B (Full)\n(V +\ntags)"]
+    ku_vals = [65.38, 65.38, 85.90, 83.33]
+    ov_vals = [64.20, 61.80, 66.20, 65.60]
+    x = np.arange(len(conds))
+    w = 0.35
+
+    r1 = ax1.bar(x - w/2, ku_vals, w, label='Knowledge Update (n=78)', color='#1b8a5a', edgecolor='black', lw=0.6)
+    r2 = ax1.bar(x + w/2, ov_vals, w, label='Overall (n=500)', color='#2b5c8f', edgecolor='black', lw=0.6)
+    for rect in r1:
+        h = rect.get_height()
+        ax1.text(rect.get_x() + rect.get_width()/2, h + 1.0, f"{h:.1f}%".replace(".", ","),
+                 ha='center', va='bottom', fontsize=7.2, fontweight='bold', color='#0f5132')
+    for rect in r2:
+        h = rect.get_height()
+        ax1.text(rect.get_x() + rect.get_width()/2, h + 1.0, f"{h:.1f}%".replace(".", ","),
+                 ha='center', va='bottom', fontsize=7.2, fontweight='bold', color='#1d3f63')
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(conds, fontsize=7.6, fontweight='bold')
+    ax1.set_ylim(50, 96)
+    ax1.set_ylabel('Acurácia (%)', fontsize=8.5, fontweight='bold')
+    ax1.set_title('(A) Ablação Fatorial 2×2: Score V vs. Tags (R08)', fontsize=8.8, fontweight='bold', pad=10)
+    ax1.grid(axis='y', linestyle='--', alpha=0.35)
+    ax1.legend(loc='upper left', fontsize=7.4, frameon=True, facecolor='white')
+
+    # --- Subplot B: Sensibilidade de lambda e tau ---
+    cfg_labels = ["λ=0,4\nτ=60d", "λ=0,6*\nτ=60d", "λ=0,8\nτ=60d", "λ=0,6\nτ=30d", "λ=0,6\nτ=90d"]
+    s_ku = [79.49, 83.33, 84.62, 79.49, 84.62]
+    s_ov = [65.60, 65.60, 66.80, 66.20, 65.80]
+    xs = np.arange(len(cfg_labels))
+
+    ax2.axhspan(64.00, 65.60, color='#f4a261', alpha=0.18, label="Faixa de ruído B×B' (64,0%–65,6%)")
+    ax2.axhline(65.38, color='#b83b3b', linestyle='--', lw=1.2, label='B0 em Knowledge Update (65,4%)')
+    ax2.plot(xs, s_ku, marker='o', lw=2.2, color='#1b8a5a', label='Knowledge Update (todos p ≤ 0,0034 vs. B0)')
+    ax2.plot(xs, s_ov, marker='s', lw=2.2, color='#2b5c8f', label='Overall (amplitude 1,20 p.p.)')
+
+    for i, (vk, vo) in enumerate(zip(s_ku, s_ov)):
+        ax2.text(i, vk + 1.3, f"{vk:.1f}%".replace(".", ","), ha='center', va='bottom', fontsize=7.0, fontweight='bold', color='#0f5132')
+        ax2.text(i, vo + 1.3, f"{vo:.1f}%".replace(".", ","), ha='center', va='bottom', fontsize=7.0, fontweight='bold', color='#1d3f63')
+
+    ax2.set_xticks(xs)
+    ax2.set_xticklabels(cfg_labels, fontsize=7.8, fontweight='bold')
+    ax2.set_ylim(58, 92)
+    ax2.set_ylabel('Acurácia (%)', fontsize=8.5, fontweight='bold')
+    ax2.set_title('(B) Sensibilidade de λ e τ — Classificação: ROBUSTO (R09)', fontsize=8.8, fontweight='bold', pad=10)
+    ax2.grid(True, linestyle='--', alpha=0.35)
+    ax2.legend(loc='lower right', fontsize=6.7, frameon=True, facecolor='white')
+
+    plt.tight_layout(w_pad=2.2)
+    fig.savefig(out_dir / "fig6_ablacao_sensibilidade.png", dpi=300, bbox_inches='tight')
+    fig.savefig(out_dir / "fig6_ablacao_sensibilidade.pdf", bbox_inches='tight')
+    plt.close()
+    print("Figura 6 gerada com sucesso.")
+
+
 if __name__ == "__main__":
     generate_fig1()
     generate_fig2()
     generate_fig3()
     generate_fig4()
     generate_fig5()
-    print("Todas as 5 figuras da Entrega 2 (Draft 2) foram geradas com sucesso em reports/figures/")
+    generate_fig6()
+    print("Todas as 6 figuras consolidadas foram geradas com sucesso em reports/figures/")

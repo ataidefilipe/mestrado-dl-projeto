@@ -3,7 +3,7 @@
 **Disciplina:** Deep Learning — Mestrado, CIn/UFPE (Prof. Cleber Zanchettin)
 **Autor:** Filipe Augusto de Ataíde Barbosa
 **Artigo-base:** *HeLa-Mem: Hebbian Learning and Associative Memory for LLM Agents* (ACL 2026)
-**Situação em 2026-11-04:** Draft 2 (terceira entrega) revisado; ablação B0 executada; plano de correção R05 em andamento.
+**Situação em 2026-11-19:** Todos os experimentos principais e de auditoria concluídos ($A$, $A^*$, $B_0$, $B$, $B'$, $B_{\text{v2}}$, ablação fatorial 2×2 `score_only`/`tags_only`, sensibilidade de $\lambda$ e $\tau$, e auditoria de precisão da supersessão `R07`–`R09`). Pronto para consolidação do artigo final.
 
 Este documento reúne em um só lugar a origem do projeto, os conceitos necessários para entendê-lo, as mudanças de rumo, o que foi implementado, os resultados e o que falta fazer. Ele foi escrito para quem nunca viu o repositório e não precisa conhecer de antemão memória para agentes, grafos ou estatística pareada: cada conceito é explicado antes de ser usado, quase sempre com um exemplo numérico. Os detalhes de cada parte estão nos documentos citados ao longo do texto.
 
@@ -42,29 +42,31 @@ Este documento reúne em um só lugar a origem do projeto, os conceitos necessá
 
 **Ideia central.** Uma memória de agente pode guardar "o usuário tem 1.250 seguidores" e, horas depois, "o usuário tem 1.300 seguidores". As duas frases ficam na memória com o mesmo status, e na hora de responder o modelo pode escolher a antiga. O HeLa-Mem, artigo-base deste trabalho, organiza memórias em um grafo com aprendizado hebbiano, mas não sabe quando um fato deixou de ser verdadeiro. A proposta adiciona a cada fato uma janela de validade `[t_start, t_end]`. Um classificador detecta quando um fato novo substitui um antigo, e o antigo é marcado como histórico, sem ser apagado. Na busca, os fatos expirados perdem peso e entram no prompt com uma etiqueta de estado (atual ou histórico).
 
-**Como foi testado.** Nas 500 questões do benchmark LongMemEval distribuídas com o código do HeLa-Mem, foram comparadas três condições:
+**Como foi testado.** Nas 500 questões do benchmark LongMemEval distribuídas com o código do HeLa-Mem, foram comparadas seis condições principais (além de réplica de ruído $B'$, ablação 2×2 e análise de sensibilidade):
 
-| Condição | O que é | Acurácia |
-|---|---|---|
-| **A** | HeLa-Mem original (reprodução) | 61,20% (306/500) |
-| **B0** | Fatos extraídos por sessão, **sem** o mecanismo temporal (ablação) | 64,20% (321/500) |
-| **B** | Proposta completa (extração por sessão **com** mecanismo temporal) | 65,60% (328/500) |
+| Condição | O que é | Acurácia Geral | `knowledge-update` |
+|---|---|---:|---:|
+| **A** | HeLa-Mem inicial (360 grafos semânticos vazios por concorrência) | 61,20% (306/500) | 73,08% (57/78) |
+| **A\*** | **Baseline Fiel** (parâmetros oficiais, 0 grafos vazios) | **63,40%** (317/500) | 67,95% (53/78) |
+| **B0** | Fatos extraídos por sessão, **sem** o mecanismo temporal (ablação) | 64,20% (321/500) | 65,38% (51/78) |
+| **B** | Proposta completa (extração por sessão + validade temporal + etiquetas) | 65,60% (328/500) | 83,33% (65/78) |
+| **B_v2** | Proposta com classificador ontológico (*Event Calculus*, sem exemplos) | 64,80% (324/500) | 79,49% (62/78) |
+| **B_tags** | Ablação `tags_only` (etiquetas `[CURRENT]`/`[HISTORICAL]`, $\mathcal{V}\equiv 1$) | **66,20%** (331/500) | **85,90%** (67/78) |
 
 **O que os resultados mostram.**
 
-- B supera A em +22 questões (McNemar bilateral p = 0,023).
-- A maior parte desse ganho (+15) vem de uma mudança secundária: extrair os fatos por sessão. O mecanismo temporal soma +7 no total, sem significância estatística (p = 0,45).
-- O mecanismo temporal funciona exatamente onde a hipótese previa. Em *Knowledge Update*, B0 → B corrige **14 questões com zero regressões** (p = 0,0015 após correção de Holm), todas em diálogos onde houve supersessão.
-- Ele também tem um custo: em *Multi-Session*, B0 → B perde 7 questões, porque eventos repetidos ("montei outro aquário") são tratados como substituição e deixam de ser contados.
+- **Confirmação causal em atualização de conhecimento (`knowledge-update`):** o mecanismo temporal produz ganho altamente significativo tanto contra a ablação $B_0$ (**+14/−0**, $p_{\text{Holm}} = 0{,}0015$ em $B$; **+12/−1**, $p = 0{,}0034$ em $B_{\text{v2}}$) quanto contra a Baseline Fiel $A^*$ (**+12**, $p = 0{,}0042$ em $B$; **+9**, $p = 0{,}0117$ em $B_{\text{v2}}$).
+- **Motor causal identificado (R08):** na ablação fatorial 2×2, **`score_only`** teve efeito nulo em KU (`65,38%`, `+3/−3`), enquanto **`tags_only`** capturou 100% do ganho (**+16/−0**, `85,90%` em KU e `66,20%` no geral). No recorte *oracle* (~9 fatos/grafo), o gargalo não é o *recall@5*, mas a desambiguação explícita de vigência no contexto.
+- **Robustez e ruído medidos (R06, R09):** a réplica $B'$ mediu piso de ruído de 7,20% no geral, mas **97,44% de estabilidade** em KU (`83,33%` idêntico). A sensibilidade de $\lambda \in \{0{,}4; 0{,}6; 0{,}8\}$ e $\tau \in \{30\text{d}, 60\text{d}, 90\text{d}\}$ classificou o resultado como **ROBUSTO** (`65,60%–66,80%` geral; KU `79,49%–84,62%`, todos $p \le 0{,}0034$ vs. $B_0$).
+- **Trade-off em *Multi-Session* (R07):** a *over-supersession* de eventos contáveis custa questões em `multi-session`. O classificador ontológico ($B_{\text{v2}}$) cortou o volume de supersessões em **53,6%** (`612 → 284`), elevou a precisão de **33,3% → 48,9%** e atingiu recorde em `temporal-reasoning` (`57,89%`), reduzindo as regressões em `multi-session`.
 
-**Conclusão atual.** A hipótese é **suportada em atualização de conhecimento** e **não suportada no total**. O próximo passo direto é ajustar o classificador para separar estados que se excluem ("moro em X" → "moro em Y") de eventos que se acumulam ("fui a um jantar" → "fui a outro jantar").
+**Conclusão atual.** A hipótese é **fortemente suportada em atualização de conhecimento** (com estabilidade comprovada frente a ruído e hiperparâmetros) e **não suportada como ganho global significativo** devido ao trade-off de *over-supersession* em contagens multi-sessão.
 
-**Ressalvas importantes** (detalhadas na Seção 12):
+**Ressalvas remanescentes** (detalhadas na Seção 12):
 
-- o arquivo de dados contém apenas as sessões de evidência de cada questão, não as ~40 sessões do LongMemEval-S oficial;
-- a baseline rodou com dois hiperparâmetros diferentes dos scripts oficiais;
-- geração e juiz usam `temperature=0.7`, sem repetições;
-- há 360 grafos semânticos vazios na baseline cuja causa ainda está em investigação.
+- o arquivo de dados distribuído pelo HeLa-Mem contém apenas as sessões de evidência (variante *oracle*, 1–6 sessões), não as ~40 sessões do LongMemEval-S oficial (Achado 10);
+- 34/500 itens do dataset possuem `haystack_dates` fora de ordem cronológica, gerando supersessões reversas exclusivamente em `temporal-reasoning` (R07);
+- o juiz LLM é o mesmo modelo que gera as respostas (`gpt-4o-mini`) e apenas um benchmark foi executado até o momento (LoCoMo é opcional).
 
 ---
 
@@ -244,7 +246,7 @@ A **temperatura** controla o quanto um LLM sorteia entre respostas possíveis:
 - **temperatura 0:** escolhe sempre a resposta mais provável (quase determinístico);
 - **temperatura 0,7** (usada aqui, no gerador **e** no juiz): sorteia com frequência.
 
-Na prática, rodar exatamente o mesmo sistema duas vezes pode mudar o resultado de algumas questões, só por acaso. Por isso parte das diferenças entre A, B0 e B é **ruído**. Para saber quanto, é preciso rodar o mesmo sistema duas vezes e contar as discordâncias. Isso ainda não foi feito (execução B', Seção 13).
+Na prática, rodar exatamente o mesmo sistema duas vezes pode mudar o resultado de algumas questões, só por acaso. Por isso parte das diferenças entre A, B0 e B é **ruído**. Essa medição foi feita na execução **B'** (R06): 36 pares discordantes no geral (7,20% de ruído, $p = 0{,}243$), mas apenas 2 pares em *Knowledge Update* (97,44% de estabilidade, acurácia idêntica de 83,33%).
 
 ### 3.13 Ablação e fatores de confusão
 
@@ -630,7 +632,7 @@ O código oficial foi executado sem alterações (commit `68f19b3`, verificado) 
 Dois problemas foram descobertos depois, na auditoria:
 
 - o módulo foi chamado diretamente, sem os scripts `.sh` oficiais, e dois hiperparâmetros ficaram com os valores padrão do código: `MAX_FLIPPED` = 5 (o script usa 3) e `KEYWORD_WEIGHT` = 0,5 (o script usa 0,7);
-- **360 dos 500 grafos semânticos ficaram vazios.** O extrator oficial engole exceções silenciosamente, e não há logs dessa execução, então ainda não se sabe se isso é comportamento do código ou falha de execução.
+- **360 dos 500 grafos semânticos ficaram vazios.** Na investigação (R06), o teste sequencial (`workers=1`) comprovou que a causa foi falha silenciosa de concorrência em multithreading. Isso foi sanado com a execução da **Baseline Fiel ($A^*$)** em 05/11 (`63,40%`, 0 grafos vazios, `multi-session` em `57,14%` idêntico ao artigo).
 
 ### 9.2 Proposta B: duas rodadas
 
@@ -727,13 +729,13 @@ O caso `01493427` mostra um fenômeno importante. A baseline A, que não tinha f
 
 | Pergunta | Resposta | Grau de certeza |
 |---|---|---|
-| B é melhor que A, como executado? | Sim, +22 questões | Evidência moderada (ruído entre execuções não medido) |
-| O ganho total vem do mecanismo temporal? | **Não.** Vem principalmente da extração por sessão | Evidência moderada |
-| O mecanismo temporal ajuda em atualização de conhecimento? | **Sim.** +14/−0, todas com supersessão | Evidência forte |
-| O mecanismo temporal tem custo? | Sim, em contagens multi-sessão (−7) | Evidência moderada |
+| B é melhor que a Baseline Fiel A\* no geral? | +11 questões (65,60% vs. 63,40%; $p = 0{,}278$) | Indício (não significativo no geral) |
+| O ganho total vem do mecanismo temporal? | **Parcialmente.** O ganho em KU é compensado pelo custo em MS | Evidência forte |
+| O mecanismo temporal ajuda em atualização de conhecimento? | **Sim.** +14/−0 vs. B0 ($p_{\text{Holm}}=0{,}0015$); +12/−2 vs. A\* ($p=0{,}0042$); robusto em $\lambda$, $\tau$ e $B_{\text{v2}}$ | **Evidência forte** |
+| O ganho em KU vem do score $\mathcal{V}$ ou das etiquetas no prompt? | **Das etiquetas no prompt** (`tags_only`: +16/−0 em KU, 85,90%; `score_only`: +3/−3, efeito nulo — R08) | **Evidência forte** |
+| O mecanismo temporal tem custo? | Sim, em contagens multi-sessão (−7 em B, reduzido para −4 em $B_{\text{v2}}$); precisão da supersessão em MS é 26,7% (R07) | Evidência forte |
 | A supersessão não-destrutiva ajuda em perguntas sobre o passado? | **Não determinado.** O único caso observado também é resolvido pela B0 | — |
-| O ganho vem do score com 𝒱 ou das etiquetas no prompt? | **Não determinado.** A B0 remove os dois ao mesmo tempo | — |
-| B supera o artigo original? | Não é possível afirmar | Configuração e dados possivelmente diferentes |
+| B supera o artigo original? | Não é possível afirmar (Achado 10: variante *oracle* vs. S completo) | — |
 
 Em uma frase: **a validade temporal resolve o problema que se propôs a resolver (fatos desatualizados), mas o classificador de supersessão é agressivo demais e cria um problema novo em perguntas de contagem, que anula o ganho no total.**
 
@@ -753,50 +755,29 @@ A auditoria completa está em [reports/analysis/R05_auditoria_processo_20261104.
 | 4 | Fatores de confusão entre A e B | **Resolvido** pela ablação B0 e validado na Proposta $B_{\text{v2}}$ (sem exemplos de prompt) |
 | 5 | `temperature=0.7` na geração e no juiz, sem repetições | **Resolvido em 05/11:** piso de ruído medido com $B'$ (7,20% de discordância geral; KU com 97,4% de estabilidade, idêntico em 83,33%) |
 | 6 | Faltavam IC, tamanho de efeito e correção para múltiplas comparações | **Resolvido** (IC 95%, Holm) |
-| 7 | Risco de ajustar hiperparâmetros no conjunto de teste | Regra fixada: sensibilidade sem seleção |
-| 8 | Só um dataset (a diretriz pede mais de um) | Pendente (LoCoMo planejado) |
-| 9 | Reprodutibilidade (requirements desatualizado, `tests/` vazio, semântica de A não versionada) | Parcialmente pendente |
-| 10 | O arquivo de dados só tem as sessões de evidência (variante *oracle*) | Fontes verificadas em 05/11: o README do HeLa-Mem chama o arquivo de LongMemEval-S, mas os baselines do artigo são do S de cerca de 115 mil tokens; falta perguntar aos autores e avaliar no S oficial |
+| 7 | Risco de ajustar hiperparâmetros no conjunto de teste | **Resolvido em 19/11 (R09):** sensibilidade de $\lambda \in \{0{,}4; 0{,}8\}$ e $\tau \in \{30\text{d}, 90\text{d}\}$ classificada como **ROBUSTO**; config mantida em $\lambda=0{,}6, \tau=60\text{d}$ |
+| 8 | Só um dataset (a diretriz pede mais de um) | Opcional conforme prazo (LoCoMo registrado como trabalho futuro / limitação se não executado) |
+| 9 | Reprodutibilidade (requirements desatualizado, `tests/` vazio) | **Resolvido em 19/11:** `requirements.txt` atualizado com versões fixadas; `tests/test_temporal_memory.py` criado (7/7 testes passando) |
+| 10 | O arquivo de dados só tem as sessões de evidência (variante *oracle*) | Fontes verificadas em 05/11: o README do HeLa-Mem chama o arquivo de LongMemEval-S, mas os baselines do artigo são do S de ~115k tokens; declarado explicitamente no artigo (sem comparação numérica com a Tabela 6 do paper) |
 
-**Por que o Achado 2 importa tanto.** Se os 360 grafos vazios forem falha de execução, a baseline A ficou artificialmente fraca, porque respondeu sem a memória semântica em 72% das questões. Nesse caso:
-
-- a comparação com o artigo (61,20% contra 65,40%) seria explicada, ao menos em parte, por essa falha;
-- parte do ganho A → B0 seria "fazer a extração funcionar", e não "extrair por sessão".
-
-**A ablação B0 não resolve isso.** Ela isola o mecanismo temporal (B0 → B), mas não diz como seria uma baseline sem falhas.
-
-Outras limitações:
+Outras limitações documentadas:
 
 - **o juiz é o mesmo modelo que gera as respostas** (`gpt-4o-mini`);
-- **as etiquetas e a reordenação por 𝒱 ainda estão acopladas** (Seção 11);
-- **a precisão do classificador de supersessão não foi medida diretamente:** isso exigiria uma amostra de supersessões rotuladas à mão.
+- **34/500 itens do dataset têm `haystack_dates` fora de ordem cronológica**, gerando supersessões reversas (`valid_to < valid_from`) exclusivamente em `temporal-reasoning` (R07);
+- **a precisão do classificador de supersessão** foi medida em amostra estratificada ($n = 45$ por sistema, R07): 33,3% em $B$ vs. 48,9% em $B_{\text{v2}}$ (com 26,7% em `multi-session`, explicando a *over-supersession* residual).
 
 ---
 
 ## 13. Próximos passos
 
-O plano completo, com comandos e critérios de conclusão, está em [docs/plano_resolucao_R05.md](plano_resolucao_R05.md). Em ordem de prioridade:
+Todos os passos prioritários de auditoria, ablação e sensibilidade do [docs/plano_resolucao_R05.md](plano_resolucao_R05.md) (Etapas 0–7) foram concluídos. O que resta:
 
 | Prioridade | Passo | Por quê | Custo |
 |---|---|---|---|
-| 1 | **Ajustar o classificador** para separar estados que se excluem (SUPERSEDES) de eventos que se acumulam (EXTENDS) | É a causa medida das regressões em *Multi-Session* | Médio (recodificar a semântica) |
-| 2 | **Rodar B'** (repetir B) | Saber quanto das diferenças é ruído do juiz (Seção 3.12) | Baixo |
-| 3 | **Investigar os 360 grafos vazios de A:** recuperar os arquivos originais ou recodificar 20 itens com `--workers 1` | Se for falha, a baseline está subestimada e precisa ser refeita (A*) | Baixo; alto se precisar de A* |
-| 4 | **Separar etiquetas de 𝒱:** variantes "só etiquetas" e "só 𝒱" | Saber qual componente produz o ganho em KU | Baixo |
-| 5 | **Sensibilidade de λ, τ e θ**, reportada sem escolher a configuração pelo resultado | Classificar o resultado como robusto ou sensível | Médio |
-| 6 | **Avaliação no LongMemEval-S completo** (~40 sessões por questão), começando por uma amostra | Testar o mecanismo em meio a sessões de distração | Alto |
-| 7 | **LoCoMo**, o segundo dataset do artigo-base | Atender à diretriz de mais de um dataset | Alto |
-| 8 | **Precisão do classificador** numa amostra rotulada à mão | Medir diretamente erros de supersessão | Baixo (manual) |
-| 9 | **Higiene:** `requirements.txt`, testes, versionar a semântica de A, mover o legado do GraphSAGE | Reprodutibilidade | Baixo |
-
-**Uma ideia concreta para o passo 1.** Acrescentar ao prompt do classificador a distinção explícita entre:
-
-- **atributos de estado único**, que são substituídos: endereço, emprego, número atual de seguidores, onde algo está guardado;
-- **eventos contáveis**, que se acumulam: compras, visitas, jantares, aquários montados, cursos concluídos.
-
-O critério de sucesso, definido antes de rodar, seria: recuperar as regressões de *Multi-Session* sem perder os 14 ganhos de *Knowledge Update*.
-
-O relatório [reports/relatorio_entrega2_draft2.md](../reports/relatorio_entrega2_draft2.md) também está desatualizado em relação à versão LaTeX e precisa ser sincronizado.
+| 1 | **Consolidar o artigo final (`.tex` e `.md`) e figuras** | Incorporar $A^*$, $B'$, $B_{\text{v2}}$, ablação 2×2 (`R08`), sensibilidade (`R09`) e auditoria (`R07`) | Zero |
+| 2 | **Abrir issue no repositório do HeLa-Mem** | Confirmar qual variante do LongMemEval gerou a Tabela 6 do Apêndice D (Achado 10) | Zero |
+| 3 | **Amostra no LongMemEval-S oficial (~40 sessões/item)** *(opcional)* | Testar o papel de $\mathcal{V}(f_i, t_{\text{query}})$ sob ruído de distrações (começando pelos 78 itens de KU) | Alto |
+| 4 | **Segundo dataset (LoCoMo)** *(opcional)* | Atender à diretriz de múltiplos datasets ou manter como trabalho futuro | Alto |
 
 ---
 
@@ -933,8 +914,13 @@ O primeiro comando refaz a B0; o segundo é a repetição B' para medir ruído. 
 | [docs/proposta_doc.md](proposta_doc.md) | Proposta formal submetida |
 | [reports/relatorio_entrega1_enxuto.md](../reports/relatorio_entrega1_enxuto.md) | Entrega 1: reprodução e diagnóstico |
 | [reports/relatorio_entrega2_draft2_ieee.tex](../reports/relatorio_entrega2_draft2_ieee.tex) | Draft 2 (versão atual, revisada) |
+| [reports/analysis/R03_reproducao_hela_fiel_500itens.md](../reports/analysis/R03_reproducao_hela_fiel_500itens.md) | Baseline Fiel ($A^*$, 63,40%, 0 grafos vazios) |
 | [reports/analysis/R05_auditoria_processo_20261104.md](../reports/analysis/R05_auditoria_processo_20261104.md) | Auditoria do processo (10 achados) |
 | [reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md](../reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md) | Resultados da ablação B0 |
+| [reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md](../reports/analysis/R06_diagnostico_baseline_e_ruido_Bprime_Bv2_20261105.md) | Diagnóstico de A, piso de ruído $B'$ e Proposta $B_{\text{v2}}$ |
+| [reports/analysis/R07_auditoria_supersessao_B_vs_Bv2.md](../reports/analysis/R07_auditoria_supersessao_B_vs_Bv2.md) | Auditoria de precisão da supersessão e sessões fora de ordem |
+| [reports/analysis/R08_ablacao_fatorial_score_vs_tags_20261119.md](../reports/analysis/R08_ablacao_fatorial_score_vs_tags_20261119.md) | Ablação fatorial 2×2 (`score_only` vs. `tags_only`) |
+| [reports/analysis/R09_sensibilidade_lambda_tau_20261119.md](../reports/analysis/R09_sensibilidade_lambda_tau_20261119.md) | Análise de sensibilidade de $\lambda$ e $\tau$ (ROBUSTO) |
 | [docs/plano_resolucao_R05.md](plano_resolucao_R05.md) | Plano de correção com status por etapa |
 | [notebooks/01_replicacao_baseline_hela_mem.ipynb](../notebooks/01_replicacao_baseline_hela_mem.ipynb) | Reprodução da baseline, executável |
 | [notebooks/02_execucao_proposta_temporal.ipynb](../notebooks/02_execucao_proposta_temporal.ipynb) | Passo a passo executável de toda a análise |

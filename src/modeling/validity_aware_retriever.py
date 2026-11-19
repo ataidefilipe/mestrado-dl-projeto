@@ -26,7 +26,7 @@ from hela_mem.utils import (
 from hela_mem.eval_longmemeval import build_longmemeval_prompt as hela_original_prompt
 from src.modeling.temporal_knowledge_memory import TemporalKnowledgeMemory, parse_date
 
-ABLATIONS = ("none", "no_temporal")
+ABLATIONS = ("none", "no_temporal", "score_only", "tags_only")
 
 
 class ValidityAwareRetriever:
@@ -34,10 +34,13 @@ class ValidityAwareRetriever:
     Retriever that incorporates query timestamp t_query into both
     semantic fact pertinence and episodic temporal presentation.
 
-    ablation="no_temporal" (B0): same facts and retrieval code, but the temporal
-    mechanism is switched off in the knowledge memory and the prompt falls back to
-    HeLa-Mem's original template (untagged "- fact" lines, original system prompt),
-    i.e. exactly the Baseline A prompt fed with session-wise extracted facts.
+    Supported ablations:
+    - "none": full Proposal B (temporal pertinence V + [CURRENT]/[HISTORICAL] prompt tags).
+    - "no_temporal" (B0): disables validity/supersession/V and uses HeLa-Mem's original prompt.
+    - "score_only": keeps validity windows, supersession edges and V(f, t_query) in retrieval,
+      but strips [CURRENT]/[HISTORICAL] tags and reverts to HeLa-Mem's original prompt.
+    - "tags_only": fixes V(f, t_query) = 1.0 in retrieval, but keeps [CURRENT]/[HISTORICAL]
+      tags and the temporal system prompt.
     """
 
     def __init__(
@@ -53,6 +56,8 @@ class ValidityAwareRetriever:
         self.ablation = ablation
         if ablation == "no_temporal" and self.temporal_kb is not None:
             self.temporal_kb.disable_temporal_mechanism()
+        elif ablation == "tags_only" and self.temporal_kb is not None:
+            self.temporal_kb.disable_temporal_pertinence()
 
     def format_knowledge_base_text(
         self,
@@ -66,7 +71,7 @@ class ValidityAwareRetriever:
         if not kb_results:
             return ""
 
-        if self.ablation == "no_temporal":
+        if self.ablation in ("no_temporal", "score_only"):
             # HeLa-Mem original format (eval_longmemeval.answer_question)
             return "\n".join(f"- {kn.get('knowledge', '')}" for kn in kb_results)
 
@@ -111,7 +116,7 @@ class ValidityAwareRetriever:
         Builds the prompt pair (system_prompt, user_prompt) following
         the exact template of HeLa-Mem, with enhanced knowledge base grounding.
         """
-        if self.ablation == "no_temporal":
+        if self.ablation in ("no_temporal", "score_only"):
             return hela_original_prompt(
                 context_text, knowledge_text, profile_text,
                 assistant_knowledge_text, question, question_date,

@@ -93,6 +93,9 @@ class TemporalKnowledgeMemory:
         # Ablation B0: when False, validity windows, supersession edges and
         # temporal pertinence are ignored (see disable_temporal_mechanism).
         self.temporal_enabled = True
+        # Ablation tags_only: when False, V(f, t_query) is fixed at 1.0 while
+        # status / valid_from / valid_to metadata remain intact for prompt tags.
+        self.pertinence_enabled = True
 
         # Hebbian Graph for Semantic Knowledge Base
         self.hebbian_kb_path = file_path.replace(".json", "_kb_graph.json")
@@ -125,6 +128,15 @@ class TemporalKnowledgeMemory:
         ids = sorted(graph.nodes.keys(), key=int)
         for prev_id, cur_id in zip(ids, ids[1:]):
             graph.add_edge(prev_id, cur_id, weight=0.5, bidirectional=True)
+
+    def disable_temporal_pertinence(self) -> None:
+        """
+        Ablation tags_only: fixes temporal pertinence V(f, t_query) = 1.0 during
+        retrieval ranking, while preserving valid_from/valid_to/status metadata so
+        the prompt still displays [CURRENT] / [HISTORICAL] tags.
+        In-memory only; save() is blocked.
+        """
+        self.pertinence_enabled = False
 
     def update_user_profile(self, user_id: str, new_data: Any, merge: bool = False) -> None:
         """Update user profile compatible with HeLa-Mem interface."""
@@ -314,7 +326,7 @@ class TemporalKnowledgeMemory:
         exp(-|t_query - valid_to| / tau): if t_query > valid_to (superseded/expired)
         0.0: if t_query < valid_from (future)
         """
-        if not self.temporal_enabled:
+        if not self.temporal_enabled or not self.pertinence_enabled:
             return 1.0
 
         if not query_date_str:
@@ -411,7 +423,7 @@ class TemporalKnowledgeMemory:
         return results
 
     def save(self) -> None:
-        if not self.temporal_enabled:
+        if not self.temporal_enabled or not self.pertinence_enabled:
             raise RuntimeError(
                 "TemporalKnowledgeMemory is in ablation mode (temporal disabled); "
                 "refusing to overwrite the encoded Proposal B files."

@@ -272,7 +272,8 @@ No repositório:
 | 5 | concluída | 2026-11-04 | B0 = 64,20%. A→B0 +15 (p=0,11); B0→B +7 (p=0,45); KU B0→B +14/−0 (Holm p=0,0015); MS B0→B −7. `reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md`. |
 | 6 | concluída | 2026-11-05 | Estatística completa implementada com McNemar exato, IC 95% e correção de Holm em `compare_ablation.py`. |
 | — | concluída | 2026-11-05 | **Proposta $B_{\text{v2}}$ (Classificador Ontológico Sem Exemplos):** 64,80% ACC geral, $KU$ 79,49% ($p=0,0034$), $TR$ 57,89% (recorde), redução de regressões em $MS$. |
-| 7 | pendente | | Sensibilidade de λ, τ, θ. |
+| 7 | concluída | 2026-11-19 | Sensibilidade de $\lambda \in \{0{,}4; 0{,}8\}$ e $\tau \in \{30\text{d}, 90\text{d}\}$ concluída: resultado classificado como **ROBUSTO** (65,60%–66,80% overall, KU 79,49%–84,62%, todos $p \le 0{,}0034$ vs $B_0$). Config mantida em $\lambda=0{,}6, \tau=60\text{d}$. Ver `reports/analysis/R09_sensibilidade_lambda_tau_20261119.md`. |
+| — | concluída | 2026-11-19 | **Ablação Fatorial 2×2 (`score_only` vs `tags_only`)** e **Auditoria de Precisão da Supersessão**: `tags_only` alcança 66,20% overall e 85,90% em KU (+16/-0, $p<0{,}0001$), `score_only` tem efeito nulo em KU (65,38%). Precisão do classificador subiu de 33,3% ($B$) para 48,9% ($B_{\text{v2}}$); 34 itens do dataset têm `haystack_dates` fora de ordem. Ver `R07` e `R08`. |
 | 8 | opcional | | Segundo dataset (LoCoMo). |
 | 8b | em andamento | 2026-11-05 | Passo 1 feito: o artigo não informa qual arquivo usou; os baselines são do S de cerca de 115 mil tokens (LightMem); o arquivo distribuído é oracle. Falta a issue aos autores e a execução no S oficial. Ver Achado 10. |
-| 9 | em andamento | 2026-11-05 | Documentação em `README.md`, `VISAO_GERAL_PROJETO.md` e relatórios técnicos R05/R06. |
+| 9 | concluída | 2026-11-19 | Documentação sincronizada (`README.md`, `VISAO_GERAL_PROJETO.md`), `requirements.txt` fixado, `tests/test_temporal_memory.py` (7/7), figuras `fig1`–`fig6` regeneradas, artigo final consolidado (`reports/relatorio_final_ieee.tex`, `reports/relatorio_final.md`, `reports/overleaf_entrega_final.zip`). |
