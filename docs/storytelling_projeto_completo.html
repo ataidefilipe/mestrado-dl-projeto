@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validade Temporal e Supersessão em Memória Associativa Hebbiana — Keynote Interativo (24 Slides)</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --accent: #38bdf8;
+      --surface: #0b1120;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    .glass-bar {
+      background: rgba(9, 14, 28, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.65);
+    }
+
+    /* Clean Keynote Slide Canvas: generous padding, vertical balance, single focal point */
+    .keynote-slide {
+      background: radial-gradient(circle at 85% 15%, rgba(14, 165, 233, 0.08), transparent 45%),
+                  radial-gradient(circle at 15% 85%, rgba(99, 102, 241, 0.07), transparent 45%),
+                  linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(2, 6, 23, 0.98) 100%);
+      border: 1px solid rgba(51, 65, 85, 0.65);
+      border-radius: 1.75rem;
+      box-shadow: 0 28px 70px -20px rgba(0, 0, 0, 0.85);
+      min-height: 76vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1.75rem, 4vw, 3.5rem);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Deck Mode (Default): show only active slide */
+    body.deck-mode .keynote-slide {
+      display: none;
+    }
+    body.deck-mode .keynote-slide.active-slide {
+      display: flex;
+      animation: keynoteFade 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes keynoteFade {
+      from { opacity: 0; transform: translateY(10px) scale(0.995); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Modern Web Guidance: Tabs pattern (aria-selected + pseudo-element border underline) */
+    [role="tab"] {
+      position: relative;
+      cursor: pointer;
+    }
+    [role="tab"][aria-selected="true"] {
+      color: var(--accent);
+    }
+    [role="tab"][aria-selected="true"]::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      border-block-end: 3px solid var(--accent);
+    }
+    .tab-panels-grid {
+      display: grid;
+    }
+    .tab-panels-grid > [role="tabpanel"] {
+      grid-area: 1 / 1;
+    }
+
+    /* Modern Web Guidance: Responsive Table with Container Queries & Sticky Headers */
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: min(460px, 65vh);
+      container-type: inline-size;
+      border-radius: 1rem;
+      border: 1px solid rgba(51, 65, 85, 0.8);
+    }
+    .table-wrapper table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+    }
+    .table-wrapper thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 2;
+      background: #0f172a;
+    }
+    .table-wrapper tbody th {
+      position: sticky;
+      inset-inline-start: 0;
+      z-index: 1;
+      background: #0b1120;
+    }
+    @container (width < 580px) {
+      .table-wrapper table,
+      .table-wrapper thead,
+      .table-wrapper tbody,
+      .table-wrapper tr,
+      .table-wrapper th,
+      .table-wrapper td {
+        display: block;
+      }
+      .table-wrapper thead {
+        display: none;
+      }
+      .table-wrapper tr {
+        margin-block-end: 1rem;
+        border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+      }
+      .table-wrapper tbody th {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 2;
+        background: #1e293b;
+      }
+    }
+
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+  </style>
+</head>
+<body class="deck-mode bg-slate-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-sky-500 selection:text-slate-950">
+
+  <!-- ===================================================================== -->
+  <!-- TOP NAVIGATION BAR (MINIMALIST KEYNOTE CONTROLLER)                     -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-50 glass-bar px-4 sm:px-8 py-3">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand & Current Act -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-mono font-bold text-white text-xs shadow-lg shadow-sky-500/20">
+          HeLa+T
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="top-act-label" class="text-xs font-mono uppercase tracking-wider text-sky-400 font-semibold">
+              Prólogo &bull; Abertura
+            </span>
+            <span class="text-slate-600">&bull;</span>
+            <span id="top-slide-title" class="text-xs sm:text-sm font-medium text-slate-200 truncate max-w-xs sm:max-w-md">
+              Validade Temporal em Memória Hebbiana
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls: Slide Prev/Next + Jump Select + View Switch -->
+      <div class="flex items-center gap-2">
+        <!-- Direct Slide Selector -->
+        <select id="slide-jump-select" aria-label="Ir para o slide" onchange="goToSlide(parseInt(this.value, 10))" class="bg-slate-900 border border-slate-700/80 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 font-mono focus:outline-none focus:border-sky-500">
+          <!-- Populated by JS -->
+        </select>
+
+        <!-- Prev / Counter / Next -->
+        <div class="flex items-center bg-slate-900 border border-slate-700/80 rounded-xl p-0.5 text-xs">
+          <button type="button" onclick="prevSlide()" title="Slide Anterior (←)" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-200 font-mono transition-colors">&larr;</button>
+          <span id="slide-counter-badge" class="font-mono text-sky-300 px-2.5 font-semibold">01 / 24</span>
+          <button type="button" onclick="nextSlide()" title="Próximo Slide (→)" class="px-2.5 py-1 rounded-lg hover:bg-slate-800 text-slate-200 font-mono transition-colors">&rarr;</button>
+        </div>
+
+        <!-- Toggle Deck vs Continuous Scroll -->
+        <button type="button" id="btn-toggle-view" onclick="toggleViewMode()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-sky-500/50 text-xs font-medium text-slate-300 transition-all">
+          📜 Ver Todos (Rolagem)
+        </button>
+      </div>
+    </div>
+
+    <!-- Thin Visual Progress Bar -->
+    <div class="max-w-6xl mx-auto mt-2.5 h-1 bg-slate-900 rounded-full overflow-hidden">
+      <div id="slide-progress-bar" class="h-full bg-gradient-to-r from-sky-400 via-cyan-400 to-indigo-400 transition-all duration-300" style="width: 4.16%"></div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN SLIDE DECK (24 CLEAN, FOCUSED SLIDES)                            -->
+  <!-- ===================================================================== -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-8 py-6 space-y-10">
+
+    <!-- SLIDE 01: CAPA -->
+    <section id="slide-0" data-act="Prólogo" data-title="Capa & Tese" class="keynote-slide active-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="px-3 py-1 rounded-full bg-sky-950/80 border border-sky-800 text-sky-300">SLIDE 01 / 24 &bull; DEFESA DE PROJETO</span>
+        <span>CIn / UFPE &bull; Mestrado em Ciência da Computação</span>
+      </div>
+
+      <div class="my-auto py-8 max-w-4xl space-y-6">
+        <p class="text-sm sm:text-base font-mono uppercase tracking-widest text-sky-400">
+          Deep Learning &bull; Prof. Cleber Zanchettin
+        </p>
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.12]">
+          Validade Temporal e Supersessão de Fatos em <span class="bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">Memória Associativa Hebbiana</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-300 font-light leading-relaxed max-w-3xl">
+          Como um agente baseado em LLM aprende o que <em>continua verdadeiro hoje</em> sem apagar a sua própria história.
+        </p>
+      </div>
+
+      <div class="pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm text-slate-400">
+        <div>
+          <strong class="text-white">Filipe Augusto de Ataíde Barbosa</strong> (<code class="text-sky-400">faab@cin.ufpe.br</code>)
+        </div>
+        <div class="font-mono text-xs">
+          Artigo-Base: HeLa-Mem (ACL 2026) &bull; Inspiração: Zep / Graphiti (2025)
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 02: O PARADOXO CENTRAL (HOOK) -->
+    <section id="slide-1" data-act="Prólogo" data-title="O Paradoxo Central" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 02 / 24 &bull; PRÓLOGO</span>
+        <span>A Descoberta que Guiou o Projeto</span>
+      </div>
+
+      <div class="my-auto py-8 max-w-4xl mx-auto text-center space-y-8">
+        <span class="inline-block px-3.5 py-1 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-xs font-mono uppercase tracking-wider">
+          O Paradoxo Central
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white leading-tight">
+          “Quando um agente extrai e lembra de <span class="text-amber-300">mais fatos</span>, ele pode responder <span class="text-rose-400">pior</span>?”
+        </h2>
+        <p class="text-base sm:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto">
+          Sim — quando a memória guarda fatos antigos e fatos atualizados com o <strong>mesmo status de verdade</strong>. Nós chamamos esse efeito de <strong class="text-sky-300">Fenômeno da Interferência Factual</strong>.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 text-left">
+          <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
+            <div class="text-xs font-mono text-slate-400">Memória Semântica Vazia (\(A\))</div>
+            <div class="text-3xl font-extrabold text-slate-200 mt-1">73,08%</div>
+            <div class="text-xs text-slate-400 mt-1">Em <em>Knowledge Update</em> (lendo só o diálogo bruto)</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-rose-950/30 border border-rose-800/60">
+            <div class="text-xs font-mono text-rose-300">Memória Semântica Completa (\(A^* / B_0\))</div>
+            <div class="text-3xl font-extrabold text-rose-300 mt-1">65,38% &darr;</div>
+            <div class="text-xs text-slate-300 mt-1">Fatos antigos e novos colidem sem data de validade</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-700/60">
+            <div class="text-xs font-mono text-emerald-300">Com Validade Temporal (\(B\) / <code>tags_only</code>)</div>
+            <div class="text-3xl font-extrabold text-emerald-300 mt-1">85,90% &uarr;</div>
+            <div class="text-xs text-slate-200 mt-1">+16 ganhos e <strong>zero regressões</strong> (\(p &lt; 0{,}0001\))</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-500 text-center">
+        Use as setas do teclado (&larr; / &rarr;) para avançar na história
+      </div>
+    </section>
+
+    <!-- SLIDE 03: ATO I - AS TRÊS DIMENSÕES DO TEMPO -->
+    <section id="slide-2" data-act="Ato I • O Dilema" data-title="Recência vs. Saliência vs. Validade" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 03 / 24 &bull; ATO I — O DILEMA COGNITIVO</span>
+        <span>Por que decaimento temporal simples não resolve</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-8">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl sm:text-4xl font-bold text-white">
+            Três dimensões que a literatura costuma confundir
+          </h2>
+          <p class="text-base text-slate-300">
+            Uma informação de 2024 (<em>"O conselho aprovou o projeto"</em>) continua válida hoje. Uma informação de 6 horas atrás (<em>"Tenho 1.250 seguidores"</em>) já pode estar obsoleta.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-t-4 border-amber-400 space-y-3">
+            <div class="text-xs font-mono text-amber-300 uppercase tracking-wider">1. Recência (\(\Delta t\))</div>
+            <h3 class="text-xl font-bold text-white">Quão nova é a memória?</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Penaliza memórias pela idade (\(\gamma = e^{-\Delta t / \tau}\)). Falha quando um fato antigo continua verdadeiro ou quando dois fatos conflitantes ocorrem no mesmo dia.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-t-4 border-indigo-400 space-y-3">
+            <div class="text-xs font-mono text-indigo-300 uppercase tracking-wider">2. Saliência Associativa (\(w_{ij}\))</div>
+            <h3 class="text-xl font-bold text-white">Quão conectada ela é?</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Memórias recuperadas juntas fortalecem sua sinapse (\(\Delta w_{ij} = +\eta\)). É o ponto forte do <strong>HeLa-Mem (ACL 2026)</strong> para raciocínio <em>multi-hop</em>.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-900/90 border-t-4 border-emerald-400 space-y-3">
+            <div class="text-xs font-mono text-emerald-300 uppercase tracking-wider">3. Validade Temporal (\([t_{\text{start}}, t_{\text{end}}]\))</div>
+            <h3 class="text-xl font-bold text-white">Ela ainda é verdade?</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Distingue <em>estado vigente</em> de <em>registro histórico</em>. Inspirada em <strong>Zep/Graphiti (2025)</strong>, é a dimensão que faltava na memória hebbiana.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Tese: Decaimento temporal contínuo não substitui supersessão discreta de estado.
+      </div>
+    </section>
+
+    <!-- SLIDE 04: ATO I - CASO REAL INTERATIVO (a2f3aa27) -->
+    <section id="slide-3" data-act="Ato I • O Dilema" data-title="Caso Real: O Paradoxo do Mesmo Dia" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 04 / 24 &bull; ATO I — EXEMPLO CONCRETO NO BENCHMARK</span>
+        <span>Questão ID: a2f3aa27 (Categoria: Knowledge Update)</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">
+              Quando a Similaridade Vetorial Prefere a Mentira Desatualizada
+            </h2>
+            <p class="text-sm text-slate-400 mt-1">
+              Duas sessões no mesmo dia (28/05/2023). Pergunta em 29/05: <em>"How many followers do I currently have on Instagram?"</em>
+            </p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <button type="button" id="btn-lens-hela" onclick="setDilemmaLens('hela')" class="px-3.5 py-2 rounded-xl bg-rose-950/90 text-rose-300 border border-rose-600/60 font-semibold">
+              1. Visão HeLa-Mem / B0
+            </button>
+            <button type="button" id="btn-lens-temporal" onclick="setDilemmaLens('temporal')" class="px-3.5 py-2 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 font-semibold">
+              2. Visão Proposta Temporal
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-400">Fato Semântico #0 (Manhã)</span>
+              <span class="text-amber-300">2023/05/28 01:28</span>
+            </div>
+            <p class="text-base font-semibold text-white">“User currently has 1,250 followers on Instagram.”</p>
+            <div id="dilemma-meta-0" class="text-xs font-mono text-slate-400 pt-2 border-t border-slate-800">
+              Cosine Sim: <strong class="text-sky-300">0.842 (Maior!)</strong> &bull; metadata: <code>{"type": "fact"}</code>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-400">Fato Semântico #1 (Noite, +18h)</span>
+              <span class="text-emerald-300">2023/05/28 19:16</span>
+            </div>
+            <p class="text-base font-semibold text-white">“User gained 50 new followers since morning, reaching 1,300 followers.”</p>
+            <div id="dilemma-meta-1" class="text-xs font-mono text-slate-400 pt-2 border-t border-slate-800">
+              Cosine Sim: <strong class="text-sky-300">0.819</strong> &bull; metadata: <code>{"type": "fact"}</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <pre class="text-xs sm:text-sm font-mono text-slate-200 overflow-x-auto"><code id="dilemma-prompt-code">&lt;KNOWLEDGE BASE&gt;
+- User currently has 1,250 followers on Instagram.
+- User gained 50 new followers since morning, reaching 1,300 followers.
+
+Resposta Gerada (HeLa-Mem A e Ablação B0): "1,250"   ❌ (Gabarito: 1,300)</code></pre>
+          <p id="dilemma-explanation" class="text-xs sm:text-sm text-slate-300">
+            <strong>Por que erra?</strong> O Fato #0 contém literalmente <em>"currently has 1,250 followers"</em>, vencendo na similaridade de cosseno. Sem etiqueta de vigência, o LLM confia na frase lexicalmente mais direta.
+          </p>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-500">
+        Alterne os botões acima para ver como o bloco <code>&lt;KNOWLEDGE BASE&gt;</code> muda com a nossa proposta.
+      </div>
+    </section>
+
+    <!-- SLIDE 05: ATO I - AS REGRAS DA DISCIPLINA E O PIVÔ -->
+    <section id="slide-4" data-act="Ato I • O Pivô" data-title="As Regras do Jogo & O Pivô do GraphSAGE" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 05 / 24 &bull; ATO I — METODOLOGIA E HONESTIDADE INTELECTUAL</span>
+        <span>Por que abandonamos um código pronto na Fase 1</span>
+      </div>
+
+      <div class="my-auto py-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div class="space-y-4">
+          <span class="text-xs font-mono uppercase tracking-wider text-amber-400">A Regra Inegociável da Disciplina</span>
+          <h2 class="text-3xl font-bold text-white leading-snug">
+            “Você precisa evoluir o artigo-base, não apenas usá-lo como peça.”
+          </h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Em setembro de 2026 (Fase 1), implementamos do zero os Algoritmos 1 e 2 do <strong>GraphSAGE</strong> em PyTorch puro e reproduzimos o benchmark <strong>PPI</strong> com equivalência exata ao PyTorch Geometric (relatórios <code>R01</code> e <code>R02</code>).
+          </p>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Mas ao aplicarmos o <strong>Teste de Substituibilidade</strong>, percebemos que o GraphSAGE era apenas um pós-processador para um grafo jurídico da Reforma Tributária: trocá-lo por qualquer outra GNN não mudaria nossa hipótese.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-rose-300 font-bold uppercase">Decisão em 19/09/2026: Recomeçar do Zero</span>
+            <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-slate-800 text-slate-400">Arquivado em legado_graphsage_ppi/</span>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            <div class="p-3.5 rounded-xl bg-rose-950/30 border border-rose-800/50 text-slate-300">
+              <strong class="text-rose-300">Abordagem Antiga (Descartada):</strong><br>
+              Escolher um tema (Reforma Tributária) &rarr; encaixar um artigo de Deep Learning como ferramenta auxiliar.
+            </div>
+            <div class="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-700/50 text-slate-200">
+              <strong class="text-emerald-300">Nova Abordagem Científica:</strong><br>
+              Encontrar uma fronteira aberta em um artigo recente (ACL 2026) &rarr; reproduzir sem modificações &rarr; intervir cirurgicamente na sua limitação central.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Lição metodológica: Descartar código funcionando quando o desenho não responde a uma pergunta científica sobre o artigo-base.
+      </div>
+    </section>
+
+    <!-- SLIDE 06: ATO I - FUNIL INTERATIVO DA LITERATURA -->
+    <section id="slide-5" data-act="Ato I • Literatura" data-title="Funil de Seleção dos 5 Artigos" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 06 / 24 &bull; ATO I — REVISÃO SISTEMÁTICA</span>
+        <span>Como 5 artigos convergiram para HeLa-Mem + Zep</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        <div class="space-y-1">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">
+            O Funil da Literatura: De Grafos Estáticos à Memória Hebbiana Temporal
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Clique em cada trabalho analisado para ver por que não bastava sozinho e o que contribuiu para o desenho final:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5" role="tablist" aria-label="Funil de artigos">
+          <button type="button" role="tab" id="lit-tab-0" aria-selected="false" onclick="selectLitTab(0)" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left">
+            <div class="text-[11px] font-mono text-slate-400">1. Microsoft 2024</div>
+            <div class="text-sm font-bold text-white mt-0.5">GraphRAG</div>
+          </button>
+          <button type="button" role="tab" id="lit-tab-1" aria-selected="false" onclick="selectLitTab(1)" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left">
+            <div class="text-[11px] font-mono text-slate-400">2. EMNLP 2025</div>
+            <div class="text-sm font-bold text-white mt-0.5">CodeRAG</div>
+          </button>
+          <button type="button" role="tab" id="lit-tab-2" aria-selected="false" onclick="selectLitTab(2)" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left">
+            <div class="text-[11px] font-mono text-slate-400">3. Xu et al. 2025</div>
+            <div class="text-sm font-bold text-white mt-0.5">A-MEM</div>
+          </button>
+          <button type="button" role="tab" id="lit-tab-3" aria-selected="true" onclick="selectLitTab(3)" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left">
+            <div class="text-[11px] font-mono text-sky-400">4. ACL 2026 ★</div>
+            <div class="text-sm font-bold text-white mt-0.5">HeLa-Mem</div>
+          </button>
+          <button type="button" role="tab" id="lit-tab-4" aria-selected="false" onclick="selectLitTab(4)" class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left">
+            <div class="text-[11px] font-mono text-emerald-400">5. Chauhan 2025 ★</div>
+            <div class="text-sm font-bold text-white mt-0.5">Zep / Graphiti</div>
+          </button>
+        </div>
+
+        <div id="lit-detail-box" class="p-6 rounded-2xl bg-slate-900/90 border border-sky-800/50 space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Síntese: <strong>HeLa-Mem</strong> (força associativa hebbiana) + <strong>Zep/Graphiti</strong> (janelas explícitas de validade temporal).
+      </div>
+    </section>
+
+    <!-- SLIDE 07: ATO II - COMO O HELA-MEM FUNCIONA -->
+    <section id="slide-6" data-act="Ato II • O Artigo-Base" data-title="A Arquitetura Dual do HeLa-Mem" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 07 / 24 &bull; ATO II — COMPREENDENDO O ARTIGO-BASE</span>
+        <span>HeLa-Mem: Hebbian Learning and Associative Memory (ACL 2026)</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-8">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            Como o HeLa-Mem organiza a memória do agente
+          </h2>
+          <p class="text-sm sm:text-base text-slate-300">
+            Inspirado na regra neurocientífica de Hebb (<em>"neurônios que disparam juntos se conectam"</em>), o sistema mantém duas estruturas complementares:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-slate-900/90 border border-sky-800/50 space-y-3">
+            <div class="text-xs font-mono text-sky-400 uppercase font-bold">1. Grafo de Memória Episódica (<code>HebbianMemoryGraph</code>)</div>
+            <h3 class="text-lg font-bold text-white">Turnos de diálogo + Ativação Espalhada</h3>
+            <ul class="text-xs sm:text-sm text-slate-300 space-y-2 list-disc list-inside">
+              <li>Cada turno <code>user/assistant</code> vira um nó com embedding, keywords e timestamp.</li>
+              <li><strong>Spreading Activation:</strong> um nó altamente relevante transfere ativação aos vizinhos (\(\text{boost} = a_i \cdot w_{ij} \cdot \alpha\)).</li>
+              <li><strong>Reforço Hebbiano:</strong> nós recuperados juntos na mesma consulta têm sua aresta reforçada (\(\Delta w_{ij} = +\eta\)).</li>
+            </ul>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-900/90 border border-indigo-800/50 space-y-3">
+            <div class="text-xs font-mono text-indigo-400 uppercase font-bold">2. Memória Semântica (<code>HebbianKnowledgeMemory</code>)</div>
+            <h3 class="text-lg font-bold text-white">Fatos condensados extraídos pelo LLM</h3>
+            <ul class="text-xs sm:text-sm text-slate-300 space-y-2 list-disc list-inside">
+              <li>Periodicamente, o LLM analisa os diálogos e extrai fatos atômicos sobre o usuário (<code>private facts</code>, <code>user profile</code>).</li>
+              <li>Na hora de responder, o sistema recupera <code>top_k = 15</code> memórias episódicas e <code>semantic_top_k = 5</code> fatos semânticos.</li>
+              <li><strong class="text-amber-300">É aqui que reside a falha temporal:</strong> todos os fatos semânticos são tratados como verdades eternas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Nossa decisão arquitetural: Manter o Grafo Episódico 100% intacto e evoluir cirurgicamente a Memória Semântica.
+      </div>
+    </section>
+
+    <!-- SLIDE 08: ATO II - AUTÓPSIA DO CÓDIGO OFICIAL (3 BUGS) -->
+    <section id="slide-7" data-act="Ato II • O Artigo-Base" data-title="Autópsia do Código Oficial (Commit 68f19b3)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 08 / 24 &bull; ATO II — INSPEÇÃO DO CÓDIGO-FONTE REAL</span>
+        <span>O que descobrimos lendo o repositório oficial antes de modificar qualquer linha</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">
+          Três Limitações Reais no Código Oficial do HeLa-Mem (<code>68f19b3</code>)
+        </h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Bug 1 -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-rose-800/60 space-y-3">
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800">1. Bug Silencioso no Decay</span>
+            <h3 class="text-base font-bold text-white"><code>compute_time_decay</code> retorna sempre <code>1.0</code></h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <code>retrieve()</code> passa a string <code>current_time</code> no lugar do número <code>tau</code>. A função dá <code>TypeError</code>, cai no <code>except:</code> e retorna <code>1.0</code>, desativando o decaimento do paper!
+            </p>
+            <pre class="p-2.5 rounded-lg bg-slate-950 text-[11px] font-mono text-rose-200 overflow-x-auto"><code># hebbian_memory.py
+compute_time_decay(
+  node["timestamp"],
+  current_time # &lt;-- String!
+) # except -&gt; return 1.0</code></pre>
+          </div>
+
+          <!-- Bug 2 -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-amber-800/60 space-y-3">
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">2. Perda da Data Histórica</span>
+            <h3 class="text-base font-bold text-white">Fatos semânticos recebem a data de hoje</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <code>add_knowledge(fact)</code> ignora a data real da sessão (<code>haystack_dates</code>, ex: 2023) e grava <code>get_timestamp()</code> (relógio da máquina em 2026) com <code>metadata={"type":"fact"}</code>.
+            </p>
+            <pre class="p-2.5 rounded-lg bg-slate-950 text-[11px] font-mono text-amber-200 overflow-x-auto"><code># knowledge_memory.py
+add_node(
+  content=fact,
+  timestamp=get_timestamp(),
+  metadata={"type": "fact"}
+)</code></pre>
+          </div>
+
+          <!-- Bug 3 -->
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-sky-800/60 space-y-3">
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">3. Busca Cega ao Tempo</span>
+            <h3 class="text-base font-bold text-white"><code>question_date</code> é omitida do Retrieval</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              O avaliador entrega <code>Current date: {question_date}</code> para o LLM no prompt final, mas chama <code>search_knowledge(question)</code> sem informar em qual data a consulta está sendo feita.
+            </p>
+            <pre class="p-2.5 rounded-lg bg-slate-950 text-[11px] font-mono text-sky-200 overflow-x-auto"><code># eval_longmemeval.py
+# question_date vai p/ prompt,
+# mas NÃO vai para a busca:
+kb.search_knowledge(
+  question, top_k=5
+)</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Conformidade metodológica: Na reprodução da Baseline (\(A\) e \(A^*\)), mantivemos o código oficial intacto sem corrigir esses pontos silenciosamente.
+      </div>
+    </section>
+
+    <!-- SLIDE 09: ATO II - FORMALIZAÇÃO DA NOSSA PROPOSTA -->
+    <section id="slide-8" data-act="Ato II • Nossa Arquitetura" data-title="Modelagem Formal: Janelas de Validade e Supersessão" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 09 / 24 &bull; ATO II — NOSSA INTERVENÇÃO ARQUITETURAL</span>
+        <span>Módulo: src/modeling/temporal_knowledge_memory.py</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-8">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            <code>TemporalKnowledgeMemory</code>: Fatos com Ciclo de Vida Explícito
+          </h2>
+          <p class="text-sm sm:text-base text-slate-300">
+            Cada fato semântico extraído na sessão de data \(t_{\text{event}}\) passa a ser modelado como uma 5-upla formal:
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-900/95 border border-sky-800/60 text-center">
+          <div class="text-lg sm:text-2xl text-white">
+            $$f_i = \langle c_i, \; \mathbf{e}_i, \; [t_{\text{start}}^{(i)}, \, t_{\text{end}}^{(i)}], \; \mathcal{S}_i, \; \mathbf{w}_i \rangle$$
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div class="text-xs font-mono text-slate-400 uppercase font-bold">Estado 1 &bull; UNRELATED</div>
+            <h3 class="text-base font-bold text-white">Fatos Independentes</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              O novo fato trata de outra entidade ou assunto. Ambos permanecem com status <code>active</code> e janela aberta \([t_{\text{start}}, \infty)\).
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-sky-800/50 space-y-2">
+            <div class="text-xs font-mono text-sky-400 uppercase font-bold">Estado 2 &bull; EXTENDS</div>
+            <h3 class="text-base font-bold text-white">Reforço Associativo (\(+\eta\))</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              O novo fato complementa ou acumula com o anterior sem contradizê-lo. Ambos permanecem ativos e sua ligação hebbiana é reforçada.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-amber-700/60 space-y-2">
+            <div class="text-xs font-mono text-amber-300 uppercase font-bold">Estado 3 &bull; SUPERSEDES</div>
+            <h3 class="text-base font-bold text-white">Fechamento Não-Destrutivo</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Encerra a vigência do fato antigo (\(t_{\text{end}}^{(\text{cand})} \leftarrow t_{\text{event}}\), status <code>superseded</code>) e cria aresta bidirecional \(w = 0{,}8\) preservando o histórico.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Candidatos verificados na ingestão: até 4 fatos ativos de sessões anteriores com similaridade de cosseno \(\ge \theta_{\text{sup}} = 0{,}35\).
+      </div>
+    </section>
+
+    <!-- SLIDE 10: ATO II - FIGURA 1 (ARQUITETURA COMPARADA) -->
+    <section id="slide-9" data-act="Ato II • Nossa Arquitetura" data-title="Visão Visual: Baseline Fiel A* vs. Proposta Temporal" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 10 / 24 &bull; ATO II — ARQUITETURA COMPARADA</span>
+        <span>Figura 1 do Artigo IEEE Consolidado</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-2xl font-bold text-white">
+            Baseline Fiel \(A^*\) vs. Proposta Temporal (\(B / B_{\text{v2}}\))
+          </h2>
+          <a href="../reports/figures/fig1_arquitetura_proposta.png" target="_blank" class="text-xs font-mono text-sky-400 hover:underline">
+            Abrir imagem original em nova aba &nearr;
+          </a>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-white border border-slate-700 shadow-xl">
+          <img src="../reports/figures/fig1_arquitetura_proposta.png" alt="Diagrama da Arquitetura Comparada" class="w-full max-h-[54vh] object-contain mx-auto">
+        </div>
+      </div>
+
+      <div class="text-xs text-slate-400 flex flex-wrap justify-between gap-2">
+        <span><strong>Esquerda (\(A^*\)):</strong> Memória semântica estática e busca sem \(t_{\text{query}}\) (63,40% global).</span>
+        <span><strong>Direita (\(B / B_{\text{v2}}\)):</strong> Janelas \([t_{\text{start}}, t_{\text{end}}]\), \(\mathcal{V}(f_i, t_{\text{query}})\) e etiquetas <code>[CURRENT]</code>/<code>[HISTORICAL]</code>.</span>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: ATO II - SIMULADOR MATEMÁTICO INTERATIVO V(f_i, t_query) -->
+    <section id="slide-10" data-act="Ato II • Simulador" data-title="Laboratório Interativo: Pertinência Temporal V(f, t)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 11 / 24 &bull; ATO II — SIMULADOR MATEMÁTICO EM TEMPO REAL</span>
+        <span>Experimente variar λ, τ e a data da pergunta t_query</span>
+      </div>
+
+      <div class="my-auto py-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Sliders -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 text-xs">
+          <h3 class="text-lg font-bold text-white">Controles da Equação \(\mathcal{V}(f_i, t_{\text{query}})\)</h3>
+          <p class="text-slate-400">
+            \(f_1\) (antigo, \(\widetilde{\text{Sim}}=0{,}85\)) foi supersedido no <strong>Dia 30</strong> por \(f_2\) (novo, \(\widetilde{\text{Sim}}=0{,}78\)):
+          </p>
+
+          <div>
+            <div class="flex justify-between font-mono mb-1">
+              <label for="sim-lambda">Peso da Similaridade (\(\lambda\)):</label>
+              <span id="val-lambda" class="text-sky-400 font-bold">0.60</span>
+            </div>
+            <input id="sim-lambda" type="range" min="0.0" max="1.0" step="0.05" value="0.60" oninput="updatePertinenceSim()" class="w-full accent-sky-400">
+          </div>
+
+          <div>
+            <div class="flex justify-between font-mono mb-1">
+              <label for="sim-tau">Decaimento Pós-Supersessão (\(\tau\)):</label>
+              <span id="val-tau" class="text-sky-400 font-bold">60 dias</span>
+            </div>
+            <input id="sim-tau" type="range" min="10" max="120" step="5" value="60" oninput="updatePertinenceSim()" class="w-full accent-sky-400">
+          </div>
+
+          <div>
+            <div class="flex justify-between font-mono mb-1">
+              <label for="sim-tquery">Data da Consulta (\(t_{\text{query}}\)):</label>
+              <span id="val-tquery" class="text-emerald-400 font-bold">Dia 75</span>
+            </div>
+            <input id="sim-tquery" type="range" min="5" max="150" step="1" value="75" oninput="updatePertinenceSim()" class="w-full accent-emerald-400">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between font-mono mb-1">
+                <label for="sim-s1" class="text-amber-300">\(\widetilde{\text{Sim}}(f_1)\):</label>
+                <span id="val-s1" class="text-amber-300 font-bold">0.85</span>
+              </div>
+              <input id="sim-s1" type="range" min="0.50" max="0.98" step="0.01" value="0.85" oninput="updatePertinenceSim()" class="w-full accent-amber-400">
+            </div>
+            <div>
+              <div class="flex justify-between font-mono mb-1">
+                <label for="sim-s2" class="text-emerald-300">\(\widetilde{\text{Sim}}(f_2)\):</label>
+                <span id="val-s2" class="text-emerald-300 font-bold">0.78</span>
+              </div>
+              <input id="sim-s2" type="range" min="0.50" max="0.98" step="0.01" value="0.78" oninput="updatePertinenceSim()" class="w-full accent-emerald-400">
+            </div>
+          </div>
+        </div>
+
+        <!-- SVG Curve & Live Scores -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 rounded-2xl bg-slate-900 border border-amber-700/50">
+              <div class="text-xs font-mono text-amber-300">Fato Antigo \(f_1\) (Dia 0 &rarr; 30)</div>
+              <div id="score-f1" class="text-2xl font-extrabold text-white mt-1">Score: 0.699</div>
+              <div id="detail-f1" class="text-[11px] font-mono text-slate-400 mt-0.5">\(\mathcal{V}(f_1) = 0.472\)</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-900 border border-emerald-600/60">
+              <div class="text-xs font-mono text-emerald-300">Fato Novo \(f_2\) (Dia 30 &rarr; \(\infty\))</div>
+              <div id="score-f2" class="text-2xl font-extrabold text-white mt-1">Score: 0.868</div>
+              <div id="detail-f2" class="text-[11px] font-mono text-slate-400 mt-0.5">\(\mathcal{V}(f_2) = 1.000\)</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-300">Inversão de Ranking ao Longo do Tempo</span>
+              <span id="sim-winner-banner" class="text-emerald-400 font-bold">Vencedor: Fato f₂</span>
+            </div>
+            <svg id="pertinence-svg" viewBox="0 0 640 220" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800"></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        $$\text{Score}(f_i, Q, t_{\text{query}}) = \lambda \, \widetilde{\text{Sim}}(\mathbf{e}_i, \mathbf{e}_Q) + (1-\lambda) \, \mathcal{V}(f_i, t_{\text{query}}) + \text{Spread}(f_i)$$
+      </div>
+    </section>
+
+    <!-- SLIDE 12: ATO III - O PRIMEIRO SUCESSO E A CORAGEM DE AUDITAR (R05) -->
+    <section id="slide-11" data-act="Ato III • A Auditoria" data-title="O Ganho Inicial (+4,40 p.p.) e a Auditoria R05" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-rose-400">SLIDE 12 / 24 &bull; ATO III — O PONTO DE VIRADA METODOLÓGICO</span>
+        <span>Relatório R05: Quando questionamos nosso próprio resultado positivo</span>
+      </div>
+
+      <div class="my-auto py-6 max-w-4xl mx-auto space-y-8">
+        <div class="space-y-3 text-center">
+          <span class="px-3 py-1 rounded-full bg-rose-950/80 border border-rose-700/60 text-rose-300 text-xs font-mono uppercase">
+            AGENT.MD §18 (Revisão Crítica) &amp; §24 (Não Otimizar para Confirmar a Hipótese)
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-bold text-white">
+            Tínhamos <span class="text-emerald-400">65,60% vs. 61,20%</span> (\(p = 0{,}023\)). Por que não paramos ali?
+          </h2>
+          <p class="text-base text-slate-300 max-w-2xl mx-auto">
+            Em 03/11/2026, a Proposta \(B\) superava a Baseline \(A\) em +22 questões. Mas uma auditoria independente do nosso próprio processo (<code>R05</code>) levantou três perguntas que precisavam ser respondidas:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-rose-800/60 space-y-2">
+            <div class="text-xs font-mono text-rose-300 font-bold">1. Integridade da Baseline A</div>
+            <h3 class="text-base font-bold text-white">Por que 360/500 grafos semânticos de \(A\) estavam vazios?</h3>
+            <p class="text-xs text-slate-300">
+              E por que a execução direta em Python usara <code>MAX_FLIPPED=5</code> e <code>KEYWORD_WEIGHT=0.5</code> em vez de <code>3</code> e <code>0.7</code> dos scripts <code>.sh</code>?
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-amber-800/60 space-y-2">
+            <div class="text-xs font-mono text-amber-300 font-bold">2. Fator de Confusão</div>
+            <h3 class="text-base font-bold text-white">Quanto do ganho vinha da extração por sessão?</h3>
+            <p class="text-xs text-slate-300">
+              De \(A\) para \(B\), mudamos a extração semântica e adicionamos validade temporal ao mesmo tempo. Precisávamos de uma ablação \(B_0\).
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-sky-800/60 space-y-2">
+            <div class="text-xs font-mono text-sky-300 font-bold">3. Ruído e Dados (Achado 10)</div>
+            <h3 class="text-base font-bold text-white">Qual o piso de ruído sob <code>temp=0.7</code>? E qual é o dataset real?</h3>
+            <p class="text-xs text-slate-300">
+              Descobrimos que o <code>longmemeval_s.json</code> distribuído no repositório do HeLa-Mem contém apenas as sessões de evidência (recorte <em>oracle</em>).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400 text-center">
+        A auditoria R05 transformou um experimento comum em uma investigação causal blindada.
+      </div>
+    </section>
+
+    <!-- SLIDE 13: ATO III - O MISTÉRIO DOS 360 GRAFOS VAZIOS (R06) -->
+    <section id="slide-12" data-act="Ato III • A Auditoria" data-title="O Mistério dos 360 Grafos Semânticos Vazios" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-rose-400">SLIDE 13 / 24 &bull; ATO III — INVESTIGAÇÃO FORENSE (RELATÓRIO R06)</span>
+        <span>Refutando a hipótese do buffer de 10 turnos</span>
+      </div>
+
+      <div class="my-auto py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white leading-snug">
+            Não era brevidade dos diálogos. Era <span class="text-rose-400">falha silenciosa de concorrência</span> no código oficial.
+          </h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Nos blocos finais da Baseline \(A\) (itens 350 a 500), <strong>98% a 100% dos grafos semânticos estavam vazios</strong>, embora esses diálogos tivessem em média 23,5 turnos.
+          </p>
+          <div class="p-4 rounded-xl bg-emerald-950/30 border border-emerald-700/60 space-y-1.5 text-xs sm:text-sm">
+            <div class="font-mono text-emerald-300 font-bold">O Teste Diagnóstico Definitivo (Item 400 — <code>eac54adc</code>):</div>
+            <p class="text-slate-200">
+              Executamos o código oficial do HeLa-Mem no item 400 com <strong><code>workers=1</code></strong> (sequencial). Ele extraiu <strong>9 nós semânticos perfeitos</strong>! Sob multithreading, disputas no <code>SentenceTransformer</code>/API lançavam exceções que eram engolidas pelo <code>try/except</code> de <code>process_incremental_buffer</code>.
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 font-mono text-xs">
+          <div class="flex justify-between text-slate-300 font-bold pb-2 border-b border-slate-800">
+            <span>Bloco de Itens na Baseline A</span>
+            <span>Grafos Semânticos Vazios</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 text-slate-400">Itens 000–049</span>
+            <div class="flex-1 h-4 bg-slate-950 rounded overflow-hidden"><div class="h-full bg-amber-500" style="width:22%"></div></div>
+            <span class="w-20 text-right text-amber-300">11/50 (22%)</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 text-slate-400">Itens 050–099</span>
+            <div class="flex-1 h-4 bg-slate-950 rounded overflow-hidden"><div class="h-full bg-rose-500" style="width:76%"></div></div>
+            <span class="w-20 text-right text-rose-300">38/50 (76%)</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 text-slate-400">Itens 100–299</span>
+            <div class="flex-1 h-4 bg-slate-950 rounded overflow-hidden"><div class="h-full bg-rose-500" style="width:58.5%"></div></div>
+            <span class="w-20 text-right text-rose-300">117/200 (59%)</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 text-slate-400">Itens 300–399</span>
+            <div class="flex-1 h-4 bg-slate-950 rounded overflow-hidden"><div class="h-full bg-rose-600" style="width:95%"></div></div>
+            <span class="w-20 text-right text-rose-300">95/100 (95%)</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 text-slate-400">Itens 400–499</span>
+            <div class="flex-1 h-4 bg-slate-950 rounded overflow-hidden"><div class="h-full bg-rose-600" style="width:99%"></div></div>
+            <span class="w-20 text-right text-rose-300 font-bold">99/100 (99%)</span>
+          </div>
+          <div class="pt-2 border-t border-slate-800 text-right text-rose-400 font-bold">
+            Total em A: 360 / 500 vazios (72,0%)
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Implicação: Não poderíamos comparar nossa proposta apenas com \(A\). Era obrigatório construir a Baseline Fiel \(A^*\).
+      </div>
+    </section>
+
+    <!-- SLIDE 14: ATO III - A BASELINE FIEL A* -->
+    <section id="slide-13" data-act="Ato III • Baseline Fiel A*" data-title="A Restauração da Baseline Fiel A* (500/500 Íntegros)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-emerald-400">SLIDE 14 / 24 &bull; ATO III — REPRODUÇÃO ESTRITA SEM FALHAS (R03-FIEL)</span>
+        <span>Conformidade 100% com scripts/encode_longmemeval.sh e eval_longmemeval.sh</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-8">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            Baseline Fiel (\(A^*\)): 500/500 Grafos Íntegros e Reprodução Exata de <em>Multi-Session</em>
+          </h2>
+          <p class="text-sm sm:text-base text-slate-300">
+            Reexecutamos a codificação e avaliação oficial com controle de concorrência (<code>workers=2</code>) e parâmetros estritos dos scripts (<code>MAX_FLIPPED=3</code>, <code>KEYWORD_WEIGHT=0.7</code>, <code>TOP_K=15</code>, <code>BUFFER_SIZE=10</code>):
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-5">
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <div class="text-xs font-mono text-slate-400">Grafos Semânticos Vazios</div>
+            <div class="text-3xl font-extrabold text-emerald-400 mt-1">0 / 500</div>
+            <p class="text-xs text-slate-400 mt-1">4.978 nós semânticos extraídos (contra 72% vazios em \(A\)).</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800">
+            <div class="text-xs font-mono text-slate-400">Acurácia Global (\(A^*\))</div>
+            <div class="text-3xl font-extrabold text-white mt-1">63,40%</div>
+            <p class="text-xs text-slate-400 mt-1">317/500 acertos (+2,20 p.p. acima dos 61,20% de \(A\)).</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-700/60">
+            <div class="text-xs font-mono text-emerald-300">Multi-Session (\(A^*\))</div>
+            <div class="text-3xl font-extrabold text-emerald-300 mt-1">57,14%</div>
+            <p class="text-xs text-slate-200 mt-1">76/133 acertos — <strong>idêntico aos 57,14%</strong> da Tabela 6 do paper ACL 2026!</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-amber-950/30 border border-amber-700/60">
+            <div class="text-xs font-mono text-amber-300">Knowledge Update (\(A^*\))</div>
+            <div class="text-3xl font-extrabold text-amber-300 mt-1">67,95% &darr;</div>
+            <p class="text-xs text-slate-200 mt-1">Caiu de 73,08% (\(A\)) para 67,95% (53/78) quando os grafos encheram!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Por que <em>Knowledge Update</em> caiu quando a memória semântica passou a funcionar em 100% dos itens? Veja o próximo slide.
+      </div>
+    </section>
+
+    <!-- SLIDE 15: ATO III - O FENÔMENO DA INTERFERÊNCIA FACTUAL -->
+    <section id="slide-14" data-act="Ato III • Interferência Factual" data-title="A Grande Descoberta: O Fenômeno da Interferência Factual" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 15 / 24 &bull; ATO III — ISOLAMENTO CAUSAL (\(A \rightarrow A^* \rightarrow B_0 \rightarrow B\))</span>
+        <span>Categoria-Alvo: Knowledge Update (N = 78)</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-6">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            O Fenômeno da Interferência Factual e sua Resolução Temporal
+          </h2>
+          <p class="text-sm sm:text-base text-slate-300">
+            Comparamos 4 condições em <code>knowledge-update</code> para separar a densidade de fatos da validade temporal:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+            <span class="text-xs font-mono text-slate-400">1. Baseline \(A\)</span>
+            <div class="text-3xl font-extrabold text-slate-200">73,08%</div>
+            <div class="text-xs font-mono text-slate-400">57 / 78 acertos</div>
+            <p class="text-xs text-slate-300 pt-1 border-t border-slate-800">
+              72% dos grafos semânticos vazios: o modelo lê só os turnos episódicos brutos.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-rose-950/25 border border-rose-800/60 space-y-2">
+            <span class="text-xs font-mono text-rose-300">2. Baseline Fiel \(A^*\)</span>
+            <div class="text-3xl font-extrabold text-rose-300">67,95% &darr;</div>
+            <div class="text-xs font-mono text-rose-400">53 / 78 (&minus;4 vs \(A\))</div>
+            <p class="text-xs text-slate-300 pt-1 border-t border-rose-900/50">
+              100% dos grafos cheios sem validade: fatos antigos e novos competem no topo do prompt.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-rose-950/35 border border-rose-700/70 space-y-2">
+            <span class="text-xs font-mono text-rose-300">3. Ablação \(B_0\)</span>
+            <div class="text-3xl font-extrabold text-rose-300">65,38% &darr;&darr;</div>
+            <div class="text-xs font-mono text-rose-400">51 / 78 (&minus;6 vs \(A\))</div>
+            <p class="text-xs text-slate-300 pt-1 border-t border-rose-900/50">
+              Extração densa por sessão sem validade temporal: máxima interferência entre estados.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-emerald-950/35 border-2 border-emerald-500/80 space-y-2">
+            <span class="text-xs font-mono text-emerald-300 font-bold">4. Proposta Temporal \(B\)</span>
+            <div class="text-3xl font-extrabold text-emerald-300">83,33% &uarr;&uarr;</div>
+            <div class="text-xs font-mono text-emerald-400">65 / 78 (+14/&minus;0 vs \(B_0\))</div>
+            <p class="text-xs text-slate-200 pt-1 border-t border-emerald-800/60">
+              Mesmos fatos de \(B_0\) + validade temporal: <strong>+17,95 p.p.</strong> (\(p_{\text{Holm}}=0{,}0015\)); +12 vs \(A^*\) (\(p=0{,}0042\)).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Conclusão causal: A memória semântica só melhora atualização de conhecimento quando acompanhada de validade e supersessão.
+      </div>
+    </section>
+
+    <!-- SLIDE 16: ATO III - ESTUDOS DE CASO QUALITATIVOS (FIGURA 4) -->
+    <section id="slide-15" data-act="Ato III • Casos Reais" data-title="Anatomia da Interferência Factual nos Grafos Reais" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 16 / 24 &bull; ATO III — EVIDÊNCIA QUALITATIVA</span>
+        <span>Figura 4 do Artigo: Casos a2f3aa27, 01493427 e 07741c45</span>
+      </div>
+
+      <div class="my-auto py-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-5 space-y-4">
+          <h2 class="text-2xl font-bold text-white">
+            Quando a Ablação \(B_0\) Soma o Passado com o Presente
+          </h2>
+          <div class="p-4 rounded-xl bg-slate-900 border border-amber-700/60 space-y-2 text-xs">
+            <div class="font-mono text-amber-300 font-bold">Caso 2 &bull; ID: <code>01493427</code> (Coleção de Cartões-Postais)</div>
+            <p class="text-slate-300 leading-relaxed">
+              Na Sessão 1, o usuário tinha <strong>17 cartões-postais</strong>. Na Sessão 2, adquiriu +8 e declarou ter <strong>25 no total</strong>.
+            </p>
+            <ul class="space-y-1 text-slate-200 font-mono">
+              <li>&bull; <strong>Baseline \(A\) (grafo vazio):</strong> lê o diálogo &rarr; <code>"25"</code> ✅</li>
+              <li>&bull; <strong>Ablação \(B_0\) (sem validade):</strong> recebe <code>- has 17</code> e <code>- has 25</code> como fatos ativos e soma os dois &rarr; <code>"42"</code> ❌</li>
+              <li>&bull; <strong>Proposta \(B\):</strong> marca 17 como <code>[HISTORICAL]</code> e 25 como <code>[CURRENT]</code> &rarr; <code>"25"</code> ✅</li>
+            </ul>
+          </div>
+          <p class="text-xs text-slate-400">
+            No Caso 3 (<code>07741c45</code>, localização dos tênis), \(B\) corrige o anacronismo temporal, mas o extrator resume <em>"shoe rack in my closet"</em> para <em>"closet"</em>, ilustrando uma limitação de granularidade lexical do extrator.
+          </p>
+        </div>
+
+        <div class="lg:col-span-7 p-3 rounded-2xl bg-white border border-slate-700 shadow-xl">
+          <img src="../reports/figures/fig4_estudo_caso_supersessao.png" alt="Três Estudos de Caso Qualitativos" class="w-full max-h-[50vh] object-contain mx-auto">
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400 flex justify-between">
+        <span>Inspeção direta dos arquivos <code>*_long_term_kb_graph.json</code></span>
+        <a href="../reports/figures/fig4_estudo_caso_supersessao.png" target="_blank" class="text-sky-400 hover:underline">Ampliar Figura 4 &nearr;</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 17: ATO III - VISÃO PANORÂMICA POR CATEGORIA (FIGURAS 2 E 3) -->
+    <section id="slide-16" data-act="Ato III • Resultados" data-title="Desempenho por Categoria e Decomposição Pareada" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 17 / 24 &bull; ATO III — RESULTADOS QUANTITATIVOS (\(N = 500\))</span>
+        <span>Figuras 2 e 3 do Artigo IEEE</span>
+      </div>
+
+      <div class="my-auto py-4 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+          <div class="flex justify-between text-xs font-mono text-slate-400">
+            <span>Figura 2: Acurácia por Categoria (\(A^*, B_0, B, B_{\text{v2}}\))</span>
+            <a href="../reports/figures/fig2_baseline_vs_paper.png" target="_blank" class="text-sky-400 hover:underline">Ampliar &nearr;</a>
+          </div>
+          <img src="../reports/figures/fig2_baseline_vs_paper.png" alt="Figura 2: Acurácia por categoria" class="w-full max-h-[44vh] object-contain rounded-xl bg-white p-1">
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+          <div class="flex justify-between text-xs font-mono text-slate-400">
+            <span>Figura 3: Saldo Pareado (\(A \rightarrow B_0\) vs. \(B_0 \rightarrow B\))</span>
+            <a href="../reports/figures/fig3_analise_pareada_ab.png" target="_blank" class="text-sky-400 hover:underline">Ampliar &nearr;</a>
+          </div>
+          <img src="../reports/figures/fig3_analise_pareada_ab.png" alt="Figura 3: Decomposição pareada" class="w-full max-h-[44vh] object-contain rounded-xl bg-white p-1">
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-300 text-center">
+        Destaque na Figura 3: Em <code>knowledge-update</code>, \(B_0 \rightarrow B\) produz <strong>+14 acertos líquidos (+14/&minus;0)</strong>; em <code>multi-session</code>, produz <strong>&minus;7 (+7/&minus;14)</strong>.
+      </div>
+    </section>
+
+    <!-- SLIDE 18: ATO IV - ABLAÇÃO FATORIAL 2x2 (R08) -->
+    <section id="slide-17" data-act="Ato IV • Ablação 2×2" data-title="Abrindo a Caixa-Preta: score_only vs. tags_only (R08)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-indigo-400">SLIDE 18 / 24 &bull; ATO IV — DESACOPLAMENTO CAUSAL (RELATÓRIO R08)</span>
+        <span>O ganho vem do re-ranking por V(f, t_query) ou das etiquetas no prompt?</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        <div class="max-w-3xl space-y-1">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white">
+            Ablação Fatorial \(2 \times 2\) sobre os Mesmos 500 Grafos
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400">
+            Clique em cada quadrante para inspecionar o papel isolado do score \(\mathcal{V}\) e das etiquetas <code>[CURRENT]</code>/<code>[HISTORICAL]</code>:
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <button type="button" id="fact-btn-B0" onclick="selectFactorialCell('B0')" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-left transition-all">
+            <div class="text-[11px] font-mono text-slate-400">\(\mathcal{V}\) Off &bull; Tags Off</div>
+            <div class="text-base font-bold text-white mt-1">1. Ablação \(B_0\)</div>
+            <div class="text-2xl font-extrabold text-slate-200 mt-2">KU: 65,38%</div>
+            <div class="text-xs font-mono text-slate-400">Global: 64,20% (321)</div>
+          </button>
+
+          <button type="button" id="fact-btn-score" onclick="selectFactorialCell('score')" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-left transition-all">
+            <div class="text-[11px] font-mono text-amber-300">\(\mathcal{V}\) On &bull; Tags Off</div>
+            <div class="text-base font-bold text-white mt-1">2. <code>score_only</code></div>
+            <div class="text-2xl font-extrabold text-amber-300 mt-2">KU: 65,38%</div>
+            <div class="text-xs font-mono text-slate-400">Global: 61,80% (309)</div>
+          </button>
+
+          <button type="button" id="fact-btn-tags" onclick="selectFactorialCell('tags')" class="p-4 rounded-2xl bg-indigo-950/50 border-2 border-indigo-400 text-left transition-all">
+            <div class="text-[11px] font-mono text-indigo-300">\(\mathcal{V}\) Off &bull; Tags On</div>
+            <div class="text-base font-bold text-white mt-1">3. <code>tags_only</code> ★</div>
+            <div class="text-2xl font-extrabold text-emerald-300 mt-2">KU: 85,90%</div>
+            <div class="text-xs font-mono text-emerald-400">Global: 66,20% (331)</div>
+          </button>
+
+          <button type="button" id="fact-btn-B" onclick="selectFactorialCell('B')" class="p-4 rounded-2xl bg-slate-900 border border-slate-700 text-left transition-all">
+            <div class="text-[11px] font-mono text-sky-300">\(\mathcal{V}\) On &bull; Tags On</div>
+            <div class="text-base font-bold text-white mt-1">4. Proposta \(B\)</div>
+            <div class="text-2xl font-extrabold text-sky-300 mt-2">KU: 83,33%</div>
+            <div class="text-xs font-mono text-sky-400">Global: 65,60% (328)</div>
+          </div>
+        </div>
+
+        <div id="factorial-detail-box" class="p-5 rounded-2xl bg-slate-900/95 border border-indigo-700/60 space-y-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Teste Exato de McNemar em KU: \(B_0 \rightarrow \texttt{score\_only}\) (+3/&minus;3, \(p = 1{,}000\)) vs. \(B_0 \rightarrow \texttt{tags\_only}\) (<strong>+16/&minus;0, \(p &lt; 0{,}0001\)</strong>).
+      </div>
+    </section>
+
+    <!-- SLIDE 19: ATO IV - POR QUE TAGS DOMINAM NO REGIME ORACLE -->
+    <section id="slide-18" data-act="Ato IV • Ablação 2×2" data-title="AMecânica do Regime Oracle vs. Escala Real" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-indigo-400">SLIDE 19 / 24 &bull; ATO IV — INTERPRETAÇÃO TEÓRICA DE R08</span>
+        <span>Conectando a Ablação 2×2 com o Achado 10 (Variante Oracle)</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-8">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            Por que <code>score_only</code> tem efeito nulo no recorte <em>oracle</em>, mas \(\mathcal{V}\) continua necessário em escala real?
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-6 rounded-2xl bg-slate-900/90 border border-indigo-800/60 space-y-3">
+            <div class="text-xs font-mono text-indigo-300 uppercase font-bold">1. No Recorte Oracle (~9,18 fatos/grafo, top_k = 5)</div>
+            <h3 class="text-xl font-bold text-white">O gargalo não é o <em>Recall@5</em>, é a Desambiguação</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Com apenas ~9 fatos no grafo e <code>semantic_top_k = 5</code>, <strong>tanto o fato antigo quanto o fato novo entram nos top-5</strong> mesmo quando o fato antigo é penalizado por \(\mathcal{V}\).
+            </p>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Sem etiquetas (<code>score_only</code>), ambos chegam ao prompt como afirmações válidas (apenas em ordem trocada), mantendo a interferência factual. As etiquetas <code>[CURRENT]</code>/<code>[HISTORICAL]</code> resolvem 100% da ambiguidade.
+            </p>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-900/90 border border-emerald-800/60 space-y-3">
+            <div class="text-xs font-mono text-emerald-300 uppercase font-bold">2. Em Memória Longa (~40 sessões, &gt;150 fatos/grafo)</div>
+            <h3 class="text-xl font-bold text-white">\(\mathcal{V}(f_i, t_{\text{query}})\) governa o Filtro de <em>Top-K</em></h3>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Quando um usuário acumula centenas de fatos ao longo de meses, múltiplos estados expirados com alta similaridade lexical competiriam pelas 5 vagas do <code>top-k</code>.
+            </p>
+            <p class="text-sm text-slate-300 leading-relaxed">
+              Nesse regime, \(\mathcal{V}(f_i, t_{\text{query}})\) impede que fatos obsoletos expulsem o fato vigente do <code>top-5</code>, enquanto as etiquetas desambiguam os candidatos sobreviventes no prompt.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Divisão funcional limpa: \(\mathcal{V}(f_i, t_{\text{query}})\) atua na <strong>recuperação (ranking)</strong>; as etiquetas atuam na <strong>geração (resolução de conflito)</strong>.
+      </div>
+    </section>
+
+    <!-- SLIDE 20: ATO IV - OVER-SUPERSESSION E EVENT CALCULUS (B_v2) -->
+    <section id="slide-19" data-act="Ato IV • Event Calculus B_v2" data-title="Mitigando Over-Supersession com Event Calculus (B_v2)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-emerald-400">SLIDE 20 / 24 &bull; ATO IV — GENERALIZAÇÃO ONTOLÓGICA (RELATÓRIO R06)</span>
+        <span>Por que Multi-Session caiu em B e como B_v2 mitigou o problema</span>
+      </div>
+
+      <div class="my-auto py-6 space-y-6">
+        <div class="max-w-3xl space-y-2">
+          <h2 class="text-3xl font-bold text-white">
+            O Trade-off de <em>Over-Supersession</em> e a Proposta \(B_{\text{v2}}\) (<em>Event Calculus</em>)
+          </h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Em <code>multi-session</code>, muitas perguntas exigem <strong>somar eventos ao longo do tempo</strong> (ex.: <em>"Quantos cursos online concluí?"</em> — caso <code>c2ac3c61</code>). O classificador de \(B\) às vezes marcava o Curso 2 como <code>SUPERSEDES</code> do Curso 1, fazendo o LLM excluí-lo da contagem.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-5 rounded-2xl bg-slate-900 border border-amber-700/60 space-y-2">
+            <div class="text-xs font-mono text-amber-300 uppercase font-bold">Regra Ontológica 1 em \(B_{\text{v2}}\) &bull; SUPERSEDES</div>
+            <h3 class="text-lg font-bold text-white">Apenas Atributos Unívocos / Estados Mutuamente Exclusivos</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Sem nenhum exemplo de domínio no prompt (eliminando viés de prompt), <code>SUPERSEDES</code> fica restrito a transições onde uma entidade não pode ocupar dois estados simultâneos (localização atual, empregador, estado civil, meta ativa).
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900 border border-emerald-700/60 space-y-2">
+            <div class="text-xs font-mono text-emerald-300 uppercase font-bold">Regra Ontológica 2 em \(B_{\text{v2}}\) &bull; EXTENDS</div>
+            <h3 class="text-lg font-bold text-white">Eventos Históricos, Transações e Entidades Coexistentes</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Eventos pretéritos, compras, viagens ou itens adicionais nunca deixam de ter ocorrido quando novos eventos acontecem; eles se acumulam permanentemente na linha do tempo como <code>EXTENDS</code>.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+            <div class="text-xs font-mono text-slate-400">Corte de Supersessões</div>
+            <div class="text-2xl font-extrabold text-emerald-300">&minus;53,6%</div>
+            <div class="text-xs text-slate-400">De 612 (\(B\)) para 284 (\(B_{\text{v2}}\))</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-emerald-700/60">
+            <div class="text-xs font-mono text-emerald-300">Temporal Reasoning (\(B_{\text{v2}}\))</div>
+            <div class="text-2xl font-extrabold text-emerald-300">57,89% ★</div>
+            <div class="text-xs text-slate-400">Recorde do projeto (77/133)</div>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-sky-700/60">
+            <div class="text-xs font-mono text-sky-300">Knowledge Update (\(B_{\text{v2}}\))</div>
+            <div class="text-2xl font-extrabold text-sky-300">79,49%</div>
+            <div class="text-xs text-slate-400">\(p=0{,}0034\) vs \(B_0\); \(p=0{,}0117\) vs \(A^*\)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Ambos os prompts (<code>v1</code> e <code>v2</code>) estão parametrizados via CLI (<code>--classifier_mode {v1,v2}</code>).
+      </div>
+    </section>
+
+    <!-- SLIDE 21: ATO IV - AUDITORIA MANUAL DE PRECISÃO E SESSÕES FORA DE ORDEM (R07) -->
+    <section id="slide-20" data-act="Ato IV • Auditoria R07" data-title="Auditoria Manual de Precisão e as 34 Sessões Fora de Ordem (R07)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-emerald-400">SLIDE 21 / 24 &bull; ATO IV — AUDITORIA DE PRECISÃO DO CLASSIFICADOR (R07)</span>
+        <span>Amostra Estratificada: 90 transições auditadas manualmente (seed=42)</span>
+      </div>
+
+      <div class="my-auto py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-7 p-5 rounded-2xl bg-slate-900/95 border border-slate-800 space-y-4">
+          <h3 class="text-lg font-bold text-white">Precisão Empírica Auditada (\(n = 45\) por sistema)</h3>
+          <table class="w-full text-xs text-left font-mono border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400">
+                <th class="py-2">Categoria</th>
+                <th class="py-2 text-center">Volume (\(B \rightarrow B_{\text{v2}}\))</th>
+                <th class="py-2 text-center">Precisão \(B\)</th>
+                <th class="py-2 text-center">Precisão \(B_{\text{v2}}\)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/70">
+              <tr>
+                <td class="py-2.5 text-white">knowledge-update</td>
+                <td class="py-2.5 text-center text-slate-300">159 &rarr; 86 (&minus;45,9%)</td>
+                <td class="py-2.5 text-center text-emerald-300">66,7% (10/15)</td>
+                <td class="py-2.5 text-center text-emerald-300">66,7% (10/15)</td>
+              </tr>
+              <tr class="bg-emerald-950/30">
+                <td class="py-2.5 text-emerald-300 font-bold">temporal-reasoning</td>
+                <td class="py-2.5 text-center text-slate-300">183 &rarr; 70 (&minus;61,7%)</td>
+                <td class="py-2.5 text-center text-rose-300">13,3% (2/15)</td>
+                <td class="py-2.5 text-center text-emerald-300 font-bold">53,3% (8/15) &uarr;4&times;</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 text-white">multi-session</td>
+                <td class="py-2.5 text-center text-slate-300">270 &rarr; 128 (&minus;52,6%)</td>
+                <td class="py-2.5 text-center text-amber-300">20,0% (3/15)</td>
+                <td class="py-2.5 text-center text-amber-300">26,7% (4/15)</td>
+              </tr>
+              <tr class="border-t border-slate-700 font-bold">
+                <td class="py-2.5 text-white">Total Estratificado</td>
+                <td class="py-2.5 text-center text-emerald-300">612 &rarr; 284 (&minus;53,6%)</td>
+                <td class="py-2.5 text-center text-slate-300">33,3% (15/45)</td>
+                <td class="py-2.5 text-center text-emerald-300">48,9% (22/45)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-amber-950/25 border border-amber-700/60 space-y-3">
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800">Achado Estrutural no Dataset</span>
+          <h3 class="text-xl font-bold text-white">34 dos 500 itens do LongMemEval têm datas fora de ordem!</h3>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Ao investigar os falsos positivos em <code>temporal-reasoning</code>, descobrimos que o JSON oficial lista sessões mais antigas <em>depois</em> de sessões mais novas em 34 itens.
+          </p>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Isso gerava supersessões reversas (\(t_{\text{end}} &lt; t_{\text{start}}\)) 100% concentradas em <code>temporal-reasoning</code>. Adicionamos a guarda <code>--chronological_guard</code> para eliminar essa classe de erro.
+          </p>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        A quadruplicação da precisão em <em>Temporal Reasoning</em> (13,3% &rarr; 53,3%) explica diretamente o recorde de 57,89% da \(B_{\text{v2}}\).
+      </div>
+    </section>
+
+    <!-- SLIDE 22: ATO IV - RUÍDO ESTOCÁSTICO (B') E SENSIBILIDADE (R09) -->
+    <section id="slide-21" data-act="Ato IV • Robustez" data-title="Blindagem Estatística: Piso de Ruído (B') e Sensibilidade (R09)" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 22 / 24 &bull; ATO IV — ESTABILIDADE E ROBUSTEZ (R06 &amp; R09)</span>
+        <span>Figura 6 do Artigo IEEE Consolidado</span>
+      </div>
+
+      <div class="my-auto py-4 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <div class="text-xs font-mono text-sky-400 font-bold uppercase">1. Piso de Ruído Estocástico (\(B \times B'\))</div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Sob <code>temperature=0.7</code>, a réplica completa \(B'\) teve 7,20% de pares discordantes no geral (65,60% vs. 64,00%, \(p=0{,}243\)), mas <strong>97,44% de estabilidade em Knowledge Update</strong>: ambas cravaram <strong>83,33% (65/78)</strong> (+1/&minus;1).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-900 border border-emerald-800/60 space-y-1.5">
+            <div class="text-xs font-mono text-emerald-400 font-bold uppercase">2. Sensibilidade Pré-Registrada (\(\lambda, \tau\)) &bull; ROBUSTO</div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Variando \(\lambda \in \{0{,}4; 0{,}6; 0{,}8\}\) e \(\tau \in \{30, 60, 90\}\text{d}\) sem seleção no teste:
+            </p>
+            <ul class="text-xs text-slate-200 font-mono space-y-1">
+              <li>&bull; <strong>Global:</strong> 65,60% a 66,80% (amplitude 1,20 p.p. &lt; ruído 1,60 p.p.)</li>
+              <li>&bull; <strong>KU:</strong> 79,49% a 84,62% (todos \(p \le 0{,}0034\) vs. \(B_0\))</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 p-3 rounded-2xl bg-white border border-slate-700 shadow-xl">
+          <img src="../reports/figures/fig6_ablacao_sensibilidade.png" alt="Figura 6: Ablação 2x2 e Sensibilidade" class="w-full max-h-[50vh] object-contain mx-auto">
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400 flex justify-between">
+        <span>Configuração reportada mantida em \(\lambda = 0{,}6, \tau = 60\text{d}\) (AGENT.MD §19).</span>
+        <a href="../reports/figures/fig6_ablacao_sensibilidade.png" target="_blank" class="text-sky-400 hover:underline">Ampliar Figura 6 &nearr;</a>
+      </div>
+    </section>
+
+    <!-- SLIDE 23: ATO V - QUADRO SINÓPTICO DAS 12 CONDIÇÕES -->
+    <section id="slide-22" data-act="Ato V • Síntese" data-title="Quadro Sinóptico: As 12 Execuções de 500 Itens" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 23 / 24 &bull; ATO V — PANORAMA GERAL CONSOLIDADO</span>
+        <span>6.000 avaliações completas (12 condições × 500 questões)</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="master-table-caption" class="text-xl sm:text-2xl font-bold text-white">
+            Todas as 12 Condições Experimentais Avaliadas (\(N = 500\))
+          </h2>
+          <span class="text-xs font-mono text-slate-400">Tabela responsiva com cabeçalhos fixos (sticky)</span>
+        </div>
+
+        <div tabindex="0" role="region" aria-labelledby="master-table-caption" class="table-wrapper">
+          <table class="text-xs text-left font-mono">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-300">
+                <th class="py-2.5 px-3">Condição Experimental</th>
+                <th class="py-2.5 px-3 text-center">OVERALL (500)</th>
+                <th class="py-2.5 px-3 text-center">KU (78)</th>
+                <th class="py-2.5 px-3 text-center">TR (133)</th>
+                <th class="py-2.5 px-3 text-center">MS (133)</th>
+                <th class="py-2.5 px-3">Papel Metodológico / Achado Principal</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/80">
+              <tr>
+                <th class="py-2 px-3 text-slate-300">1. Baseline \(A\) (Inicial)</th>
+                <td class="py-2 px-3 text-center">61,20% (306)</td>
+                <td class="py-2 px-3 text-center">73,08% (57)</td>
+                <td class="py-2 px-3 text-center">51,88% (69)</td>
+                <td class="py-2 px-3 text-center text-rose-300">46,62% (62)</td>
+                <td class="py-2 px-3 text-slate-400">360/500 grafos semânticos vazios (concorrência)</td>
+              </tr>
+              <tr class="bg-slate-900/60">
+                <th class="py-2 px-3 text-white font-bold">2. Baseline Fiel \(A^*\) (R03)</th>
+                <td class="py-2 px-3 text-center font-bold text-white">63,40% (317)</td>
+                <td class="py-2 px-3 text-center text-amber-300">67,95% (53)</td>
+                <td class="py-2 px-3 text-center">53,38% (71)</td>
+                <td class="py-2 px-3 text-center text-emerald-300 font-bold">57,14% (76)</td>
+                <td class="py-2 px-3 text-emerald-300">0 vazios; MS idêntico ao paper ACL 2026 (57,14%)</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-3 text-slate-200">3. Ablação \(B_0\) (<code>no_temporal</code>)</th>
+                <td class="py-2 px-3 text-center">64,20% (321)</td>
+                <td class="py-2 px-3 text-center text-rose-300">65,38% (51)</td>
+                <td class="py-2 px-3 text-center">57,14% (76)</td>
+                <td class="py-2 px-3 text-center">54,14% (72)</td>
+                <td class="py-2 px-3 text-amber-300">Isola extração por sessão; prova interferência factual</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-3 text-slate-300">4. Ablação <code>score_only</code> (R08)</th>
+                <td class="py-2 px-3 text-center">61,80% (309)</td>
+                <td class="py-2 px-3 text-center text-rose-300">65,38% (51)</td>
+                <td class="py-2 px-3 text-center">53,38% (71)</td>
+                <td class="py-2 px-3 text-center">51,13% (68)</td>
+                <td class="py-2 px-3 text-slate-400">Só \(\mathcal{V}\) sem etiquetas: efeito nulo em KU (\(p=1{,}000\))</td>
+              </tr>
+              <tr class="bg-indigo-950/35">
+                <th class="py-2 px-3 text-indigo-300 font-bold">5. Ablação <code>tags_only</code> (R08) ★</th>
+                <td class="py-2 px-3 text-center font-bold text-emerald-300">66,20% (331)</td>
+                <td class="py-2 px-3 text-center font-bold text-emerald-300">85,90% (67)</td>
+                <td class="py-2 px-3 text-center">56,39% (75)</td>
+                <td class="py-2 px-3 text-center">51,13% (68)</td>
+                <td class="py-2 px-3 text-indigo-200">Motor causal no oracle (+16/&minus;0 vs \(B_0\), \(p&lt;0{,}0001\))</td>
+              </tr>
+              <tr class="bg-sky-950/35">
+                <th class="py-2 px-3 text-sky-300 font-bold">6. Proposta \(B\) (\(\lambda=0{,}6, \tau=60\text{d}\))</th>
+                <td class="py-2 px-3 text-center font-bold text-sky-300">65,60% (328)</td>
+                <td class="py-2 px-3 text-center font-bold text-sky-300">83,33% (65)</td>
+                <td class="py-2 px-3 text-center">55,64% (74)</td>
+                <td class="py-2 px-3 text-center">48,87% (65)</td>
+                <td class="py-2 px-3 text-sky-200">+12 vs \(A^*\) (\(p=0{,}0042\)); +14/&minus;0 vs \(B_0\) (\(p_{\text{Holm}}=0{,}0015\))</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-3 text-slate-300">7. Réplica \(B'\) (Piso de Ruído R06)</th>
+                <td class="py-2 px-3 text-center">64,00% (320)</td>
+                <td class="py-2 px-3 text-center font-bold text-emerald-300">83,33% (65)</td>
+                <td class="py-2 px-3 text-center">51,13% (68)</td>
+                <td class="py-2 px-3 text-center">50,38% (67)</td>
+                <td class="py-2 px-3 text-slate-400">97,44% de estabilidade em KU (+1/&minus;1)</td>
+              </tr>
+              <tr class="bg-emerald-950/25">
+                <th class="py-2 px-3 text-emerald-300 font-bold">8. Proposta \(B_{\text{v2}}\) (Event Calculus)</th>
+                <td class="py-2 px-3 text-center font-bold text-white">64,80% (324)</td>
+                <td class="py-2 px-3 text-center font-bold text-emerald-300">79,49% (62)</td>
+                <td class="py-2 px-3 text-center font-bold text-emerald-300">57,89% (77)</td>
+                <td class="py-2 px-3 text-center">51,13% (68)</td>
+                <td class="py-2 px-3 text-emerald-200">&minus;53,6% supersessões; precisão TR 13,3%&rarr;53,3%</td>
+              </tr>
+              <tr>
+                <th class="py-2 px-3 text-slate-300">9–12. Sensibilidade (\(\lambda \in \{0{,}4;0{,}8\}, \tau \in \{30,90\}\text{d}\))</th>
+                <td class="py-2 px-3 text-center">65,60%–66,80%</td>
+                <td class="py-2 px-3 text-center text-emerald-300">79,49%–84,62%</td>
+                <td class="py-2 px-3 text-center">53,38%–58,65%</td>
+                <td class="py-2 px-3 text-center">49,62%–51,88%</td>
+                <td class="py-2 px-3 text-slate-400">Resultado classificado como ROBUSTO (todos \(p \le 0{,}0034\))</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400">
+        Todos os arquivos JSON por item estão versionados em <code>results/</code> e auditáveis sem chamadas de API.
+      </div>
+    </section>
+
+    <!-- SLIDE 24: ATO V - CONCLUSÃO E DEFESA PERANTE A BANCA (Q&A) -->
+    <section id="slide-23" data-act="Ato V • Defesa & Q&A" data-title="Conclusão Científica & Simulador de Arguição da Banca" class="keynote-slide">
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span class="text-sky-400">SLIDE 24 / 24 &bull; ATO V — FECHAMENTO E DEFESA</span>
+        <span>Perguntas Prováveis da Banca (Com suporte a busca Ctrl+F via hidden="until-found")</span>
+      </div>
+
+      <div class="my-auto py-4 space-y-6">
+        <div class="p-5 rounded-2xl bg-gradient-to-r from-sky-950/70 via-slate-900 to-indigo-950/70 border border-sky-700/60 space-y-2">
+          <div class="text-xs font-mono text-sky-300 uppercase font-bold">Resposta Final à Pergunta de Pesquisa</div>
+          <p class="text-sm sm:text-base text-white leading-relaxed">
+            A hipótese é <strong>fortemente suportada em atualização de conhecimento</strong> (+15,38 p.p. sobre \(A^*\), \(p=0{,}0042\); +17,95 p.p. sobre \(B_0\), \(p_{\text{Holm}}=0{,}0015\); +20,52 p.p. em <code>tags_only</code>, \(p&lt;0{,}0001\)) e <strong>não suportada como ganho global uniforme</strong> devido ao trade-off estrutural entre substituição de estado e contagem cumulativa em <code>multi-session</code>, mitigado via <em>Event Calculus</em> (\(B_{\text{v2}}\)).
+          </p>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex gap-2 overflow-x-auto pb-1 border-b border-slate-800" role="tablist" aria-label="Perguntas da Banca">
+            <button type="button" role="tab" id="qa-tab-0" aria-selected="true" onclick="selectQaTab(0)" class="px-3.5 py-2 text-xs font-mono text-slate-300 whitespace-nowrap">
+              P1. Ganho Global (\(p=0{,}278\))?
+            </button>
+            <button type="button" role="tab" id="qa-tab-1" aria-selected="false" onclick="selectQaTab(1)" class="px-3.5 py-2 text-xs font-mono text-slate-300 whitespace-nowrap">
+              P2. Por que tags_only &gt; score_only?
+            </button>
+            <button type="button" role="tab" id="qa-tab-2" aria-selected="false" onclick="selectQaTab(2)" class="px-3.5 py-2 text-xs font-mono text-slate-300 whitespace-nowrap">
+              P3. Pareamento Episódico \(A\) vs. \(A^*\)?
+            </button>
+            <button type="button" role="tab" id="qa-tab-3" aria-selected="false" onclick="selectQaTab(3)" class="px-3.5 py-2 text-xs font-mono text-slate-300 whitespace-nowrap">
+              P4. Recorte Oracle e 34 Itens Desordenados?
+            </button>
+            <button type="button" role="tab" id="qa-tab-4" aria-selected="false" onclick="selectQaTab(4)" class="px-3.5 py-2 text-xs font-mono text-slate-300 whitespace-nowrap">
+              P5. Custo de Chamadas de LLM?
+            </button>
+          </div>
+
+          <div class="tab-panels-grid">
+            <div role="tabpanel" id="qa-panel-0" aria-labelledby="qa-tab-0" tabindex="0">
+              <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-xs font-mono text-sky-400 font-bold">P1: "Por que o ganho global (\(A^* \rightarrow B\): 63,40% &rarr; 65,60%, \(p = 0{,}278\)) não é estatisticamente significativo?"</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  Porque o LongMemEval agrega 6 categorias com demandas cognitivas opostas: apenas <code>knowledge-update</code> (78 itens) testa substituição de estado, enquanto <code>multi-session</code> (133 itens) testa contagem cumulativa. Na categoria-alvo (<code>knowledge-update</code>), o efeito é altamente significativo tanto contra \(A^*\) (+12 líquidos, \(p = 0{,}0042\)) quanto contra \(B_0\) (+14/&minus;0, \(p_{\text{Holm}} = 0{,}0015\)), mais de 6 vezes acima do piso de ruído. No agregado global, esse ganho é parcialmente compensado pela <em>over-supersession</em> em <code>multi-session</code>, diagnosticada em <code>R07</code> e mitigada por \(B_{\text{v2}}\).
+                </p>
+              </div>
+            </div>
+
+            <div role="tabpanel" id="qa-panel-1" aria-labelledby="qa-tab-1" hidden="until-found">
+              <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-xs font-mono text-indigo-400 font-bold">P2: "Se tags_only atingiu 85,90% em KU e score_only teve efeito nulo (65,38%), a equação \(\mathcal{V}(f_i, t_{\text{query}})\) é desnecessária?"</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  Ela é redundante <strong>apenas no regime <em>oracle</em></strong> (~9,18 fatos/grafo e <code>semantic_top_k=5</code>), onde tanto o fato antigo quanto o novo entram no top-5 mesmo com \(\mathcal{V} \equiv 1\). Nesse regime, o gargalo é a desambiguação no prompt (resolvida pelas etiquetas). Em bancos longos com dezenas de sessões distratoras (&gt;150 fatos/grafo), \(\mathcal{V}(f_i, t_{\text{query}})\) passa a ser indispensável como filtro de <em>recall@5</em> para evitar que estados obsoletos ocupem as vagas do <code>top-k</code>.
+                </p>
+              </div>
+            </div>
+
+            <div role="tabpanel" id="qa-panel-2" aria-labelledby="qa-tab-2" hidden="until-found">
+              <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-xs font-mono text-emerald-400 font-bold">P3: "Os grafos episódicos de \(B, B_0, B_{\text{v2}}\) vieram de \(A\) (MAX_FLIPPED=5, KEYWORD_WEIGHT=0.5), enquanto \(A^*\) usou 3 e 0.7. Isso afeta a conclusão?"</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  Não, porque reportamos <strong>duas âncoras complementares</strong>: (1) \(B_0 \rightarrow B / B_{\text{v2}} / \texttt{tags\_only}\) é 100% pareada sobre exatamente os mesmos 500 grafos episódicos e semânticos (+14/&minus;0 em \(B\), +16/&minus;0 em <code>tags_only</code>); e (2) contra a Baseline Fiel \(A^*\) (parâmetros oficiais e 0 grafos vazios), \(B\) mantém +12 acertos líquidos em KU (\(p = 0{,}0042\)) e \(B_{\text{v2}}\) mantém +9 (\(p = 0{,}0117\)). Além disso, \(A^* \rightarrow B_0\) em KU é estatisticamente neutra (53 vs. 51, \(p = 0{,}8145\)).
+                </p>
+              </div>
+            </div>
+
+            <div role="tabpanel" id="qa-panel-3" aria-labelledby="qa-tab-3" hidden="until-found">
+              <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-xs font-mono text-amber-400 font-bold">P4: "Como foram descobertas as duas anomalias no benchmark distribuído pelo HeLa-Mem?"</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  Pela inspeção programática dos dados (<code>AGENT.MD §4</code>): em R05 constatamos que <code>haystack_session_ids == answer_session_ids</code> nos 500 itens de <code>data/longmemeval_s.json</code> (1–6 sessões de evidência, variante <em>oracle</em>). Em R07 constatamos que 34/500 itens têm <code>haystack_dates</code> fora de ordem cronológica no JSON, gerando supersessões reversas exclusivamente em <code>temporal-reasoning</code>.
+                </p>
+              </div>
+            </div>
+
+            <div role="tabpanel" id="qa-panel-4" aria-labelledby="qa-tab-4" hidden="until-found">
+              <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+                <div class="text-xs font-mono text-sky-400 font-bold">P5: "Qual é o sobrecusto de chamadas de LLM da arquitetura proposta?"</div>
+                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  Na <strong>consulta/inferência</strong>, o custo extra de chamadas de LLM é <strong>ZERO</strong> (\(\mathcal{V}\) e as etiquetas são calculados deterministicamente em Python). O custo extra ocorre apenas na <strong>ingestão</strong> quando um novo fato atinge similaridade \(\ge 0{,}35\) com fatos ativos de sessões anteriores (até 4 candidatos). Nos 156 itens de sessão única, o sobrecusto de ingestão também é zero.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-xs font-mono text-slate-400 flex flex-wrap justify-between gap-2">
+        <span>Apresentação Concluída &bull; 24 Slides</span>
+        <div class="flex gap-4">
+          <a href="../reports/relatorio_final.md" class="text-sky-400 hover:underline">Relatório Final (.md)</a>
+          <a href="../reports/relatorio_final_ieee.tex" class="text-sky-400 hover:underline">Artigo IEEE (.tex)</a>
+          <a href="roteiro_defesa_apresentacao.md" class="text-sky-400 hover:underline">Roteiro de Defesa</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT CONTROLLER                                                 -->
+  <!-- ===================================================================== -->
+  <script>
+    const slides = Array.from(document.querySelectorAll('.keynote-slide'));
+    const TOTAL_SLIDES = slides.length;
+    let currentSlide = 0;
+    let viewMode = 'deck'; // 'deck' (1 slide per screen, clean Keynote feel) | 'scroll'
+
+    function populateJumpSelect() {
+      const sel = document.getElementById('slide-jump-select');
+      sel.innerHTML = slides.map((s, idx) => {
+        const num = String(idx + 1).padStart(2, '0');
+        const act = s.getAttribute('data-act') || '';
+        const title = s.getAttribute('data-title') || '';
+        return `<option value="${idx}">${num}. [${act}] ${title}</option>`;
+      }).join('');
+    }
+
+    function updateSlideUI() {
+      const numStr = String(currentSlide + 1).padStart(2, '0');
+      document.getElementById('slide-counter-badge').textContent = `${numStr} / ${TOTAL_SLIDES}`;
+      document.getElementById('slide-jump-select').value = String(currentSlide);
+
+      const activeEl = slides[currentSlide];
+      if (activeEl) {
+        document.getElementById('top-act-label').textContent = activeEl.getAttribute('data-act') || '';
+        document.getElementById('top-slide-title').textContent = activeEl.getAttribute('data-title') || '';
+      }
+
+      const pct = ((currentSlide + 1) / TOTAL_SLIDES) * 100;
+      document.getElementById('slide-progress-bar').style.width = `${pct.toFixed(2)}%`;
+
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active-slide', idx === currentSlide);
+      });
+    }
+
+    function goToSlide(idx) {
+      currentSlide = Math.max(0, Math.min(TOTAL_SLIDES - 1, idx));
+      updateSlideUI();
+      if (viewMode === 'scroll') {
+        slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < TOTAL_SLIDES - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    function toggleViewMode() {
+      viewMode = (viewMode === 'deck') ? 'scroll' : 'deck';
+      document.body.classList.toggle('deck-mode', viewMode === 'deck');
+      const btn = document.getElementById('btn-toggle-view');
+      if (viewMode === 'deck') {
+        btn.textContent = '📜 Ver Todos (Rolagem)';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        btn.textContent = '🖥️ Modo Keynote (1 por tela)';
+        slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      const role = (e.target && e.target.getAttribute) ? e.target.getAttribute('role') : '';
+      if (tag === 'input' || tag === 'select' || tag === 'textarea' || role === 'tab') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        if (viewMode === 'deck') { e.preventDefault(); nextSlide(); }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (viewMode === 'deck') { e.preventDefault(); prevSlide(); }
+      }
+    });
+
+    // Slide 04: Dilemma Lens
+    function setDilemmaLens(mode) {
+      const btnHela = document.getElementById('btn-lens-hela');
+      const btnTemp = document.getElementById('btn-lens-temporal');
+      const meta0 = document.getElementById('dilemma-meta-0');
+      const meta1 = document.getElementById('dilemma-meta-1');
+      const code = document.getElementById('dilemma-prompt-code');
+      const exp = document.getElementById('dilemma-explanation');
+
+      if (mode === 'hela') {
+        btnHela.className = 'px-3.5 py-2 rounded-xl bg-rose-950/90 text-rose-300 border border-rose-600/60 font-semibold';
+        btnTemp.className = 'px-3.5 py-2 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 font-semibold';
+        meta0.innerHTML = 'Cosine Sim: <strong class="text-sky-300">0.842 (Maior!)</strong> &bull; metadata: <code>{"type": "fact"}</code>';
+        meta1.innerHTML = 'Cosine Sim: <strong class="text-sky-300">0.819</strong> &bull; metadata: <code>{"type": "fact"}</code>';
+        code.textContent = `<KNOWLEDGE BASE>\n- User currently has 1,250 followers on Instagram.\n- User gained 50 new followers since morning, reaching 1,300 followers.\n\nResposta Gerada (HeLa-Mem A e Ablação B0): "1,250"   ❌ (Gabarito: 1,300)`;
+        exp.innerHTML = '<strong>Por que erra?</strong> O Fato #0 contém literalmente <em>"currently has 1,250 followers"</em>, vencendo na similaridade de cosseno. Sem etiqueta de vigência, o LLM confia na frase lexicalmente mais direta.';
+      } else {
+        btnTemp.className = 'px-3.5 py-2 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-600/60 font-semibold';
+        btnHela.className = 'px-3.5 py-2 rounded-xl bg-slate-900 text-slate-300 border border-slate-700 font-semibold';
+        meta0.innerHTML = 'Status: <strong class="text-amber-300">superseded</strong> &bull; valid_to: <code>2023/05/28 19:16</code>';
+        meta1.innerHTML = 'Status: <strong class="text-emerald-300">active</strong> &bull; valid_from: <code>2023/05/28 19:16</code>';
+        code.textContent = `<KNOWLEDGE BASE>\n- [CURRENT / ACTIVE (Valid since: 2023/05/28 19:16)] User gained 50 new followers since morning, reaching 1,300 followers.\n- [HISTORICAL / SUPERSEDED (Valid: 01:28 to 19:16)] User currently has 1,250 followers on Instagram.\n\nResposta Gerada (Proposta B, B_v2 e tags_only): "1,300"   ✅ (CONFLITO RESOLVIDO)`;
+        exp.innerHTML = '<strong>Como a Proposta Temporal resolve:</strong> A supersessão fecha a janela do Fato #0 às 19:16 sem apagá-lo e sinaliza <code>[HISTORICAL]</code> vs. <code>[CURRENT]</code> no prompt.';
+      }
+    }
+
+    // Slide 06: Literature Funnel
+    const LIT_DATA = [
+      {
+        title: '1. Microsoft GraphRAG (Edge et al., 2024)',
+        badge: 'Corpus Estático',
+        badgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+        what: 'Extrai grafo de entidades e comunidades hierárquicas (Leiden) para sumarização global de coleções textuais.',
+        gap: 'Não modela conversas incrementais onde atributos do usuário mudam e invalidam estados anteriores.',
+        role: 'Mostrou o valor de representações em grafo sobre chunks vetoriais isolados.'
+      },
+      {
+        title: '2. CodeRAG (EMNLP 2025)',
+        badge: 'Agentic Coding',
+        badgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+        what: 'Combina grafos estruturais de código com reranking multi-rota para completamento em nível de repositório.',
+        gap: 'Focado em dependências estáticas de código, não em memória episódica/semântica de longo prazo.',
+        role: 'Inspiração para o reranking combinando similaridade vetorial e sinal estrutural.'
+      },
+      {
+        title: '3. A-MEM: Agentic Memory (Xu et al., 2025)',
+        badge: 'Precursor Zettelkasten',
+        badgeClass: 'bg-amber-950 text-amber-300 border-amber-800',
+        what: 'Organiza experiências em notas interligadas estilo Zettelkasten que evoluem quando novas notas entram.',
+        gap: 'Nossa ideia inicial ("adicionar pesos com reforço e decay ao A-MEM") já havia acabado de ser publicada pelo HeLa-Mem (ACL 2026)!',
+        role: 'Foi o trampolim que nos levou ao HeLa-Mem e à pergunta mais profunda sobre validade temporal.'
+      },
+      {
+        title: '4. HeLa-Mem: Hebbian Associative Memory (ACL 2026) ★',
+        badge: 'ARTIGO-BASE ESCOLHIDO',
+        badgeClass: 'bg-sky-950 text-sky-300 border-sky-700',
+        what: 'Grafo episódico e semântico com aprendizado hebbiano (coativação reforça sinapses) e spreading activation.',
+        gap: 'Trata todos os fatos semânticos extraídos como estáticos e atemporais, sofrendo interferência factual quando o estado muda.',
+        role: 'Código-base oficial reproduzido (commit 68f19b3) sobre o qual construímos nossa intervenção.'
+      },
+      {
+        title: '5. Zep / Graphiti: Temporal Knowledge Graph (2025) ★',
+        badge: 'INSPIRAÇÃO DA EVOLUÇÃO',
+        badgeClass: 'bg-emerald-950 text-emerald-300 border-emerald-700',
+        what: 'Grafo de conhecimento temporal com janelas explícitas de validade [valid_from, valid_to] e invalidação não-destrutiva.',
+        gap: 'Não possui a dinâmica associativa hebbiana nem spreading activation do HeLa-Mem.',
+        role: 'Forneceu o princípio de janelas de validade e supersessão que incorporamos à memória semântica do HeLa-Mem.'
+      }
+    ];
+
+    function selectLitTab(idx) {
+      for (let i = 0; i < LIT_DATA.length; i++) {
+        const btn = document.getElementById(`lit-tab-${i}`);
+        if (btn) btn.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+      }
+      const d = LIT_DATA[idx];
+      document.getElementById('lit-detail-box').innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 class="text-lg font-bold text-white">${d.title}</h3>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded border ${d.badgeClass}">${d.badge}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pt-1">
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="font-mono text-sky-400 font-bold">Proposta Original</div>
+            <p class="text-slate-300 leading-relaxed">${d.what}</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="font-mono text-amber-400 font-bold">Limitação Identificada</div>
+            <p class="text-slate-300 leading-relaxed">${d.gap}</p>
+          </div>
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+            <div class="font-mono text-emerald-400 font-bold">Herança no Projeto</div>
+            <p class="text-slate-300 leading-relaxed">${d.role}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Slide 11: Pertinence Simulator
+    function computeScore(sim, v, lambda) {
+      return lambda * sim + (1.0 - lambda) * v;
+    }
+
+    function updatePertinenceSim() {
+      const lambda = parseFloat(document.getElementById('sim-lambda').value);
+      const tau = parseFloat(document.getElementById('sim-tau').value);
+      const tq = parseFloat(document.getElementById('sim-tquery').value);
+      const s1 = parseFloat(document.getElementById('sim-s1').value);
+      const s2 = parseFloat(document.getElementById('sim-s2').value);
+
+      document.getElementById('val-lambda').textContent = lambda.toFixed(2);
+      document.getElementById('val-tau').textContent = `${tau} dias`;
+      document.getElementById('val-s1').textContent = s1.toFixed(2);
+      document.getElementById('val-s2').textContent = s2.toFixed(2);
+
+      const tSup = 30.0;
+      document.getElementById('val-tquery').textContent = tq < tSup
+        ? `Dia ${tq} (Antes da supersessão)`
+        : `Dia ${tq} (+${tq - tSup}d pós-supersessão)`;
+
+      const v1 = (tq <= tSup) ? 1.0 : Math.exp(-(tq - tSup) / tau);
+      const v2 = (tq < tSup) ? 0.0 : 1.0;
+      const sc1 = computeScore(s1, v1, lambda);
+      const sc2 = computeScore(s2, v2, lambda);
+
+      document.getElementById('score-f1').textContent = `Score: ${sc1.toFixed(3)}`;
+      document.getElementById('detail-f1').textContent = `V(f₁) = ${v1.toFixed(3)} • λ·Sim = ${(lambda * s1).toFixed(3)}`;
+      document.getElementById('score-f2').textContent = `Score: ${sc2.toFixed(3)}`;
+      document.getElementById('detail-f2').textContent = `V(f₂) = ${v2.toFixed(3)} • λ·Sim = ${(lambda * s2).toFixed(3)}`;
+
+      const banner = document.getElementById('sim-winner-banner');
+      if (sc2 >= sc1) {
+        banner.textContent = `Top-1: Fato f₂ (Vigente) por +${(sc2 - sc1).toFixed(3)}`;
+        banner.className = 'text-emerald-400 font-bold';
+      } else {
+        banner.textContent = `Top-1: Fato f₁ (${tq < tSup ? 'Consulta Histórica' : 'Obsoleto vence!'}) por +${(sc1 - sc2).toFixed(3)}`;
+        banner.className = tq < tSup ? 'text-sky-400 font-bold' : 'text-amber-400 font-bold';
+      }
+
+      const svg = document.getElementById('pertinence-svg');
+      const W = 640, H = 220, padL = 42, padR = 18, padT = 16, padB = 28;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const xOf = (t) => padL + (t / 150.0) * plotW;
+      const yOf = (sc) => padT + (1.0 - sc) * plotH;
+
+      let pts1 = [], pts2 = [];
+      for (let t = 0; t <= 150; t += 1) {
+        const vt1 = (t <= tSup) ? 1.0 : Math.exp(-(t - tSup) / tau);
+        const vt2 = (t < tSup) ? 0.0 : 1.0;
+        pts1.push(`${xOf(t).toFixed(1)},${yOf(computeScore(s1, vt1, lambda)).toFixed(1)}`);
+        pts2.push(`${xOf(t).toFixed(1)},${yOf(computeScore(s2, vt2, lambda)).toFixed(1)}`);
+      }
+
+      svg.innerHTML = `
+        <line x1="${padL}" y1="${yOf(1.0)}" x2="${W - padR}" y2="${yOf(1.0)}" stroke="#1e293b"/>
+        <line x1="${padL}" y1="${yOf(0.5)}" x2="${W - padR}" y2="${yOf(0.5)}" stroke="#1e293b"/>
+        <line x1="${padL}" y1="${yOf(0.0)}" x2="${W - padR}" y2="${yOf(0.0)}" stroke="#334155"/>
+        <text x="${padL - 6}" y="${yOf(1.0) + 4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">1.0</text>
+        <text x="${padL - 6}" y="${yOf(0.5) + 4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">0.5</text>
+        <text x="${padL - 6}" y="${yOf(0.0) + 4}" fill="#64748b" font-size="10" text-anchor="end" font-family="monospace">0.0</text>
+        <text x="${xOf(0)}" y="${H - 8}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">Dia 0</text>
+        <text x="${xOf(30)}" y="${H - 8}" fill="#f59e0b" font-size="10" text-anchor="middle" font-family="monospace">Dia 30 (Sup.)</text>
+        <text x="${xOf(90)}" y="${H - 8}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">Dia 90</text>
+        <text x="${xOf(150)}" y="${H - 8}" fill="#64748b" font-size="10" text-anchor="middle" font-family="monospace">Dia 150</text>
+        <line x1="${xOf(tSup)}" y1="${padT}" x2="${xOf(tSup)}" y2="${H - padB}" stroke="#f59e0b" stroke-dasharray="4 4"/>
+        <polyline fill="none" stroke="#fbbf24" stroke-width="2.5" points="${pts1.join(' ')}"/>
+        <polyline fill="none" stroke="#34d399" stroke-width="2.5" points="${pts2.join(' ')}"/>
+        <line x1="${xOf(tq)}" y1="${padT}" x2="${xOf(tq)}" y2="${H - padB}" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="${xOf(tq)}" cy="${yOf(sc1)}" r="5" fill="#fbbf24" stroke="#020617" stroke-width="1.5"/>
+        <circle cx="${xOf(tq)}" cy="${yOf(sc2)}" r="5" fill="#34d399" stroke="#020617" stroke-width="1.5"/>
+      `;
+    }
+
+    // Slide 18: Factorial 2x2 Matrix
+    const FACTORIAL_INFO = {
+      B0: {
+        title: '1. Ablação B0 (no_temporal) — 64,20% Global | 65,38% em KU (51/78)',
+        body: 'Usa exatamente os mesmos 4.591 fatos extraídos sessão a sessão da Proposta B, mas sem validade temporal e sem etiquetas. A colisão entre fatos antigos e novos derruba KU para 65,38%.'
+      },
+      score: {
+        title: '2. Ablação score_only (Só Pertinência V) — 61,80% Global | 65,38% em KU (51/78)',
+        body: 'Ativa V(f, t_query) na busca, mas omite as etiquetas [CURRENT]/[HISTORICAL] no prompt. Efeito nulo em KU (+3/-3 vs B0, p=1,000): como ambos os fatos entram no top-5, apenas reordená-los não resolve o conflito.'
+      },
+      tags: {
+        title: '3. Ablação tags_only (Só Etiquetas no Prompt) ★ — 66,20% Global | 85,90% em KU (67/78)',
+        body: 'Fixa V(f, t_query) = 1.0 e mantém as etiquetas [CURRENT / ACTIVE] e [HISTORICAL / SUPERSEDED]. Captura 100% do ganho causal (+16 ganhos e ZERO regressões sobre B0, p < 0,0001) e atinge o recorde global do projeto (66,20%).'
+      },
+      B: {
+        title: '4. Proposta B Completa (V + Etiquetas) — 65,60% Global | 83,33% em KU (65/78)',
+        body: 'Combina V(f, t_query) e etiquetas (+14/-0 vs B0 em KU, p_Holm=0,0015; +12 vs A*, p=0,0042). A diferença para tags_only é de apenas 3 itens no geral (p=0,755), dentro do ruído estocástico.'
+      }
+    };
+
+    function selectFactorialCell(key) {
+      ['B0', 'score', 'tags', 'B'].forEach(k => {
+        const btn = document.getElementById(`fact-btn-${k}`);
+        if (!btn) return;
+        btn.className = (k === key)
+          ? 'p-4 rounded-2xl bg-indigo-950/50 border-2 border-indigo-400 text-left transition-all'
+          : 'p-4 rounded-2xl bg-slate-900 border border-slate-700 text-left transition-all hover:border-sky-500/60';
+      });
+      const info = FACTORIAL_INFO[key];
+      document.getElementById('factorial-detail-box').innerHTML = `
+        <div class="text-xs font-mono text-indigo-300 font-bold">${info.title}</div>
+        <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${info.body}</p>
+      `;
+    }
+
+    // Slide 24: Q&A Tabs
+    function selectQaTab(activeIdx) {
+      for (let i = 0; i < 5; i++) {
+        const tab = document.getElementById(`qa-tab-${i}`);
+        const panel = document.getElementById(`qa-panel-${i}`);
+        if (!tab || !panel) continue;
+        if (i === activeIdx) {
+          tab.setAttribute('aria-selected', 'true');
+          panel.removeAttribute('hidden');
+          panel.setAttribute('tabindex', '0');
+          tab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        } else {
+          tab.setAttribute('aria-selected', 'false');
+          panel.setAttribute('hidden', 'until-found');
+          panel.removeAttribute('tabindex');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateJumpSelect();
+      selectLitTab(3);
+      updatePertinenceSim();
+      selectFactorialCell('tags');
+      updateSlideUI();
+
+      for (let i = 0; i < 5; i++) {
+        const panel = document.getElementById(`qa-panel-${i}`);
+        if (panel) panel.addEventListener('beforematch', () => selectQaTab(i));
+      }
+
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '\\(', right: '\\)', display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  </script>
+</body>
+</html>

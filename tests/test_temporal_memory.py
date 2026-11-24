@@ -175,6 +175,27 @@ class TestTemporalPertinenceAndAblations(unittest.TestCase):
         with self.assertRaises(ValueError):
             ValidityAwareRetriever(self.graph, self.kb, ablation="invalid_mode")
 
+    def test_classifier_modes_v1_vs_v2(self):
+        kb_v1 = TemporalKnowledgeMemory(
+            file_path=os.path.join(self.tmp.name, "kb_v1.json"),
+            classifier_mode="v1",
+        )
+        kb_v2 = TemporalKnowledgeMemory(
+            file_path=os.path.join(self.tmp.name, "kb_v2.json"),
+            classifier_mode="v2",
+        )
+        p1 = kb_v1.build_relation_prompt("Fact 1", "2023/05/01", "Fact 2", "2023/05/10")
+        p2 = kb_v2.build_relation_prompt("Fact 1", "2023/05/01", "Fact 2", "2023/05/10")
+        self.assertIn("moving an item to a new storage", p1)
+        self.assertNotIn("SINGLE-VALUED ATTRIBUTE", p1)
+        self.assertIn("SINGLE-VALUED ATTRIBUTE", p2)
+        self.assertNotIn("moving an item to a new storage", p2)
+        with self.assertRaises(ValueError):
+            TemporalKnowledgeMemory(
+                file_path=os.path.join(self.tmp.name, "kb_bad.json"),
+                classifier_mode="v3",
+            )
+
 
 class TestStatistics(unittest.TestCase):
     def test_mcnemar_exact(self):

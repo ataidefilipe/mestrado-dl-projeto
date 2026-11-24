@@ -568,8 +568,23 @@ def main() -> None:
         default="eval_results",
         help="Subfolder of output_dir for per-item results (e.g. eval_results_b0)",
     )
+    parser.add_argument(
+        "--classifier_mode",
+        choices=["v1", "v2"],
+        default=None,
+        help="Relation classifier prompt formulation: v1 (initial Proposal B with examples) or v2 (Event Calculus ontology, default)",
+    )
+    parser.add_argument(
+        "--chronological_guard",
+        action="store_true",
+        help="Enable chronological guard (blocks reverse supersession when t_new < t_old in unsorted haystack_dates)",
+    )
 
     args = parser.parse_args()
+    if args.classifier_mode:
+        os.environ["TEMPORAL_CLASSIFIER_MODE"] = args.classifier_mode
+    if args.chronological_guard:
+        os.environ["TEMPORAL_CHRONOLOGICAL_GUARD"] = "1"
     target_ids = [s.strip() for s in args.target_ids.split(",")] if args.target_ids else None
 
     run_pipeline(

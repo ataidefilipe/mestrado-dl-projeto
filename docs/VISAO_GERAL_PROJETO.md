@@ -332,7 +332,7 @@ A primeira versão (o repositório ainda se chama `kg-reforma-tributaria` em alg
 2. extração mais validação semântica;
 3. extração mais pós-processamento estrutural com **GraphSAGE**, uma rede neural para grafos (GNN) que proporia arestas faltantes.
 
-O artigo-base seria o GraphSAGE. A reprodução foi feita no dataset PPI, uma rede de interações entre proteínas e benchmark clássico de GNNs. A primeira tentativa (R01) estava errada e foi refeita do zero (R02), com equivalência numérica exata ao PyTorch Geometric. Esses registros continuam em `reports/analysis/R01*`, `R02*` e no código `src/modeling/sage_*.py`, `reproduce_ppi.py`, `baseline_graphsage.py`.
+O artigo-base seria o GraphSAGE. A reprodução foi feita no dataset PPI, uma rede de interações entre proteínas e benchmark clássico de GNNs. A primeira tentativa (R01) estava errada e foi refeita do zero (R02), com equivalência numérica exata ao PyTorch Geometric. Esses registros históricos e scripts (`sage_*.py`, `reproduce_ppi.py`, `baseline_graphsage.py`, `R01*`, `R02*`) foram arquivados em `outras-ideias (desconsiderar)/legado_graphsage_ppi/`.
 
 ### 4.2 Por que a Fase 1 foi abandonada
 
@@ -787,10 +787,12 @@ Todos os passos prioritários de auditoria, ablação e sensibilidade do [docs/p
 
 ```text
 mestrado-dl-projeto/
-├── README.md                       # Evolução da proposta (de onde veio a ideia)
+├── README.md                       # Evolução da proposta (de onde veio a ideia e todas as etapas 0–17)
 ├── AGENT.MD                        # Regras de análise seguidas no projeto
+├── requirements.txt                # Dependências com versões fixadas (Python 3.12.9)
 ├── docs/
 │   ├── VISAO_GERAL_PROJETO.md      # Este documento
+│   ├── roteiro_defesa_apresentacao.md # Roteiro de slides, narrativa e Q&A para a banca
 │   ├── projeto_diretrizes.md       # Diretrizes da disciplina
 │   ├── proposta_doc.md             # Proposta submetida
 │   ├── plano_resolucao_R05.md      # Plano de correção (passo a passo, com status)
@@ -798,29 +800,35 @@ mestrado-dl-projeto/
 ├── external/HeLa-Mem/              # Submódulo: código oficial (commit 68f19b3)
 ├── src/
 │   ├── modeling/
-│   │   ├── temporal_knowledge_memory.py   # Memória semântica com validade e supersessão (+ modo B0)
-│   │   ├── validity_aware_retriever.py    # Busca com 𝒱 e prompt com etiquetas (+ modo B0)
-│   │   └── sage_*.py, reproduce_ppi.py    # Legado da Fase 1 (GraphSAGE)
+│   │   ├── temporal_knowledge_memory.py   # Memória semântica com validade, supersessão (v1/v2) e modos B0/tags_only
+│   │   └── validity_aware_retriever.py    # Busca com 𝒱 e prompt com etiquetas (none/no_temporal/score_only/tags_only)
 │   ├── analysis/
-│   │   ├── run_hela_longmemeval.py        # Execução da Baseline A
-│   │   ├── run_temporal_hela_longmemeval.py  # Execução de B e B0 (--ablation, --results_subdir)
-│   │   ├── compare_ablation.py            # Tabelas A/B0/B, McNemar, subconjuntos
+│   │   ├── run_hela_longmemeval.py        # Execução da Baseline A inicial
+│   │   ├── run_baseline_fiel.py           # Orquestrador da Baseline Fiel A* (parâmetros oficiais, 0 grafos vazios)
+│   │   ├── run_temporal_hela_longmemeval.py  # Execução de B, B_v2 e ablações (--ablation, --classifier_mode, --results_subdir)
+│   │   ├── compare_ablation.py            # Tabelas A/A*/B0/B/B_v2, McNemar exato, IC 95%, correção de Holm
+│   │   ├── sample_supersession_audit.py   # Amostragem estratificada das transições SUPERSEDES (R07)
 │   │   └── audit_process.py               # Auditoria reproduzível (sem API)
-│   └── visualization/generate_report_figures.py  # Figuras do artigo
+│   └── visualization/generate_report_figures.py  # Geração das figuras fig1–fig6 do artigo
+├── tests/
+│   └── test_temporal_memory.py     # Suíte de testes unitários offline (8/8 testes passando)
 ├── notebooks/
-│   ├── 01_replicacao_baseline_hela_mem.ipynb   # Reprodução da baseline
-│   └── 02_execucao_proposta_temporal.ipynb     # Passo a passo: B, B0, estatística, casos, figuras
+│   ├── 01_replicacao_baseline_hela_mem.ipynb   # Reprodução da baseline (A e A*)
+│   └── 02_execucao_proposta_temporal.ipynb     # Passo a passo: B, B0, B_v2, ablação 2x2, sensibilidade, figuras
 ├── results/
 │   ├── baseline_episodic_500.zip   # Grafos episódicos de A
 │   ├── temporal_encoded_500.zip    # Grafos e resultados de B
-│   ├── longmemeval_baseline_full/eval_results/eval_summary.json      # A
-│   └── longmemeval_temporal_full/eval_results{,_b0}/eval_summary.json # B e B0
+│   ├── longmemeval_baseline_full/eval_results/eval_summary.json      # A (61,20%)
+│   ├── longmemeval_baseline_fiel/eval_results/eval_summary.json      # A* (63,40%)
+│   ├── longmemeval_temporal_full/eval_results*/eval_summary.json     # B, B0, B', score_only, tags_only, sensibilidade
+│   └── longmemeval_temporal_v2/eval_results/eval_summary.json        # B_v2 (64,80%)
 ├── reports/
-│   ├── relatorio_entrega2_draft2_ieee.tex   # Draft 2 (versão de referência)
-│   ├── overleaf_entrega2_draft2.zip         # Pacote para o Overleaf
-│   ├── figures/                             # fig1–fig5 (PNG e PDF)
-│   └── analysis/                            # Registros R01–R05
-└── outras-ideias (desconsiderar)/           # Material da Fase 1, fora do escopo
+│   ├── relatorio_final_ieee.tex             # Artigo final consolidado (formato IEEE 2 colunas)
+│   ├── relatorio_final.md                   # Artigo final em Markdown
+│   ├── overleaf_entrega_final.zip           # Pacote final pronto para compilação no Overleaf
+│   ├── figures/                             # fig1–fig6 (PNG e PDF)
+│   └── analysis/                            # Registros técnicos R03–R09 e CSVs de auditoria
+└── outras-ideias (desconsiderar)/           # Material e legado da Fase 1 (GraphSAGE/PPI), fora do escopo
 ```
 
 ### 14.2 Reproduzir a análise (sem chave de API)
@@ -913,7 +921,8 @@ O primeiro comando refaz a B0; o segundo é a repetição B' para medir ruído. 
 | [docs/projeto_diretrizes.md](projeto_diretrizes.md) | Diretrizes da disciplina |
 | [docs/proposta_doc.md](proposta_doc.md) | Proposta formal submetida |
 | [reports/relatorio_entrega1_enxuto.md](../reports/relatorio_entrega1_enxuto.md) | Entrega 1: reprodução e diagnóstico |
-| [reports/relatorio_entrega2_draft2_ieee.tex](../reports/relatorio_entrega2_draft2_ieee.tex) | Draft 2 (versão atual, revisada) |
+| [reports/relatorio_final_ieee.tex](../reports/relatorio_final_ieee.tex) e [relatorio_final.md](../reports/relatorio_final.md) | Artigo final consolidado (formato IEEE e Markdown) |
+| [docs/roteiro_defesa_apresentacao.md](roteiro_defesa_apresentacao.md) | Roteiro de apresentação (slides, narrativa científica e Q&A da banca) |
 | [reports/analysis/R03_reproducao_hela_fiel_500itens.md](../reports/analysis/R03_reproducao_hela_fiel_500itens.md) | Baseline Fiel ($A^*$, 63,40%, 0 grafos vazios) |
 | [reports/analysis/R05_auditoria_processo_20261104.md](../reports/analysis/R05_auditoria_processo_20261104.md) | Auditoria do processo (10 achados) |
 | [reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md](../reports/analysis/R05_decomposicao_A_B0_B_20261104_205642.md) | Resultados da ablação B0 |
